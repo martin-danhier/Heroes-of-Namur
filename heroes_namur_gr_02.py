@@ -2,27 +2,58 @@
 # Display user interface
 
 def display_ui (players, map):
+    """Description of the function
+    ...
+    Version
+    -------
+    specification : Guillaume Nizet (v.1 22/02/19)
+    """
     pass
 
 def get_coords_to_color(coords):
+    """Description of the function
+    ...
+    Version
+    -------
+    specification : Guillaume Nizet (v.1 22/02/19)
+    """
     pass
 
 def create_stats(players):
+    """Description of the function
+    ...
+    Version
+    -------
+    specification : Martin Danhier (v.1 22/02/19)
+    """
     pass
 
 ### INPUT ###
 # Check input command written by player
 
 def create_character():
+    """Description of the function
+    ...
+    Version
+    -------
+    specification : Jonathan Nhouyvanisvong (v.1 22/02/19)
+    """
     pass
 
 def parse_command (command):
+    """"""
     pass
 
 ### GENERATION ###
 # Use file to apply parameters of HoN
 
 def read_file(path):
+    """Description of the function
+    ...
+    Version
+    -------
+    specification : Jonathan Nhouyvanisvong (v.1 22/02/19)
+    """
     pass
 
 ### CLEANING ###
@@ -35,15 +66,33 @@ def clean():
 # Step : use abilities (!before CLEANING & MOVE AND FIGHT!)
 
 def special_abilities():
+    """Description of the function
+    ...
+    Version
+    -------
+    specification : Jonathan Nhouyvanisvong (v.1 22/02/19)
+    """
     pass
 
 ### MOVE AND FIGHT ###
 # Choice : Move or attack ?
 
 def attack():
+    """Description of the function
+    ...
+    Version
+    -------
+    specification : Jonathan Nhouyvanisvong (v.1 22/02/19)
+    """
     pass
 
 def moving_on():
+    """Description of the function
+    ...
+    Version
+    -------
+    specification : Jonathan Nhouyvanisvong (v.1 22/02/19)
+    """
     pass
 
 
@@ -55,6 +104,7 @@ def process_creatures():
 ### AI ###
 
 def think(players, map):
+    pass
 
 ### TOOLS ###
 
