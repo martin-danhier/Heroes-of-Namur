@@ -28,6 +28,13 @@ def create_stats(players):
     """
     pass
 
+def convert_to_true_coords():
+    """"""
+    pass
+def create_line_char():
+    """"""
+    pass
+
 ### INPUT ###
 # Check input command written by player
 
