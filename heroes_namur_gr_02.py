@@ -163,7 +163,14 @@ def special_abilities():
 
 def attack(heroes_players):
     """Prepare and store the attack chosen by player
-    ...
+    Parameters
+    ----------
+    hero_player: containing data for the hero who will attack and the enemy who will be attacked (dictionary)
+
+    Notes
+    -------
+    parse_command() store in a list the move made. And the statistic of heroes_players updates automatically.
+
     Version
     -------
     specification : Jonathan Nhouyvanisvong (v.1 22/02/19)
