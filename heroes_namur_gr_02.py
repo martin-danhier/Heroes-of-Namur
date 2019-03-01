@@ -227,6 +227,12 @@ def is_coord_in_range(coords_1, coords_2):
 #!One function can be lauched for 1 party!
 
 def main():
+    """ Main loop for the game, calls every function during each iteration
+    
+    Version:
+    --------
+    specification : Guillaume Nizet (v.1 01/03/19)
+    """
     pass
 
 main()
