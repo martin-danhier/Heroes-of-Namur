@@ -14,7 +14,7 @@ def display_ui (players, map):
 
     Parameters:
     -----------
-    players : information about players and their characters (dict)
+    players : information about players and their characters : heroes and creatures (dict)
     map : information about the map, with spur and player spawns coordinates (dict)
 
     Version:
@@ -45,7 +45,7 @@ def create_stats(players):
     
     Parameters:
     -----------
-    players : information about players and their characters (dict)
+    players : information about players and their characters : heroes and creatures (dict)
 
     Returns
     -------
@@ -131,12 +131,12 @@ def clean(players):
 
     Parameters:
     -----------
-    players : information about players and their characters (dict)
+    players : information about players and their characters : heroes and creatures (dict)
 
     Notes:
     ------
-    'players' can be updated:
-        - Heroes coordinates can be changed if they are killed 
+    'players' can be modified:
+        - Heroes coordinates can be updated if they are killed 
         - Creatures can be removed from the dictionary if they are killed
         - Victory points and level of heroes can be updated if a creature is killed
 
@@ -182,7 +182,26 @@ def moving_on(player, map):
 
 ### CREATURES ###
 
-def process_creatures():
+def process_creatures(players):
+    """ Automatically computes an action for a creature to perform:
+            - does nothing if there is no hero in its area of influence or if it's not affected by any special ability
+            - goes towards the nearest player if there is at least one hero in its area of influence or if it's affected by a special ability
+            - attacks a player if it is right next to it
+
+    Parameters:
+    -----------
+    players : information about players and their characters : heroes and creatures (dict)
+
+    Notes:
+    ------
+    'players' can be modified:
+        - Creatures coordinates can be updated if they move towards a player
+        - Players health can be updated if they get attacked by a creature
+
+    Version:
+    --------
+    specification : Guillaume Nizet (v.1 01/03/19)
+    """
     pass
 
 ### AI ###
