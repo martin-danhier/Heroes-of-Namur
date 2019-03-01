@@ -45,20 +45,38 @@ def create_stats(players):
     
     Parameters:
     -----------
-    players : a dictionnary
+    players : information about players and their characters (dict)
 
-    Returns:
-    --------
-    stats : a multi line string countain
+    Returns
+    -------
+    stats : a multiline string countaining the UI of the stats. (str)
 
-    Version:
-    --------
-    specification : Martin Danhier (v.1 28/02/19)
+    Notes
+    -----
+    For the format of players, see rapport_gr_02_part_02.
+
+    Version
+    -------
+    specification : Martin Danhier (v.1 29/02/19)
     """
     pass
 
-def convert_to_true_coords():
-    """"""
+def convert_to_true_coords(coords):
+    """ Converts a pair of coords to absolute char coords.
+
+    Parameters
+    ----------
+    coords: a tuple of format (row (int), col (int))
+
+    Returns
+    -------
+    true_coords: a tuple of format (row (int), col (int)) countaining the coords of the center char of the tile
+
+    Version
+    -------
+    specification : Martin Danhier (v.1 01/02/19)
+    
+    """
     pass
 def create_line_char():
     """"""
@@ -68,21 +86,21 @@ def create_line_char():
 # Check input command written by player
 
 def create_character(player_dictionary, database):
-"""Attribute the character chosen by player and saved in main dictionary
-   Parameters
-   ----------
-   player_dictionary: player data that will contain the chosen heroes (dictionary)
-   database: containing default stats characters (dictionary)
-   
-   Returns
-   -------
-   players_dictionary : update with a new hero (dictionary)
+    """ Attribute the character chosen by player and saved in main dictionary
+    Parameters
+    ----------
+    player_dictionary: player data that will contain the chosen heroes (dictionary)
+    database: containing default stats characters (dictionary)
+    
+    Returns
+    -------
+    players_dictionary : update with a new hero (dictionary)
 
-   Version
-   -------
-   specification : Jonathan Nhouyvanisvong (v.2 01/03/19)
-   
-   """
+    Version
+    -------
+    specification : Jonathan Nhouyvanisvong (v.2 01/03/19)
+    
+    """
     pass
 
 def parse_command (command):
@@ -104,7 +122,28 @@ def read_file(path):
 ### CLEANING ###
 # Clean entities & attributes bonus / malus
 
-def clean():
+def clean(players):
+    """ Cleans the board by:
+        - Removing the creatures that were killed
+        - Putting back on their spawn platforms heroes that were killed
+        - Giving victory points to players that are in the killed creatures areas
+        - Leveling up heroes if they have enough victory points
+
+    Parameters:
+    -----------
+    players : information about players and their characters (dict)
+
+    Notes:
+    ------
+    'players' can be updated:
+        - Heroes coordinates can be changed if they are killed 
+        - Creatures can be removed from the dictionary if they are killed
+        - Victory points and level of heroes can be updated if a creature is killed
+
+    Version:
+    --------
+    specification : Guillaume Nizet (v.1 01/03/19)    
+    """
     pass
 
 ### SPECIAL ABILITY ###
