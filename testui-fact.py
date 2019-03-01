@@ -9,7 +9,7 @@ map = {
         "player1": (1, 1),
         "player2": (8, 8)
     },
-    "smur": [(5, 5), (5, 6), (6, 6), (6, 5)]
+    "spur": [(5, 5), (5, 6), (6, 6), (6, 5)]
 }
 
 players = {
@@ -87,10 +87,10 @@ def display_ui(map, players):
     height = map["size"][1]
 
     # Generate dict with coords to color
-    colored_coords = {"smur": []}
-    # Get colored borders around smur
-    for coords in map["smur"]:
-        colored_coords["smur"] += get_coords_to_color(
+    colored_coords = {"spur": []}
+    # Get colored borders around spur
+    for coords in map["spur"]:
+        colored_coords["spur"] += get_coords_to_color(
             convert_to_true_coords(coords))
     # Get colored borders around players spawn points
     colored_coords["spawn_player1"] = get_coords_to_color(convert_to_true_coords(
@@ -121,7 +121,7 @@ def display_ui(map, players):
         while x_pos < (4 * width) + 1:
 
             # Select color
-            if (y_pos, x_pos) in colored_coords["smur"]:
+            if (y_pos, x_pos) in colored_coords["spur"]:
                 color = colored.fg('cyan')
             elif (y_pos, x_pos) in colored_coords["spawn_player1"]:
                 color = colored.fg('green')
