@@ -2,11 +2,16 @@
 # Display user interface
 
 def display_ui (players, map):
-    """Description of the function
-    ...
+    """Displays the board (with colors) and statistics of the players, based on two dictionaries: players and map
+
+    Parameters:
+    -----------
+    players: information about players and their characters (dict)
+    map: information about the map, with spur and player spawns coordinates (dict)
+
     Version
     -------
-    specification : Guillaume Nizet (v.1 22/02/19)
+    specification : Guillaume Nizet (v.1 01/03/19)
     """
     pass
 
