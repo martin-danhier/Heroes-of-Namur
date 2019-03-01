@@ -161,7 +161,7 @@ def special_abilities():
 ### MOVE AND FIGHT ###
 # Choice : Move or attack ?
 
-def attack(player_1, player_2):
+def attack(heroes_players):
     """Prepare and store the attack chosen by player
     ...
     Version
@@ -170,12 +170,21 @@ def attack(player_1, player_2):
     """
     pass
 
-def moving_on(player, map):
-    """Prepare and store the movement chosen by player
-    ...
+def moving_on(hero_player, map):
+    """Prepare and update the movement chosen by player
+    Parameters
+    ----------
+    hero_player: hero who wants to move (dictionary)
+    map: map coordinates to check differents entities (dictionary)
+
+    Notes
+    -------
+    parse_command() store in a list the move made. And the coordinates of hero_player updates automatically.
+
     Version
     -------
-    specification : Jonathan Nhouyvanisvong (v.1 22/02/19)
+    specification : Jonathan Nhouyvanisvong (v.2 01/03/19)
+
     """
     pass
 
