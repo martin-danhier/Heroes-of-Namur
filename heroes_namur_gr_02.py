@@ -29,20 +29,38 @@ def create_stats(players):
     
     Parameters
     ----------
-    players : a dictionnary
+    players : a dictionnary coutaining the player data. (dict)
 
     Returns
     -------
-    stats : a multi line string countain
+    stats : a multiline string countaining the UI of the stats. (str)
+
+    Notes
+    -----
+    For the format of players, see rapport_gr_02_part_02.
 
     Version
     -------
-    specification : Martin Danhier (v.1 28/02/19)
+    specification : Martin Danhier (v.1 29/02/19)
     """
     pass
 
-def convert_to_true_coords():
-    """"""
+def convert_to_true_coords(coords):
+    """ Converts a pair of coords to absolute char coords.
+
+    Parameters
+    ----------
+    coords: a tuple of format (row (int), col (int))
+
+    Returns
+    -------
+    true_coords: a tuple of format (row (int), col (int)) countaining the coords of the center char of the tile
+
+    Version
+    -------
+    specification : Martin Danhier (v.1 01/02/19)
+    
+    """
     pass
 def create_line_char():
     """"""
