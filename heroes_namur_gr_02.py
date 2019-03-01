@@ -37,7 +37,7 @@ def create_stats(players):
     
     Parameters:
     -----------
-    players : a dictionnary
+    players : information about players and their characters (dict)
 
     Returns:
     --------
@@ -78,8 +78,8 @@ def parse_command (command):
 def read_file(path):
     """Description of the function
     
-    Version
-    -------
+    Version:
+    --------
     specification : Jonathan Nhouyvanisvong (v.1 22/02/19)
     """
     pass
@@ -87,7 +87,28 @@ def read_file(path):
 ### CLEANING ###
 # Clean entities & attributes bonus / malus
 
-def clean():
+def clean(players):
+    """ Cleans the board by:
+        - Removing the creatures that were killed
+        - Putting back on their spawn platforms heroes that were killed
+        - Giving victory points to players that are in the killed creatures areas
+        - Leveling up heroes if they have enough victory points
+
+    Parameters:
+    -----------
+    players : information about players and their characters (dict)
+
+    Notes:
+    ------
+    'players' can be updated:
+        - Heroes coordinates can be changed if they are killed 
+        - Creatures can be removed from the dictionary if they are killed
+        - Victory points and level of heroes can be updated if a creature is killed
+
+    Version:
+    --------
+    specification : Guillaume Nizet (v.1 01/03/19)    
+    """
     pass
 
 ### SPECIAL ABILITY ###
