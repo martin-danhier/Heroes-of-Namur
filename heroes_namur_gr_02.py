@@ -2,41 +2,49 @@
 # Display user interface
 
 def display_ui (players, map):
-    """Displays the board (with colors) and statistics of the players, based on two dictionaries: players and map
+    """ Displays the board (with colors) and statistics of the players, based on two dictionaries: players and map
 
     Parameters:
     -----------
-    players: information about players and their characters (dict)
-    map: information about the map, with spur and player spawns coordinates (dict)
+    players : information about players and their characters (dict)
+    map : information about the map, with spur and player spawns coordinates (dict)
 
-    Version
-    -------
+    Version:
+    --------
     specification : Guillaume Nizet (v.1 01/03/19)
     """
     pass
 
 def get_coords_to_color(coords):
-    """Description of the function
-    ...
-    Version
-    -------
-    specification : Guillaume Nizet (v.1 22/02/19)
+    """ Returns a list of coordinates that need to be colored, which are around the given coordinates 'coords'
+
+    Parameters:
+    -----------
+    coords : coordinates which need to have their surrounding coordinates colored (tuple)
+
+    Returns:
+    --------
+    coords_to_color : coordinates that need to be colored (list)
+
+    Version:
+    --------
+    specification : Guillaume Nizet (v.1 1/03/19)
     """
     pass
 
 def create_stats(players):
-    """ Generates a string countaining the stats of the players.
+    """ Generates a string containing the stats of the players.
     
-    Parameters
-    ----------
+    Parameters:
+    -----------
     players : a dictionnary
 
-    Returns
-    -------
+    Returns:
+    --------
     stats : a multi line string countain
 
-    Version
-    -------
+    Version:
+    --------
     specification : Martin Danhier (v.1 28/02/19)
     """
     pass
