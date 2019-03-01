@@ -9,7 +9,8 @@
 ### UI ###
 # Display user interface
 
-def display_ui (players, map):
+
+def display_ui(players, map):
     """ Displays the board (with colors) and statistics of the players, based on two dictionaries: players and map
 
     Parameters:
@@ -17,11 +18,16 @@ def display_ui (players, map):
     players : information about players and their characters (dict)
     map : information about the map, with spur and player spawns coordinates (dict)
 
+    Notes
+    -----
+    For the format of players and map, see rapport_gr_02_part_02.
+
     Version:
     --------
     specification : Guillaume Nizet (v.1 01/03/19)
     """
     pass
+
 
 def get_coords_to_color(coords):
     """ Returns a list of coordinates that need to be colored, which are around the given coordinates 'coords'
@@ -40,9 +46,10 @@ def get_coords_to_color(coords):
     """
     pass
 
+
 def create_stats(players):
     """ Generates a string containing the stats of the players.
-    
+
     Parameters:
     -----------
     players : information about players and their characters (dict)
@@ -61,6 +68,7 @@ def create_stats(players):
     """
     pass
 
+
 def convert_to_true_coords(coords):
     """ Converts a pair of coords to absolute char coords.
 
@@ -75,37 +83,62 @@ def convert_to_true_coords(coords):
     Version
     -------
     specification : Martin Danhier (v.1 01/02/19)
-    
+
     """
     pass
-def create_line_char():
-    """"""
+
+
+def create_line_char(first, cross, last, y, x, color, width):
+    """ Create and color a border character.
+
+    Parameters
+    ----------
+    first: first intersection character of the line. (str)
+    cross: intersection character in the middle of the line. (str)
+    last: last intersection character of the line. (str)
+    y: the ordinate of the character (int)
+    x: the abcissa of the character (int)
+    color: the color of the character (str)
+    width: the width of the map (number of columns) (int)
+
+    Returns
+    -------
+    colored_char: the char that has to be printed at the given coordinates, colored in the given color (str)
+
+    Version
+    -------
+    specification : Martin Danhier (v.1 01/03/19)
+    """
     pass
 
 ### INPUT ###
 # Check input command written by player
 
-def create_character(player_dictionary, database):
-    """ Attribute the character chosen by player and saved in main dictionary
+
+def create_character(players, database):
+    """ Attribute the character chosen by player and saved in main dictionary.
+
     Parameters
     ----------
-    player_dictionary: player data that will contain the chosen heroes (dictionary)
+    players: player data that will contain the chosen heroes (dictionary)
     database: containing default stats characters (dictionary)
-    
-    Returns
-    -------
-    players_dictionary : update with a new hero (dictionary)
+
+    Notes
+    -----
+    For the format of players and database, see rapport_gr_02_part_02.
+    The players dictionary is updated: a new hero is added.
 
     Version
     -------
     specification : Jonathan Nhouyvanisvong (v.2 01/03/19)
-    
+
     """
     pass
 
-def parse_command (command):
+
+def parse_command(command):
     """"""
-    
+
 
 ### GENERATION ###
 # Use file to apply parameters of HoN
@@ -121,6 +154,7 @@ def read_file(path):
 
 ### CLEANING ###
 # Clean entities & attributes bonus / malus
+
 
 def clean(players):
     """ Cleans the board by:
@@ -149,6 +183,7 @@ def clean(players):
 ### SPECIAL ABILITY ###
 # Step : use abilities (!before CLEANING & MOVE AND FIGHT!)
 
+
 def special_abilities():
     """Prepare special abilities to use
     ...
@@ -161,6 +196,7 @@ def special_abilities():
 ### MOVE AND FIGHT ###
 # Choice : Move or attack ?
 
+
 def attack(player_1, player_2):
     """Prepare and store the attack chosen by player
     ...
@@ -169,6 +205,7 @@ def attack(player_1, player_2):
     specification : Jonathan Nhouyvanisvong (v.1 22/02/19)
     """
     pass
+
 
 def moving_on(player, map):
     """Prepare and store the movement chosen by player
@@ -187,10 +224,12 @@ def process_creatures():
 
 ### AI ###
 
+
 def think(players, map):
     pass
 
 ### TOOLS ###
+
 
 def is_coord_in_range(coords_1, coords_2):
     pass
@@ -198,7 +237,9 @@ def is_coord_in_range(coords_1, coords_2):
 ### MAIN ###
 #!One function can be lauched for 1 party!
 
+
 def main():
     pass
+
 
 main()
