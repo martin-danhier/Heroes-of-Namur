@@ -20,11 +20,19 @@ def get_coords_to_color(coords):
     pass
 
 def create_stats(players):
-    """Description of the function
-    ...
+    """ Generates a string countaining the stats of the players.
+    
+    Parameters
+    ----------
+    players : a dictionnary
+
+    Returns
+    -------
+    stats : a multi line string countain
+
     Version
     -------
-    specification : Martin Danhier (v.1 22/02/19)
+    specification : Martin Danhier (v.1 28/02/19)
     """
     pass
 
@@ -49,14 +57,14 @@ def create_character():
 
 def parse_command (command):
     """"""
-    pass
+    
 
 ### GENERATION ###
 # Use file to apply parameters of HoN
 
 def read_file(path):
     """Description of the function
-    ...
+    
     Version
     -------
     specification : Jonathan Nhouyvanisvong (v.1 22/02/19)
