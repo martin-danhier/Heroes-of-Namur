@@ -1,3 +1,11 @@
+"""Dictionary
+* players : name_player {name_heros : stats_heros}, name_player_2 {}
+* database : name_class {lvl : default_stats_table}
+* map : size - spawns {players - bot - citadel}
+
+**don't forget nb turns of game in dictionary**
+"""
+
 ### UI ###
 # Display user interface
 
@@ -39,18 +47,36 @@ def create_stats(players):
     -----------
     players : information about players and their characters (dict)
 
-    Returns:
-    --------
-    stats : a multi line string countain
+    Returns
+    -------
+    stats : a multiline string countaining the UI of the stats. (str)
 
-    Version:
-    --------
-    specification : Martin Danhier (v.1 28/02/19)
+    Notes
+    -----
+    For the format of players, see rapport_gr_02_part_02.
+
+    Version
+    -------
+    specification : Martin Danhier (v.1 29/02/19)
     """
     pass
 
-def convert_to_true_coords():
-    """"""
+def convert_to_true_coords(coords):
+    """ Converts a pair of coords to absolute char coords.
+
+    Parameters
+    ----------
+    coords: a tuple of format (row (int), col (int))
+
+    Returns
+    -------
+    true_coords: a tuple of format (row (int), col (int)) countaining the coords of the center char of the tile
+
+    Version
+    -------
+    specification : Martin Danhier (v.1 01/02/19)
+    
+    """
     pass
 def create_line_char():
     """"""
@@ -59,12 +85,21 @@ def create_line_char():
 ### INPUT ###
 # Check input command written by player
 
-def create_character():
-    """Description of the function
-    ...
+def create_character(player_dictionary, database):
+    """ Attribute the character chosen by player and saved in main dictionary
+    Parameters
+    ----------
+    player_dictionary: player data that will contain the chosen heroes (dictionary)
+    database: containing default stats characters (dictionary)
+    
+    Returns
+    -------
+    players_dictionary : update with a new hero (dictionary)
+
     Version
     -------
-    specification : Jonathan Nhouyvanisvong (v.1 22/02/19)
+    specification : Jonathan Nhouyvanisvong (v.2 01/03/19)
+    
     """
     pass
 
@@ -76,10 +111,10 @@ def parse_command (command):
 # Use file to apply parameters of HoN
 
 def read_file(path):
-    """Description of the function
-    
-    Version:
-    --------
+    """Read parameter file to complete structure of the game
+    ...
+    Version
+    -------
     specification : Jonathan Nhouyvanisvong (v.1 22/02/19)
     """
     pass
@@ -115,7 +150,7 @@ def clean(players):
 # Step : use abilities (!before CLEANING & MOVE AND FIGHT!)
 
 def special_abilities():
-    """Description of the function
+    """Prepare special abilities to use
     ...
     Version
     -------
@@ -126,8 +161,8 @@ def special_abilities():
 ### MOVE AND FIGHT ###
 # Choice : Move or attack ?
 
-def attack():
-    """Description of the function
+def attack(player_1, player_2):
+    """Prepare and store the attack chosen by player
     ...
     Version
     -------
@@ -135,8 +170,8 @@ def attack():
     """
     pass
 
-def moving_on():
-    """Description of the function
+def moving_on(player, map):
+    """Prepare and store the movement chosen by player
     ...
     Version
     -------
