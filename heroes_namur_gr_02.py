@@ -20,7 +20,7 @@ def display_ui(players, map):
 
     Notes
     -----
-    For the format of players and map, see rapport_gr_02_part_02.
+    For the formats of players and map, see rapport_gr_02_part_02.
 
     Version
     -------
@@ -135,8 +135,8 @@ def create_character(players, map, command, player):
 
     Notes
     -----
-    For the format of players and map, see rapport_gr_02_part_02.
-    The players dictionary is updated: one or more heroes can be added.
+    For the formats of 'players' and 'map', see rapport_gr_02_part_02.
+    The 'players' dictionary is updated: one or more heroes can be added.
 
     Version
     -------
@@ -199,7 +199,7 @@ def clean(players):
     Notes
     -----
     'players' can be updated if a hero or a creature is killed.
-    For the format of players, see rapport_gr_02_part_02.
+    For the format of 'players', see rapport_gr_02_part_02.
     More details about the rules of the cleaning can be found in the instructions, p10.
 
     Version
@@ -234,40 +234,57 @@ def special_abilities():
 ### MOVE AND FIGHT ###
 # Choice : Move or attack ?
 
-# Maybe one big function ?
-# maybe some minor changes to do
-
-def attack(heroes_players):
-    """ Execute
-    Parameters
-    ----------
-    hero_player: containing data for the hero who will attack and the enemy who will be attacked (dictionary)
-
-    Notes
-    -------
-    parse_command() store in a list the move made. And the statistic of heroes_players updates automatically.
-
-    Version
-    -------
-    specification : Jonathan Nhouyvanisvong (v.2 22/02/19)
-    """
-    pass
-
-def moving_on(hero_player, map):
-    """ Prepare and update the movement chosen by player.
+def attack(order, players, map):
+    """ Tries to execute the given attack order.
 
     Parameters
     ----------
-    hero_player: hero who wants to move (dictionary)
-    map: map coordinates to check differents entities (dictionary)
+    order: the attack order. (dict)
+    players : data of player heroes and creatures. (dict)
+    map: data of the map (spawns, spur, size, etc...). (dict)
 
     Notes
     -----
-    parse_command() store in a list the move made. And the coordinates of hero_player updates automatically.
+    The 'order' dictionary is in the following format: 
+        {
+            'hero' : hero_name (str),
+            'player' : player_name (str),
+            'action' : 'fight',
+            'target' : ( x (int), y (int) )
+        }
+    For the formats of 'players' and 'map', see rapport_gr_02_part_02.
+    The 'players' dictionary may be updated.
 
     Version
     -------
-    specification : Jonathan Nhouyvanisvong (v.2 01/03/19)
+    specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
+    """
+    pass
+
+def moving_on(order, players, map):
+    """ Tries to execute the given move order.
+
+    Parameters
+    ----------
+    order: the attack order. (dict)
+    players : data of player heroes and creatures. (dict)
+    map: data of the map (spawns, spur, size, etc...). (dict)
+
+    Notes
+    -----
+    The 'order' dictionary is in the following format: 
+        {
+            'hero' : hero_name (str),
+            'player' : player_name (str),
+            'action' : 'move',
+            'target' : ( x (int), y (int) )
+        }
+    For the formats of 'players' and 'map', see rapport_gr_02_part_02.
+    The 'players' dictionary may be updated.
+
+    Version
+    -------
+    specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
 
     """
     pass
@@ -312,7 +329,7 @@ def think (players, map, database, player):
 
     Notes
     -----
-    For the format of 'players', 'map' and 'database', see rapport_gr_02_part_02.
+    For the formats of 'players', 'map' and 'database', see rapport_gr_02_part_02.
     The format of 'command' is described in the instructions, p14.
 
     Version
