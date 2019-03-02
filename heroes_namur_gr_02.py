@@ -186,10 +186,20 @@ def clean(players):
 
 def special_abilities():
     """Prepare special abilities to use
-    ...
+    Parameters
+    ----------
+    
+    Returns
+    -------
+
+
+    Notes
+    -----
+    parse_command() store in a list the move made. And the statistic of heroes_players updates automatically.
+
     Version
     -------
-    specification : Jonathan Nhouyvanisvong (v.1 22/02/19)
+    specification : Jonathan Nhouyvanisvong (v.2 02/03/19)
     """
     pass
 
@@ -208,7 +218,7 @@ def attack(heroes_players):
 
     Version
     -------
-    specification : Jonathan Nhouyvanisvong (v.1 22/02/19)
+    specification : Jonathan Nhouyvanisvong (v.2 22/02/19)
     """
     pass
 
