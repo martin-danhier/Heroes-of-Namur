@@ -137,7 +137,29 @@ def create_character(players, database):
 
 
 def parse_command(command):
-    """"""
+    """ Parse the input into a list of actions.
+    
+    Parameters
+    ----------
+    command: the input string to be parsed (str)
+    
+    Returns
+    -------
+    actions: a list of actions (list of dict)
+
+    Notes
+    -----
+    The format of the "command" string is destribed in the instructions, p14.
+    A typical "action" dict looks like this : 
+        {
+            'hero' : hero_name (str),
+            'action' : action (str) (can be the name of an ability (as 'fulgura') or 'attack' or 'fight'),
+            'coords' : ( x (int), y (int) ) (tuple, optional)
+        }
+    
+    Version
+    -------
+    specification : Martin Danhier (v.1 02/03/2019)"""
 
 
 ### GENERATION ###
