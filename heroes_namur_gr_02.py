@@ -331,11 +331,11 @@ def is_coord_in_range(coords_1, coords_2):
 
 
 def main():
-    """ Main loop for the game, calls every function during each iteration
+    """ Manages the global course of the in-game events.
     
     Version:
     --------
-    specification : Guillaume Nizet (v.1 01/03/19)
+    specification : Guillaume Nizet (v.2 03/03/19)
     """
     pass
 
