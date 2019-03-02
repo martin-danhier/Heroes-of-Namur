@@ -3,7 +3,7 @@
 * database : name_class {lvl : default_stats_table}
 * map : size - spawns {players - bot - citadel}
 
-**don't forget nb turns of game in dictionary**
+**don't forget nb turns of game in dictionary ===> map['turn']**
 """
 
 ### UI ###
@@ -11,38 +11,42 @@
 
 
 def display_ui(players, map):
-    """ Displays the board (with colors) and statistics of the players, based on two dictionaries: players and map
+    """ Displays the board (with colors) and statistics of the players.
 
-    Parameters:
-    -----------
-    players : information about players and their characters : heroes and creatures (dict)
-    map : information about the map, with spur and player spawns coordinates (dict)
+    Parameters
+    ----------
+    players : data of player heroes and creatures (dict)
+    map: data of the map (spawns, spur, size, etc...) (dict)
 
     Notes
     -----
     For the format of players and map, see rapport_gr_02_part_02.
 
-    Version:
-    --------
-    specification : Guillaume Nizet (v.1 01/03/19)
+    Version
+    -------
+    specification : Guillaume Nizet (v.2 02/03/19)
     """
     pass
 
 
 def get_coords_to_color(coords):
-    """ Returns a list of coordinates that need to be colored, which are around the given coordinates 'coords'
+    """ Generates the coordinates that need to be colored around the given coordinates. 
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     coords : coordinates which need to have their surrounding coordinates colored (tuple)
 
-    Returns:
-    --------
-    coords_to_color : coordinates that need to be colored (list)
+    Returns
+    -------
+    coords_to_color : coordinates that need to be colored (tuple).
+
+    Notes
+    -----
+    A typical 'coord' tuple is in the format ( row (int), column (int) ).
 
     Version:
     --------
-    specification : Guillaume Nizet (v.1 1/03/19)
+    specification : Guillaume Nizet (v.2 02/03/19)
     """
     pass
 
@@ -52,11 +56,11 @@ def create_stats(players):
 
     Parameters:
     -----------
-    players : information about players and their characters : heroes and creatures (dict)
+    players : data of player heroes and creatures (dict)
 
     Returns
     -------
-    stats : a multiline string countaining the UI of the stats. (str)
+    stats : a multiline string countaining the graphical representation of the stats. (str)
 
     Notes
     -----
@@ -64,25 +68,29 @@ def create_stats(players):
 
     Version
     -------
-    specification : Martin Danhier (v.1 29/02/19)
+    specification : Martin Danhier (v.3 02/03/19)
     """
     pass
 
 
 def convert_to_true_coords(coords):
-    """ Converts a pair of coords to absolute char coords.
+    """ Converts the given tile coordinates to absolute char coordinates.
 
     Parameters
     ----------
-    coords: a tuple of format (row (int), col (int))
-
+    coords: the tile coordinates to convert (tuple).
+    
     Returns
     -------
-    true_coords: a tuple of format (row (int), col (int)) countaining the coords of the center char of the tile
+    true_coords: the coordinates of the center character of the tile. (tuple)
+
+    Notes
+    -----
+    A typical 'coord' tuple is in the format ( row (int), column (int) ).
 
     Version
     -------
-    specification : Martin Danhier (v.1 01/02/19)
+    specification : Martin Danhier (v.2 02/03/19)
 
     """
     pass
