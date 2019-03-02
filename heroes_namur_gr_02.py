@@ -195,10 +195,11 @@ def clean(players):
         - Heroes coordinates can be updated if they are killed 
         - Creatures can be removed from the dictionary if they are killed
         - Victory points and level of heroes can be updated if a creature is killed
+    For the format of players, see rapport_gr_02_part_02.
 
     Version:
     --------
-    specification : Guillaume Nizet (v.1 01/03/19)    
+    specification : Guillaume Nizet (v.2 03/03/19)    
     """
     pass
 
@@ -219,7 +220,7 @@ def special_abilities():
 # Choice : Move or attack ?
 
 def attack(heroes_players):
-    """Prepare and store the attack chosen by player
+    """ Prepare and store the attack chosen by player
     Parameters
     ----------
     hero_player: containing data for the hero who will attack and the enemy who will be attacked (dictionary)
@@ -235,14 +236,15 @@ def attack(heroes_players):
     pass
 
 def moving_on(hero_player, map):
-    """Prepare and update the movement chosen by player
+    """ Prepare and update the movement chosen by player.
+
     Parameters
     ----------
     hero_player: hero who wants to move (dictionary)
     map: map coordinates to check differents entities (dictionary)
 
     Notes
-    -------
+    -----
     parse_command() store in a list the move made. And the coordinates of hero_player updates automatically.
 
     Version
@@ -277,11 +279,32 @@ def process_creatures(players):
     """
     pass
 
+
 ### AI ###
 
+def think(players, map, database, player):
+    """ Entry point of the IA: process data and create an "order string".
+    
+    Parameters
+    ----------
+    players : data of player heroes and creatures (dict)
+    map: data of the map (spawns, spur, size, etc...) (dict)
+    database : data of hero classes (dict)
+    player : the name of the AI player (str)
 
-def think(players, map):
-    pass
+    Returns
+    -------
+    command : string countaining the orders to execute (str)
+
+    Notes
+    -----
+    For the format of players, map and database, see rapport_gr_02_part_02.
+    The format of command is described in the instructions, p14.
+
+    Version
+    -------
+    specificaation : Martin Danhier (v.1 02/03/19)
+    """
 
 ### TOOLS ###
 
