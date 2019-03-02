@@ -123,22 +123,24 @@ def create_line_char(first, cross, last, y, x, color, width):
 # Check input command written by player
 
 
-def create_character(players, database):
-    """ Attribute the character chosen by player and saved in main dictionary.
+def create_character(players, map, command, player):
+    """ Parse the input command and create the players.
 
     Parameters
     ----------
-    players: player data that will contain the chosen heroes (dictionary)
-    database: containing default stats characters (dictionary)
+    players : data of player heroes and creatures. (dict)
+    map: data of the map (spawns, spur, size, etc...). (dict)
+    command: the input string to be parsed. (str)
+    player: the player executing the command. (str)
 
     Notes
     -----
-    For the format of players and database, see rapport_gr_02_part_02.
-    The players dictionary is updated: a new hero is added.
+    For the format of players and map, see rapport_gr_02_part_02.
+    The players dictionary is updated: one or more heroes can be added.
 
     Version
     -------
-    specification : Jonathan Nhouyvanisvong (v.2 01/03/19)
+    specification : Jonathan Nhouyvanisvong (v.3 02/03/2019)
 
     """
     pass
@@ -161,8 +163,9 @@ def parse_command(command):
     A typical "action" dict looks like this : 
         {
             'hero' : hero_name (str),
+            'player' : player_name (str),
             'action' : action (str) (can be the name of an ability (as 'fulgura') or 'attack' or 'fight'),
-            'coords' : ( x (int), y (int) ) (tuple, optional)
+            'target' : ( x (int), y (int) ) >> optional
         }
     
     Version
@@ -187,27 +190,21 @@ def read_file(path):
 
 
 def clean(players):
-    """ Cleans the board by:
-        - Removing the creatures that were killed
-        - Putting back on their spawn platforms heroes that were killed
-        - Giving victory points to players that are in the killed creatures areas
-        - Leveling up heroes if they have enough victory points
+    """ Cleans the board (managing death and levels).
 
-    Parameters:
-    -----------
-    players : information about players and their characters : heroes and creatures (dict)
+    Parameters
+    ----------
+    players : data of player heroes and creatures. (dict)
 
-    Notes:
-    ------
-    'players' can be modified:
-        - Heroes coordinates can be updated if they are killed 
-        - Creatures can be removed from the dictionary if they are killed
-        - Victory points and level of heroes can be updated if a creature is killed
+    Notes
+    -----
+    'players' can be updated if a hero or a creature is killed.
     For the format of players, see rapport_gr_02_part_02.
+    More details about the rules of the cleaning can be found in the instructions, p10.
 
-    Version:
-    --------
-    specification : Guillaume Nizet (v.2 03/03/19)    
+    Version
+    -------
+    specification : Guillaume Nizet (v.4 02/03/19)    
     """
     pass
 
@@ -216,10 +213,10 @@ def clean(players):
 
 
 def special_abilities():
-    """Prepare special abilities to use
+    """ Prepare special abilities to use
     Parameters
     ----------
-    
+
     Returns
     -------
 
@@ -237,8 +234,11 @@ def special_abilities():
 ### MOVE AND FIGHT ###
 # Choice : Move or attack ?
 
+# Maybe one big function ?
+# maybe some minor changes to do
+
 def attack(heroes_players):
-    """ Prepare and store the attack chosen by player
+    """ Execute
     Parameters
     ----------
     hero_player: containing data for the hero who will attack and the enemy who will be attacked (dictionary)
@@ -276,31 +276,27 @@ def moving_on(hero_player, map):
 ### CREATURES ###
 
 def process_creatures(players):
-    """ Automatically computes an action for a creature to perform:
-            - does nothing if there is no hero in its area of influence or if it's not affected by any special ability
-            - goes towards the nearest player if there is at least one hero in its area of influence or if it's affected by a special ability
-            - attacks a player if it is right next to it
+    """ Automatically computes an action for a creature to perform.
 
     Parameters:
     -----------
-    players : information about players and their characters : heroes and creatures (dict)
+    players : data of player heroes and creatures (dict)
 
     Notes:
     ------
-    'players' can be modified:
-        - Creatures coordinates can be updated if they move towards a player
-        - Players health can be updated if they get attacked by a creature
+    For the format of 'players', see rapport_gr_02_part_02.
+    The 'players' dict can be modified.
 
     Version:
     --------
-    specification : Guillaume Nizet (v.1 01/03/19)
+    specification : Guillaume Nizet (v.2 03/03/19)
     """
     pass
 
 
 ### AI ###
 
-def think(players, map, database, player):
+def think (players, map, database, player):
     """ Entry point of the IA: process data and create an "order string".
     
     Parameters
@@ -316,8 +312,8 @@ def think(players, map, database, player):
 
     Notes
     -----
-    For the format of players, map and database, see rapport_gr_02_part_02.
-    The format of command is described in the instructions, p14.
+    For the format of 'players', 'map' and 'database', see rapport_gr_02_part_02.
+    The format of 'command' is described in the instructions, p14.
 
     Version
     -------
