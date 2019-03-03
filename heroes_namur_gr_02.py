@@ -177,11 +177,25 @@ def parse_command(command):
 # Use file to apply parameters of HoN
 
 def read_file(path):
-    """Read parameter file to complete structure of the game
-    ...
+    """
+    Reads map file and create the data structures.
+
+    Parameters
+    ----------
+    path: the path of a map file (str)
+
+    Returns
+    -------
+    map: data of the map (spawns, spur, size, etc...). (dict)
+
+    Notes
+    -----
+    For the format of 'map', see rapport_gr_02_part_02.
+    The format of a typical map file is described in the instructions, p8.
+
     Version
     -------
-    specification : Jonathan Nhouyvanisvong (v.1 22/02/19)
+    specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
     """
     pass
 
