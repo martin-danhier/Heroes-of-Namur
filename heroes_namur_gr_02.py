@@ -115,7 +115,7 @@ def create_line_char(first, cross, last, y, x, color, width):
 
     Version
     -------
-    specification : Martin Danhier (v.1 01/03/19)
+    specification : Martin Danhier (v.2 01/03/19)
     """
     pass
 
@@ -170,7 +170,7 @@ def parse_command(command):
     
     Version
     -------
-    specification : Martin Danhier (v.1 02/03/2019)"""
+    specification : Martin Danhier (v.2 02/03/2019)"""
 
 
 ### GENERATION ###
@@ -226,22 +226,30 @@ def clean(players):
 # Step : use abilities
 
 
-def special_abilities():
+def special_abilities(order, players, map):
     """ Prepare special abilities to use
+    
     Parameters
     ----------
-
-    Returns
-    -------
-
+    order: the ability order. (dict)
+    players : data of player heroes and creatures. (dict)
+    map: data of the map (spawns, spur, size, etc...). (dict)
 
     Notes
     -----
-    parse_command() store in a list the move made. And the statistic of heroes_players updates automatically.
+    The 'order' dictionary is in the following format: 
+        {
+            'hero' : hero_name (str),
+            'player' : player_name (str),
+            'action' : 'ability_name',
+            'target' : ( x (int), y (int) )
+        }
+    For the formats of 'players' and 'map', see rapport_gr_02_part_02.
+    The 'players' dictionary may be updated.
 
     Version
     -------
-    specification : Jonathan Nhouyvanisvong (v.2 02/03/19)
+    specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
     """
     pass
 
@@ -348,7 +356,7 @@ def think (players, map, database, player):
 
     Version
     -------
-    specificaation : Martin Danhier (v.1 02/03/19)
+    specification : Martin Danhier (v.2 02/03/19)
     """
 
 ### TOOLS ###
