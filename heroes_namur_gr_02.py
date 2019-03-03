@@ -79,7 +79,7 @@ def convert_to_true_coords(coords):
     Parameters
     ----------
     coords: the tile coordinates to convert (tuple).
-    
+
     Returns
     -------
     true_coords: the coordinates of the center character of the tile. (tuple)
@@ -148,11 +148,11 @@ def create_character(players, map, command, player):
 
 def parse_command(command):
     """ Parse the input into a list of actions.
-    
+
     Parameters
     ----------
     command: the input string to be parsed (str)
-    
+
     Returns
     -------
     actions: a list of actions (list of dict)
@@ -165,9 +165,9 @@ def parse_command(command):
             'hero' : hero_name (str),
             'player' : player_name (str),
             'action' : action (str) (can be the name of an ability (as 'fulgura') or 'attack' or 'fight'),
-            'target' : ( x (int), y (int) ) >> optional
+            'target' : ( x (int), y (int) ) #optional
         }
-    
+
     Version
     -------
     specification : Martin Danhier (v.2 02/03/2019)"""
@@ -226,7 +226,7 @@ def clean(players):
 # Step : use abilities
 
 
-def special_abilities(order, players, map):
+def use_special_ability(order, players, map):
     """ Tries to execute the given ability order.
 
     Parameters
@@ -242,7 +242,7 @@ def special_abilities(order, players, map):
             'hero' : hero_name (str),
             'player' : player_name (str),
             'action' : 'ability_name',
-            'target' : ( x (int), y (int) )
+            'target' : ( x (int), y (int) ) #optional
         }
     For the formats of 'players' and 'map', see rapport_gr_02_part_02.
     The 'players' dictionary may be updated.
@@ -255,6 +255,7 @@ def special_abilities(order, players, map):
 
 ### MOVE AND FIGHT ###
 # Choice : Move or attack ?
+
 
 def attack(order, players, map):
     """ Tries to execute the given attack order.
@@ -272,7 +273,7 @@ def attack(order, players, map):
             'hero' : hero_name (str),
             'player' : player_name (str),
             'action' : 'fight',
-            'target' : ( x (int), y (int) )
+            'target' : ( x (int), y (int) ) #optional
         }
     For the formats of 'players' and 'map', see rapport_gr_02_part_02.
     The 'players' dictionary may be updated.
@@ -283,7 +284,8 @@ def attack(order, players, map):
     """
     pass
 
-def moving_on(order, players, map):
+
+def move_on(order, players, map):
     """ Tries to execute the given move order.
 
     Parameters
@@ -299,7 +301,7 @@ def moving_on(order, players, map):
             'hero' : hero_name (str),
             'player' : player_name (str),
             'action' : 'move',
-            'target' : ( x (int), y (int) )
+            'target' : ( x (int), y (int) ) #optional
         }
     For the formats of 'players' and 'map', see rapport_gr_02_part_02.
     The 'players' dictionary may be updated.
@@ -335,9 +337,9 @@ def process_creatures(players):
 
 ### AI ###
 
-def think (players, map, database, player):
+def think(players, map, database, player):
     """ Entry point of the IA: process data and create an "order string".
-    
+
     Parameters
     ----------
     players : data of player heroes and creatures (dict)
@@ -364,21 +366,21 @@ def think (players, map, database, player):
 
 def are_coords_in_range(source, target, range):
     """ Checks if the target coordinates are in the range of the source ones.
-    
+
     Parameters
     ----------
     source: the source pair of coordinates. (tuple)
     target: the target pair of coordinates. (tuple)
     range: the size of the range. (int)
-    
+
     Returns
     -------
     is_target_in_range: is the target in the range of source. (bool)
-    
+
     Notes
     -----
     A typical 'coord' tuple is in the format ( row (int), column (int) ).
-    
+
     Version
     -------
     specification: Martin Danhier (v.1 03/03/19)"""
@@ -389,7 +391,7 @@ def are_coords_in_range(source, target, range):
 
 def main():
     """ Manages the global course of the in-game events.
-    
+
     Version:
     --------
     specification : Guillaume Nizet (v.2 03/03/19)
