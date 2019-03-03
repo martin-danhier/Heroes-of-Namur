@@ -223,7 +223,7 @@ def clean(players):
     pass
 
 ### SPECIAL ABILITY ###
-# Step : use abilities (!before CLEANING & MOVE AND FIGHT!)
+# Step : use abilities
 
 
 def special_abilities():
@@ -354,8 +354,26 @@ def think (players, map, database, player):
 ### TOOLS ###
 
 
-def is_coord_in_range(coords_1, coords_2):
-    pass
+def are_coords_in_range(source, target, range):
+    """ Checks if the target coordinates are in the range of the source ones.
+    
+    Parameters
+    ----------
+    source: the source pair of coordinates. (tuple)
+    target: the target pair of coordinates. (tuple)
+    range: the size of the range. (int)
+    
+    Returns
+    -------
+    is_target_in_range: is the target in the range of source. (bool)
+    
+    Notes
+    -----
+    A typical 'coord' tuple is in the format ( row (int), column (int) ).
+    
+    Version
+    -------
+    specification: Martin Danhier (v.1 03/03/19)"""
 
 ### MAIN ###
 #!One function can be lauched for 1 party!
