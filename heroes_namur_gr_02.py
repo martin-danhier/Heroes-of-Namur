@@ -227,8 +227,8 @@ def clean(players):
 
 
 def special_abilities(order, players, map):
-    """ Prepare special abilities to use
-    
+    """ Tries to execute the given ability order.
+
     Parameters
     ----------
     order: the ability order. (dict)
