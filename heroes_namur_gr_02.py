@@ -25,6 +25,8 @@ def display_ui(players, map):
     Version
     -------
     specification : Guillaume Nizet (v.2 02/03/19)
+    implementation : prenom nom (v.1 06/03/19)
+    
     """
     pass
 
@@ -47,6 +49,8 @@ def get_coords_to_color(coords):
     Version:
     --------
     specification : Guillaume Nizet (v.2 02/03/19)
+    implementation : prenom nom (v.1 06/03/19)
+    
     """
     pass
 
@@ -69,6 +73,8 @@ def create_stats(players):
     Version
     -------
     specification : Martin Danhier (v.3 02/03/19)
+    implementation : prenom nom (v.1 06/03/19)
+    
     """
     pass
 
@@ -91,7 +97,8 @@ def convert_to_true_coords(coords):
     Version
     -------
     specification : Martin Danhier (v.2 02/03/19)
-
+    implementation : prenom nom (v.1 06/03/19)
+    
     """
     pass
 
@@ -116,6 +123,8 @@ def create_line_char(first, cross, last, y, x, color, width):
     Version
     -------
     specification : Martin Danhier (v.2 01/03/19)
+    implementation : prenom nom (v.1 06/03/19)
+    
     """
     pass
 
@@ -141,7 +150,8 @@ def create_character(players, map, command, player):
     Version
     -------
     specification : Jonathan Nhouyvanisvong (v.3 02/03/2019)
-
+    implementation : prenom nom (v.1 06/03/19)
+    
     """
     pass
 
@@ -170,7 +180,10 @@ def parse_command(command):
 
     Version
     -------
-    specification : Martin Danhier (v.2 02/03/2019)"""
+    specification : Martin Danhier (v.2 02/03/2019)
+    implementation : prenom nom (v.1 06/03/19)
+    
+    """
 
 
 ### GENERATION ###
@@ -196,6 +209,8 @@ def read_file(path):
     Version
     -------
     specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
+    implementation : prenom nom (v.1 06/03/19)
+    
     """
     pass
 
@@ -218,7 +233,9 @@ def clean(players):
 
     Version
     -------
-    specification : Guillaume Nizet (v.4 02/03/19)    
+    specification : Guillaume Nizet (v.4 02/03/19)
+    implementation : prenom nom (v.1 06/03/19)
+    
     """
     pass
 
@@ -250,6 +267,8 @@ def use_special_ability(order, players, map):
     Version
     -------
     specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
+    implementation : prenom nom (v.1 06/03/19)
+    
     """
     pass
 
@@ -281,6 +300,8 @@ def attack(order, players, map):
     Version
     -------
     specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
+    implementation : prenom nom (v.1 06/03/19)
+    
     """
     pass
 
@@ -309,7 +330,8 @@ def move_on(order, players, map):
     Version
     -------
     specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
-
+    implementation : prenom nom (v.1 06/03/19)
+    
     """
     pass
 
@@ -331,6 +353,8 @@ def process_creatures(players):
     Version:
     --------
     specification : Guillaume Nizet (v.2 03/03/19)
+    implementation : prenom nom (v.1 06/03/19)
+    
     """
     pass
 
@@ -359,6 +383,8 @@ def think(players, map, database, player):
     Version
     -------
     specification : Martin Danhier (v.2 02/03/19)
+    implementation : prenom nom (v.1 06/03/19)
+    
     """
 
 ### TOOLS ###
@@ -383,7 +409,10 @@ def are_coords_in_range(source, target, range):
 
     Version
     -------
-    specification: Martin Danhier (v.1 03/03/19)"""
+    specification: Martin Danhier (v.1 03/03/19)
+    implementation : prenom nom (v.1 06/03/19)
+    
+    """
 
 ### MAIN ###
 #!One function can be lauched for 1 party!
@@ -395,6 +424,8 @@ def main():
     Version:
     --------
     specification : Guillaume Nizet (v.2 03/03/19)
+    implementation : prenom nom (v.1 06/03/19)
+
     """
     pass
 
