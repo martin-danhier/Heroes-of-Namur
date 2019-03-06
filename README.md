@@ -16,7 +16,7 @@ The github repo for our amazing project
 ## Découp. & spéc. fct (19/2 - 04/3)
 
 - [x] 19/2 : découp. & spéc. fcts
-- [ ] 5/3 : lim. dépôt rapport & module
+- [x] 5/3 : lim. dépôt rapport & module
 
 ## Implémentat° jeu avc IA naïve (5/3 - 1/4)
 
