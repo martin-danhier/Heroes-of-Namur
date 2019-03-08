@@ -150,7 +150,7 @@ def create_character(players, map, command, player):
     Version
     -------
     specification : Jonathan Nhouyvanisvong (v.3 02/03/2019)
-    implementation : prenom nom (v.1 06/03/19)
+    implementation : prenom nom (v.2 08/03/19)
     
     """
 
@@ -185,9 +185,18 @@ def parse_command(command):
     Version
     -------
     specification : Martin Danhier (v.2 02/03/2019)
-    implementation : prenom nom (v.1 06/03/19)
+    implementation : prenom nom (v.2 08/03/19)
     
     """
+    #Syntax command
+    # nom:type #type of character (create)
+    # nom:capacity #use capacity
+    # OR -> nom:capacity:r-c #use capacity, position required
+
+    # nom:@r-c #move
+    # nom:*r-c #attack
+
+
 
 
 ### GENERATION ###
@@ -251,12 +260,15 @@ def clean(players):
     Version
     -------
     specification : Guillaume Nizet (v.4 02/03/19)
-    implementation : prenom nom (v.1 06/03/19)
+    implementation : prenom nom (v.2 08/03/19)
     
     """
 
     #creatures dispawn
+
     #heroes revives in their spawn
+
+    #attributes bonus
     pass
 
 ### SPECIAL ABILITY ###
@@ -287,11 +299,12 @@ def use_special_ability(order, players, map):
     Version
     -------
     specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
-    implementation : prenom nom (v.1 06/03/19)
+    implementation : prenom nom (v.2 08/03/19)
     
     """
     #compare class & level required
     #check ability
+    #execute bonus/malus concerning active skill
     pass
 
 ### MOVE AND FIGHT ###
@@ -322,7 +335,7 @@ def attack(order, players, map):
     Version
     -------
     specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
-    implementation : prenom nom (v.1 06/03/19)
+    implementation : prenom nom (v.2 08/03/19)
     
     """
     #analyze surface : is it any enemies ? -> are_coords_in_range(source, target, range)
@@ -353,10 +366,10 @@ def move_on(order, players, map):
     Version
     -------
     specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
-    implementation : prenom nom (v.1 06/03/19)
+    implementation : prenom nom (v.2 08/03/19)
     
     """
-    #analyze map : wall ? -> are_coords_in_range(source, target, range)
+    #analyze map : wall ? player ? -> are_coords_in_range(source, target, range)
     pass
 
 
@@ -377,10 +390,11 @@ def process_creatures(players):
     Version:
     --------
     specification : Guillaume Nizet (v.2 03/03/19)
-    implementation : prenom nom (v.1 06/03/19)
+    implementation : prenom nom (v.2 08/03/19)
     
     """
-    #actually, create a stupid AI (It can attack but nobody here)
+    #actually, create a stupid AI (Exem. : It can attack but it failed because nobody here)
+    # Action : left, right, up, down, attack, nothing
     pass
 
 
@@ -436,8 +450,8 @@ def are_coords_in_range(source, target, range):
 
     Version
     -------
-    specification: Martin Danhier (v.1 03/03/19)
-    implementation : prenom nom (v.1 06/03/19)
+    specification: Martin Danhier (v.2 03/03/19)
+    implementation : prenom nom (v.2 08/03/19)
     
     """
     #wall ? enemy (or not) ? objectifs ? 
@@ -452,7 +466,7 @@ def main():
     Version:
     --------
     specification : Guillaume Nizet (v.2 03/03/19)
-    implementation : prenom nom (v.1 06/03/19)
+    implementation : prenom nom (v.2 08/03/19)
 
     """
     #Step 1 : create map and implements data
