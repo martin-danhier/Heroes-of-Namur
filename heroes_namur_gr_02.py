@@ -1,11 +1,3 @@
-"""Dictionary
-* players : name_player {name_heros : stats_heros}, name_player_2 {}
-* database : name_class {lvl : default_stats_table}
-* map : size - spawns {players - bot - citadel}
-
-**don't forget nb turns of game in dictionary ===> map['turn']**
-"""
-
 ### UI ###
 # Display user interface
 
@@ -129,7 +121,7 @@ def create_line_char(first, cross, last, y, x, color, width):
     pass
 
 ### INPUT ###
-# Check input command written by player
+# Process input
 
 
 def create_character(players, map, command, player):
@@ -200,7 +192,7 @@ def parse_command(command):
 
 
 ### GENERATION ###
-# Use file to apply parameters of HoN
+# Create map
 
 def read_file(path):
     """
@@ -241,7 +233,7 @@ def read_file(path):
     pass
 
 ### CLEANING ###
-# Clean entities & attributes bonus / malus
+# Clean and apply bonuses
 
 
 def clean(players):
@@ -271,8 +263,8 @@ def clean(players):
     #attributes bonus
     pass
 
-### SPECIAL ABILITY ###
-# Step : use abilities
+### ACTIONS ###
+# Execute orders
 
 
 def use_special_ability(order, players, map):
@@ -306,10 +298,6 @@ def use_special_ability(order, players, map):
     #check ability
     #execute bonus/malus concerning active skill
     pass
-
-### MOVE AND FIGHT ###
-# Choice : Move or attack ?
-
 
 def attack(order, players, map):
     """ Tries to execute the given attack order.
@@ -374,6 +362,7 @@ def move_on(order, players, map):
 
 
 ### CREATURES ###
+# Process creatures
 
 def process_creatures(players):
     """ Automatically computes an action for a creature to perform.
@@ -399,6 +388,7 @@ def process_creatures(players):
 
 
 ### AI ###
+# Artificial player
 
 def think(players, map, database, player):
     """ Entry point of the IA: process data and create an "order string".
@@ -429,7 +419,7 @@ def think(players, map, database, player):
 
 
 ### TOOLS ###
-
+# Useful methods
 
 def are_coords_in_range(source, target, range):
     """ Checks if the target coordinates are in the range of the source ones.
@@ -457,8 +447,7 @@ def are_coords_in_range(source, target, range):
     #wall ? enemy (or not) ? objectifs ? 
 
 ### MAIN ###
-#!One function can be lauched for 1 party!
-
+# Entry point of the game
 
 def main():
     """ Manages the global course of the in-game events.
