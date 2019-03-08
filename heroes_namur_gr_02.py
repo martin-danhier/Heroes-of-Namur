@@ -153,6 +153,10 @@ def create_character(players, map, command, player):
     implementation : prenom nom (v.1 06/03/19)
     
     """
+
+    #create 4 heros/player
+    #choose heros
+
     pass
 
 
@@ -209,9 +213,22 @@ def read_file(path):
     Version
     -------
     specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
-    implementation : prenom nom (v.1 06/03/19)
+    implementation : Jonathan Nhouyvanisvong (v.2 07/03/19)
     
     """
+
+    #coords map
+    ## (range, column, turns)
+
+    #coords spawn
+    ## (range, column) x2
+
+    #coords spur
+    ## (range, column) x4
+
+    #coords creatures
+    ## (range, column, hp, dmg, rayon_influence, victory_pts) x ?
+
     pass
 
 ### CLEANING ###
@@ -237,6 +254,9 @@ def clean(players):
     implementation : prenom nom (v.1 06/03/19)
     
     """
+
+    #creatures dispawn
+    #heroes revives in their spawn
     pass
 
 ### SPECIAL ABILITY ###
@@ -270,6 +290,8 @@ def use_special_ability(order, players, map):
     implementation : prenom nom (v.1 06/03/19)
     
     """
+    #compare class & level required
+    #check ability
     pass
 
 ### MOVE AND FIGHT ###
@@ -303,6 +325,7 @@ def attack(order, players, map):
     implementation : prenom nom (v.1 06/03/19)
     
     """
+    #analyze surface : is it any enemies ? -> are_coords_in_range(source, target, range)
     pass
 
 
@@ -333,6 +356,7 @@ def move_on(order, players, map):
     implementation : prenom nom (v.1 06/03/19)
     
     """
+    #analyze map : wall ? -> are_coords_in_range(source, target, range)
     pass
 
 
@@ -356,6 +380,7 @@ def process_creatures(players):
     implementation : prenom nom (v.1 06/03/19)
     
     """
+    #actually, create a stupid AI (It can attack but nobody here)
     pass
 
 
@@ -387,6 +412,8 @@ def think(players, map, database, player):
     
     """
 
+
+
 ### TOOLS ###
 
 
@@ -413,6 +440,7 @@ def are_coords_in_range(source, target, range):
     implementation : prenom nom (v.1 06/03/19)
     
     """
+    #wall ? enemy (or not) ? objectifs ? 
 
 ### MAIN ###
 #!One function can be lauched for 1 party!
@@ -427,6 +455,14 @@ def main():
     implementation : prenom nom (v.1 06/03/19)
 
     """
+    #Step 1 : create map and implements data
+    #Step 2 : create 4 heros/player
+    ##LOOP##
+    #Step 3 : give order (store in list)
+    #Step 4 : First clear
+    #Step 5 : Lauch orders
+    #Step 6 : Second clear
+    #Step 7 : Check if "game over" (nb turns finished ?, 1 heros remaining ?, nb turns passed in citadel)
     pass
 
 
