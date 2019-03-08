@@ -421,18 +421,17 @@ def think(players, map, database, player):
 ### TOOLS ###
 # Useful methods
 
-def are_coords_in_range(source, target, range):
-    """ Checks if the target coordinates are in the range of the source ones.
+def get_distance(coords1, coords2):
+    """ Get the distance between two coordinates.
 
     Parameters
     ----------
-    source: the source pair of coordinates. (tuple)
-    target: the target pair of coordinates. (tuple)
-    range: the size of the range. (int)
+    coords1: the first pair of coordinates. (tuple)
+    coords2: the second pair of coordinates. (tuple)
 
     Returns
     -------
-    is_target_in_range: is the target in the range of source. (bool)
+    distance: the distance between the two coordinates (int)
 
     Notes
     -----
@@ -440,11 +439,35 @@ def are_coords_in_range(source, target, range):
 
     Version
     -------
-    specification: Martin Danhier (v.2 03/03/19)
+    specification: Martin Danhier (v.3 08/03/19)
     implementation : prenom nom (v.2 08/03/19)
     
     """
     #wall ? enemy (or not) ? objectifs ? 
+
+def get_tile_info(coords):
+    """ Get the details of the given tile.
+    
+    Parameters
+    ----------
+    coords: the coordinates of a tile.
+    
+    Returns
+    -------
+    info : the details of the tile (str).
+
+    Notes
+    -----
+    info can take the following values:
+        'wall' if the tile doesn't exist.
+        'player' if the tile contains a hero or a creature.
+        'clear' if the tile is clear.
+
+    Version
+    -------
+    specification: Martin Danhier (v.1 08/03/2019)
+    implementation: void
+    """
 
 ### MAIN ###
 # Entry point of the game
