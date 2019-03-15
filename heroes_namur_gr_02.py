@@ -413,8 +413,9 @@ def think(players, map, database, player):
     -------
     specification : Martin Danhier (v.2 02/03/19)
     implementation : prenom nom (v.1 06/03/19)
-    
+
     """
+    #TODO: ia naive
 
 
 
