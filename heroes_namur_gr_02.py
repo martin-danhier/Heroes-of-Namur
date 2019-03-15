@@ -379,12 +379,7 @@ def process_creatures(players):
     Version:
     --------
     specification : Guillaume Nizet (v.2 03/03/19)
-    implementation : prenom nom (v.2 08/03/19)
-
     """
-    # actually, create a stupid AI (Exem. : It can attack but it failed because nobody here)
-    # Action : left, right, up, down, attack, nothing
-    # TODO
     pass
 
 
