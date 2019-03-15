@@ -1,3 +1,6 @@
+import colored
+import os
+
 ### UI ###
 # Display user interface
 
@@ -48,7 +51,7 @@ def get_coords_to_color(coords):
 
 # ----
 
-def create_stats(players, database):
+ddef create_stats(players, database):
     """ Generates a string containing the stats of the players.
 
     Parameters:
@@ -99,7 +102,7 @@ def create_stats(players, database):
                         ability_cooldown = players[player][hero]['cooldown'][index_ability]
                         # Add the name of the ability and the number of turns left before being able to use it again.
                         if ability_cooldown == 0:
-                            stats += ' %s (ready)' % ability_name
+                            stats += ' %s (%s)' % (ability_name, colored.stylize('ready', colored.fg('light_goldenrod_1')))
                         else:
                             stats += '%s (%s turns left)' % (ability_name, colored.stylize(ability_cooldown, colored.fg('light_goldenrod_1')))
                         # Add a comma to separate abilities
