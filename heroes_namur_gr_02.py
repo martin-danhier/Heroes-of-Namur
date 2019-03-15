@@ -327,6 +327,7 @@ def attack(order, players, map):
     
     """
     #analyze surface : is it any enemies ? -> are_coords_in_range(source, target, range)
+    #TODO
     pass
 
 
