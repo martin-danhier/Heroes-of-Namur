@@ -46,29 +46,71 @@ def get_coords_to_color(coords):
     """
     pass
 
+# ----
 
-def create_stats(players):
+def create_stats(players, database):
     """ Generates a string containing the stats of the players.
 
     Parameters:
     -----------
     players : data of player heroes and creatures (dict)
+    database = data of hero classes (dict)
 
     Returns
     -------
-    stats : a multiline string countaining the graphical representation of the stats. (str)
+    stats : a multiline string containing the graphical representation of the stats. (str)
 
     Notes
     -----
-    For the format of players, see rapport_gr_02_part_02.
+    For the formats of players and database, see rapport_gr_02_part_02.
 
     Version
     -------
-    specification : Martin Danhier (v.3 02/03/19)
-    implementation : prenom nom (v.1 06/03/19)
-    
+    specification : Martin Danhier (v.4 15/03/19)
+    implementation : Martin Danhier (v.1 15/03/19)
+
     """
-    pass
+    stats = "Stats\n-----"
+    # Define colors that will be used for each player
+    player_colors = {'Player 1': 'green', 'Player 2': 'light_red'}
+
+    # For each player (not including creatures)
+    for player in players:
+        if player != 'creatures':
+            # Add the name of the player
+            stats += "\n\n%s:" % colored.stylize(player, colored.fg(player_colors[player]))
+
+            # Add hero data
+            for hero in players[player]:
+                stats += '\n - \'%s\', %s:\n   (HP: %s, XP: %s, LVL: %s)\n   Position: (%s, %s)' % (
+                    colored.stylize(hero, colored.fg(player_colors[player])), players[player][hero]['type'],
+                    colored.stylize(players[player][hero]['hp'], colored.fg('light_goldenrod_1')), colored.stylize(players[player][hero]['xp'], colored.fg('light_goldenrod_1')), colored.stylize(players[player][hero]['level'], colored.fg('light_goldenrod_1')),
+                    colored.stylize(players[player][hero]['coords'][0], colored.fg('light_goldenrod_1')), colored.stylize(players[player][hero]['coords'][1], colored.fg('light_goldenrod_1')))
+                
+                # Display abilities stats.
+                nb_abilities = len(players[player][hero]['cooldown'])
+
+                # Display them if there are some abilities to display
+                if (nb_abilities > 0):
+                    stats += '\n   Special abilities: '    
+                    for index_ability in range(nb_abilities):
+                        # Get data from databases.
+                        ability_name = database[players[player][hero]['type']][players[player][hero]['level']]['abilities'][index_ability]['name']
+                        ability_cooldown = players[player][hero]['cooldown'][index_ability]
+                        # Add the name of the ability and the number of turns left before being able to use it again.
+                        if ability_cooldown == 0:
+                            stats += ' %s (ready)' % ability_name
+                        else:
+                            stats += '%s (%s turns left)' % (ability_name, colored.stylize(ability_cooldown, colored.fg('light_goldenrod_1')))
+                        # Add a comma to separate abilities
+                        if nb_abilities > 1 and index_ability < nb_abilities - 1:
+                            stats += ','
+                else:
+                    stats += "\n   No special ability."
+    # Return the full stats string
+    return stats
+
+# ----
 
 
 def convert_to_true_coords(coords):
