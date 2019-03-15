@@ -441,9 +441,10 @@ def get_distance(coords1, coords2):
     -------
     specification: Martin Danhier (v.3 08/03/19)
     implementation : prenom nom (v.2 08/03/19)
-    
+
     """
-    #wall ? enemy (or not) ? objectifs ? 
+    # wall ? enemy (or not) ? objectifs ?
+    # TODO
 
 def get_tile_info(coords):
     """ Get the details of the given tile.
