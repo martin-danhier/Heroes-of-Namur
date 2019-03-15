@@ -187,8 +187,8 @@ def parse_command(command):
 
     # nom:@r-c #move
     # nom:*r-c #attack
-
-
+    
+    #TODO
 
 
 ### GENERATION ###
