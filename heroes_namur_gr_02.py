@@ -447,11 +447,11 @@ def get_distance(coords1, coords2):
 
 def get_tile_info(coords):
     """ Get the details of the given tile.
-    
+
     Parameters
     ----------
     coords: the coordinates of a tile.
-    
+
     Returns
     -------
     info : the details of the tile (str).
@@ -468,6 +468,7 @@ def get_tile_info(coords):
     specification: Martin Danhier (v.1 08/03/2019)
     implementation: void
     """
+    #TODO
 
 ### MAIN ###
 # Entry point of the game
