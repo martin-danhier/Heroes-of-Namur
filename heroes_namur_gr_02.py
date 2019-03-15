@@ -235,7 +235,6 @@ def read_file(path):
 ### CLEANING ###
 # Clean and apply bonuses
 
-
 def clean(players):
     """ Cleans the board (managing death and levels).
 
@@ -261,6 +260,8 @@ def clean(players):
     #heroes revives in their spawn
 
     #attributes bonus
+    # spec à revoir : il y aura sûrement besoin de "database"
+    #TODO
     pass
 
 ### ACTIONS ###
