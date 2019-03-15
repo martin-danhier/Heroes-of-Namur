@@ -205,6 +205,8 @@ def read_file(path):
     Returns
     -------
     map: data of the map (spawns, spur, size, etc...). (dict)
+    players: data of players (players, creatures) (dict)
+
 
     Notes
     -----
@@ -213,23 +215,43 @@ def read_file(path):
 
     Version
     -------
-    specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
-    implementation : Jonathan Nhouyvanisvong (v.2 07/03/19)
+    specification : Jonathan Nhouyvanisvong (v.4 15/03/19)
+    implementation : Jonathan Nhouyvanisvong (v.3 14/03/19)
     
     """
+    # data.hon : map, spawn, spur, creatures
+    # NEED
+    # players = {'player_name' : {'heros_name' : 'stats_heros'}, 'creatures' : {{'hp' : , 'dmg' : , 'radius' : , 'xp' : , 'coords' : []}, ...}
+    # map = {'size' : (,), 'win_turns' : ' ', 'spawns' : {'player' : (,), 'player_bot' : (,)}, 'citadel' : [(,), (,)]}
 
-    #coords map
-    ## (range, column, turns)
-
-    #coords spawn
-    ## (range, column) x2
-
-    #coords spur
-    ## (range, column) x4
-
-    #coords creatures
-    ## (range, column, hp, dmg, rayon_influence, victory_pts) x ?
-
+    fh = open('data.hon', 'r')
+    map = {}
+    # fct split()
+    # delete /n and space
+    for line in fh.readlines():
+        if line == 'map:':
+            map[size] = 
+            map[win_turns] = 
+            pass
+            #coords map
+            ## (range, column, turns)
+        elif line == 'spawn:': #spawn about players
+            map[spawns] = 
+            pass
+            #coords spawn
+            ## (range, column) x2
+        elif line == 'spur:': #spawn about citadel
+            map[spawns][citadel] = 
+            pass
+            #coords spur
+            ## (range, column) x4
+        elif line == 'creatures:':
+            players[creatures] = 
+            pass
+            #coords creatures
+            ## (range, column, hp, dmg, rayon_influence, victory_pts) x ?
+    #lines = fh.readlines()
+    #fh.close()
     pass
 
 ### CLEANING ###
