@@ -51,7 +51,7 @@ def get_coords_to_color(coords):
 
 # ----
 
-ddef create_stats(players, database):
+def create_stats(players, database):
     """ Generates a string containing the stats of the players.
 
     Parameters:
@@ -70,7 +70,7 @@ ddef create_stats(players, database):
     Version
     -------
     specification : Martin Danhier (v.4 15/03/19)
-    implementation : Martin Danhier (v.1 15/03/19)
+    implementation : Martin Danhier (v.2 15/03/19)
 
     """
     stats = "Stats\n-----"
