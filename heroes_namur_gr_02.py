@@ -24,7 +24,7 @@ def display_ui(players, map):
 
 
 def get_coords_to_color(coords):
-    """ Generates the coordinates that need to be colored around the given coordinates. 
+    """ Returns the coordinates that need to be colored around the given coordinates. 
 
     Parameters
     ----------
@@ -41,10 +41,18 @@ def get_coords_to_color(coords):
     Version:
     --------
     specification : Guillaume Nizet (v.2 02/03/19)
-    implementation : prenom nom (v.1 06/03/19)
+    implementation : Guillaume Nizet (v.2 04/03/19)
     
     """
-    pass
+    coords_to_color = []
+    # For each character around the coord
+    for row in range(coords[0]-1, coords[0] + 2):
+        for col in range(coords[1]-2, coords[1]+3):
+
+            # If it is a border (not center), add it
+            if row != coords[0] or col not in range(coords[1]-1, coords[1]+2):
+                coords_to_color.append((row, col))
+    return coords_to_color
 
 
 def create_stats(players):
