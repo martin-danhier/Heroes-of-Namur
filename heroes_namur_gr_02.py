@@ -71,7 +71,7 @@ def create_stats(players):
     pass
 
 
-def convert_to_true_coords(coords):
+def convert_to_true_coords(coords): #virer
     """ Converts the given tile coordinates to absolute char coordinates.
 
     Parameters
@@ -89,10 +89,10 @@ def convert_to_true_coords(coords):
     Version
     -------
     specification : Martin Danhier (v.2 02/03/19)
-    implementation : prenom nom (v.1 06/03/19)
+    implementation : Martin Danhier (v.1 02/03/19)
     
     """
-    pass
+    return (coords[0] * 2, coords[1] * 4 - 2)
 
 
 def create_line_char(first, cross, last, y, x, color, width):
