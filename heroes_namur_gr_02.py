@@ -297,7 +297,9 @@ def use_special_ability(order, players, map):
     #compare class & level required
     #check ability
     #execute bonus/malus concerning active skill
+    #TODO
     pass
+
 
 def attack(order, players, map):
     """ Tries to execute the given attack order.
