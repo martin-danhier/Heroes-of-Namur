@@ -123,10 +123,17 @@ def create_line_char(first, cross, last, y, x, color, width):
     Version
     -------
     specification : Martin Danhier (v.2 01/03/19)
-    implementation : prenom nom (v.1 06/03/19)
-    
+    implementation : Martin Danhier (v.2 02/03/19)
     """
-    pass
+    if x == 0:  # on the first position
+        return '%s  %s' % (color, first)
+    elif x < (width * 4):
+        if x % 4 != 0:
+            return '%s═' % color
+        else:
+            return '%s%s' % (color, cross)
+    elif x == (width * 4):  # on the last position
+        return '%s%s' % (color, last)
 
 ### INPUT ###
 # Process input
