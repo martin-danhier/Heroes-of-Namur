@@ -145,11 +145,14 @@ def create_character(players, map, command, player):
     implementation : prenom nom (v.2 08/03/19)
     
     """
-
+    #choose player_name
     #create 4 heros/player
-    #choose heros
-
+    #choose heros_name
+    #choose heros : barbarian, healer, mage, rogue
+    #TODO
     pass
+
+
 
 
 def parse_command(command):
