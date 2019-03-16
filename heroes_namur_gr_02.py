@@ -35,13 +35,10 @@ def display_ui(players, map):
     colored_coords = {"spur": []}
     # Get colored borders around spur
     for coords in map["spur"]:
-        colored_coords["spur"] += get_coords_to_color(
-            convert_to_true_coords(coords))
+        colored_coords["spur"] += get_coords_to_color((coords[0] * 2, coords[1] * 4 - 2))
     # Get colored borders around players spawn points
-    colored_coords["spawn_player1"] = get_coords_to_color(convert_to_true_coords(
-        map["spawns"]["player1"]))
-    colored_coords["spawn_player2"] = get_coords_to_color(
-        convert_to_true_coords(map["spawns"]["player2"]))
+    colored_coords["spawn_player1"] = get_coords_to_color((map["spawns"]["player1"][0] * 2, map["spawns"]["player1"][1] * 4 - 2))
+    colored_coords["spawn_player2"] = get_coords_to_color((map["spawns"]["player2"][0] * 2, map["spawns"]["player2"][1] * 4 - 2))
     # Get player coords
     player_coords = {}
     for player in players:
@@ -49,16 +46,28 @@ def display_ui(players, map):
             coords = players[player][character]['coords']
             # If the character is a creature
             if player == 'creatures':
-                player_coords[coords] = ('blue', 'Ϩ')
+                player_coords[coords] = ('blue', '*')
             else:
-                if players[player][character]['type'] == 'barbarian':
-                    type = 'ᰞ'
-                elif players[player][character]['type'] == 'mage':
-                    type = 'ϟ'
-                elif players[player][character]['type'] == 'healer':
-                    type = '+'
-                elif players[player][character]['type'] == 'rogue':
-                    type = '◉' #'࿄'
+                # Get the number of players on the same box
+                players_count = 0
+                for other_character in players[player]:
+                    if players[player][other_character]['coords'] == coords:
+                        players_count += 1
+
+                # If there are several characters on the box, their count is displayer
+                if players_count > 1:
+                    type = str(players_count)
+
+                # If there is only 1 player on the box, its type is displayed
+                else:
+                    if players[player][character]['type'] == 'barbarian':
+                        type = '🔰'
+                    elif players[player][character]['type'] == 'mage':
+                        type = 'ϟ'
+                    elif players[player][character]['type'] == 'healer':
+                        type = '+'
+                    elif players[player][character]['type'] == 'rogue':
+                        type = '🔪' 
                 # If the character is owned by the first player (human)
                 if player == 'player1':
                     player_coords[coords] = ('dark_green', type)
@@ -66,7 +75,7 @@ def display_ui(players, map):
                 elif player == 'player2':
                     player_coords[coords] = ('red', type)
 
-    # Add columns numbers
+    # Add column numbers
     for col in range(map['size'][1]):
         if col + 1 < 10:
             board += '  %d ' % (col + 1)
@@ -80,7 +89,7 @@ def display_ui(players, map):
         if y_pos % 2 != 0:
             board += '   '
             
-        # for each column
+        # For each column
         x_pos = 0
         while x_pos < (4 * width) + 1:
 
@@ -134,7 +143,7 @@ def display_ui(players, map):
     
             x_pos += 1
 
-        # add stats
+        # Add stats
         stat_line = ''
         if y_pos-1 < len(stats):
             stat_line = stats[y_pos-1]
