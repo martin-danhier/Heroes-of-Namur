@@ -1,3 +1,6 @@
+import colored
+import os
+
 ### UI ###
 # Display user interface
 
@@ -24,7 +27,7 @@ def display_ui(players, map):
 
 
 def get_coords_to_color(coords):
-    """ Generates the coordinates that need to be colored around the given coordinates. 
+    """ Returns the coordinates that need to be colored around the given coordinates. 
 
     Parameters
     ----------
@@ -41,59 +44,84 @@ def get_coords_to_color(coords):
     Version:
     --------
     specification : Guillaume Nizet (v.2 02/03/19)
-    implementation : prenom nom (v.1 06/03/19)
+    implementation : Guillaume Nizet (v.2 04/03/19)
     
     """
-    pass
+    coords_to_color = []
+    # For each character around the coord
+    for row in range(coords[0]-1, coords[0] + 2):
+        for col in range(coords[1]-2, coords[1]+3):
 
+            # If it is a border (not center), add it
+            if row != coords[0] or col not in range(coords[1]-1, coords[1]+2):
+                coords_to_color.append((row, col))
+    return coords_to_color
 
-def create_stats(players):
+# ----
+
+def create_stats(players, database):
     """ Generates a string containing the stats of the players.
 
     Parameters:
     -----------
     players : data of player heroes and creatures (dict)
+    database = data of hero classes (dict)
 
     Returns
     -------
-    stats : a multiline string countaining the graphical representation of the stats. (str)
+    stats : a multiline string containing the graphical representation of the stats. (str)
 
     Notes
     -----
-    For the format of players, see rapport_gr_02_part_02.
+    For the formats of players and database, see rapport_gr_02_part_02.
 
     Version
     -------
-    specification : Martin Danhier (v.3 02/03/19)
-    implementation : prenom nom (v.1 06/03/19)
-    
+    specification : Martin Danhier (v.4 15/03/19)
+    implementation : Martin Danhier (v.2 15/03/19)
+
     """
-    pass
+    stats = "Stats\n-----"
+    # Define colors that will be used for each player
+    player_colors = {'Player 1': 'green', 'Player 2': 'light_red'}
 
+    # For each player (not including creatures)
+    for player in players:
+        if player != 'creatures':
+            # Add the name of the player
+            stats += "\n\n%s:" % colored.stylize(player, colored.fg(player_colors[player]))
 
-def convert_to_true_coords(coords):
-    """ Converts the given tile coordinates to absolute char coordinates.
+            # Add hero data
+            for hero in players[player]:
+                stats += '\n - \'%s\', %s:\n   (HP: %s, XP: %s, LVL: %s)\n   Position: (%s, %s)' % (
+                    colored.stylize(hero, colored.fg(player_colors[player])), players[player][hero]['type'],
+                    colored.stylize(players[player][hero]['hp'], colored.fg('light_goldenrod_1')), colored.stylize(players[player][hero]['xp'], colored.fg('light_goldenrod_1')), colored.stylize(players[player][hero]['level'], colored.fg('light_goldenrod_1')),
+                    colored.stylize(players[player][hero]['coords'][0], colored.fg('light_goldenrod_1')), colored.stylize(players[player][hero]['coords'][1], colored.fg('light_goldenrod_1')))
+                
+                # Display abilities stats.
+                nb_abilities = len(players[player][hero]['cooldown'])
 
-    Parameters
-    ----------
-    coords: the tile coordinates to convert (tuple).
+                # Display them if there are some abilities to display
+                if (nb_abilities > 0):
+                    stats += '\n   Special abilities: '    
+                    for index_ability in range(nb_abilities):
+                        # Get data from databases.
+                        ability_name = database[players[player][hero]['type']][players[player][hero]['level']]['abilities'][index_ability]['name']
+                        ability_cooldown = players[player][hero]['cooldown'][index_ability]
+                        # Add the name of the ability and the number of turns left before being able to use it again.
+                        if ability_cooldown == 0:
+                            stats += ' %s (%s)' % (ability_name, colored.stylize('ready', colored.fg('light_goldenrod_1')))
+                        else:
+                            stats += '%s (%s turns left)' % (ability_name, colored.stylize(ability_cooldown, colored.fg('light_goldenrod_1')))
+                        # Add a comma to separate abilities
+                        if nb_abilities > 1 and index_ability < nb_abilities - 1:
+                            stats += ','
+                else:
+                    stats += "\n   No special ability."
+    # Return the full stats string
+    return stats
 
-    Returns
-    -------
-    true_coords: the coordinates of the center character of the tile. (tuple)
-
-    Notes
-    -----
-    A typical 'coord' tuple is in the format ( row (int), column (int) ).
-
-    Version
-    -------
-    specification : Martin Danhier (v.2 02/03/19)
-    implementation : prenom nom (v.1 06/03/19)
-    
-    """
-    pass
-
+# ----
 
 def create_line_char(first, cross, last, y, x, color, width):
     """ Create and color a border character.
@@ -115,14 +143,20 @@ def create_line_char(first, cross, last, y, x, color, width):
     Version
     -------
     specification : Martin Danhier (v.2 01/03/19)
-    implementation : prenom nom (v.1 06/03/19)
-    
+    implementation : Martin Danhier (v.2 02/03/19)
     """
-    pass
+    if x == 0:  # on the first position
+        return '%s  %s' % (color, first)
+    elif x < (width * 4):
+        if x % 4 != 0:
+            return '%s═' % color
+        else:
+            return '%s%s' % (color, cross)
+    elif x == (width * 4):  # on the last position
+        return '%s%s' % (color, last)
 
 ### INPUT ###
 # Process input
-
 
 def create_character(players, map, command, player):
     """ Parse the input command and create the players.
