@@ -1,3 +1,5 @@
+from math import sqrt
+
 ### UI ###
 # Display user interface
 
@@ -440,9 +442,12 @@ def get_distance(coords1, coords2):
     Version
     -------
     specification: Martin Danhier (v.3 08/03/19)
-    implementation : prenom nom (v.2 08/03/19)
+    implementation : Guillaume Nizet (v.1 16/03/19)
 
     """
+
+    # Euclidian distance formula
+    return sqrt((coords2[0] - coords1[0]) ** 2 + (coords2[1] - coords1[1]) ** 2)
     # wall ? enemy (or not) ? objectifs ?
     # TODO
 
