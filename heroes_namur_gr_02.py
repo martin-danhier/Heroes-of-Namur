@@ -357,9 +357,9 @@ def move_on(order, players, map):
     implementation : prenom nom (v.2 08/03/19)
     
     """
-    #analyze map : wall ? player ? -> are_coords_in_range(source, target, range)
-    #TODO
-    pass
+    # If the target tile is clear and not farther than square root of 2 (to be able to move diagonally)
+    if get_tile_info(order['target'], players, map) == 'clear' and get_distance(players[order['player']][order['hero']]['coords'], order['target']) <= sqrt(2):
+        players[order['player']][order['hero']]['coords'] = order['target']
 
 
 ### CREATURES ###
