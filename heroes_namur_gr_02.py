@@ -25,6 +25,7 @@ def display_ui(players, map):
     """
     pass
 
+# -----
 
 def get_coords_to_color(coords):
     """ Returns the coordinates that need to be colored around the given coordinates. 
@@ -57,7 +58,7 @@ def get_coords_to_color(coords):
                 coords_to_color.append((row, col))
     return coords_to_color
 
-# ----
+# -----
 
 def create_stats(players, database):
     """ Generates a string containing the stats of the players.
@@ -121,7 +122,7 @@ def create_stats(players, database):
     # Return the full stats string
     return stats
 
-# ----
+# -----
 
 def create_line_char(first, cross, last, y, x, color, width):
     """ Create and color a border character.
@@ -185,6 +186,7 @@ def create_character(players, map, command, player):
 
     pass
 
+# -----
 
 def parse_command(command):
     """ Parse the input into a list of actions.
@@ -333,6 +335,8 @@ def use_special_ability(order, players, map):
     #execute bonus/malus concerning active skill
     pass
 
+# -----
+
 def attack(order, players, map):
     """ Tries to execute the given attack order.
 
@@ -363,6 +367,7 @@ def attack(order, players, map):
     #analyze surface : is it any enemies ? -> are_coords_in_range(source, target, range)
     pass
 
+# -----
 
 def move_on(order, players, map):
     """ Tries to execute the given move order.
@@ -479,12 +484,16 @@ def get_distance(coords1, coords2):
     """
     #wall ? enemy (or not) ? objectifs ? 
 
-def get_tile_info(coords):
+# -----
+
+def get_tile_info(coords, players, map):
     """ Get the details of the given tile.
 
     Parameters
     ----------
-    coords: the coordinates of a tile.
+    coords: the coordinates of a tile. (tuple)
+    players : data of player heroes and creatures (dict)
+    map: data of the map (spawns, spur, size, etc...) (dict)
 
     Returns
     -------
@@ -496,13 +505,26 @@ def get_tile_info(coords):
         'wall' if the tile doesn't exist.
         'player' if the tile contains a hero or a creature.
         'clear' if the tile is clear.
+    For the formats of players and map, see rapport_gr_02_part_02.
+    A typical 'coord' tuple is in the format ( row (int), column (int) ).
 
     Version
     -------
-    specification: Martin Danhier (v.1 08/03/2019)
-    implementation: void
+    specification: Martin Danhier (v.2 16/03/2019)
+    implementation: Martin Danhier (v.1 16/03/2019)
     """
-    #TODO
+    # If the coordinates are out of the map.
+    if coords[0] <= 0 or coords[0] > map['size'][0] or coords[1] <= 0 or coords[1] > map['size'][1]:
+        return 'wall'
+    else:
+        # For each hero / creature, check if its coords are equal to tested ones.
+        for player in players:
+            for individual in players[player]:
+                if players[player][individual]['coords'] == coords:
+                    return 'player'
+        # If this code is reached, then the tile is clear.
+        return 'clear'
+
 
 ### MAIN ###
 # Entry point of the game
