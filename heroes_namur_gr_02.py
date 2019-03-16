@@ -335,7 +335,7 @@ def move_on(order, players, map):
 
     Parameters
     ----------
-    order: the attack order. (dict)
+    order: the move order. (dict)
     players : data of player heroes and creatures. (dict)
     map: data of the map (spawns, spur, size, etc...). (dict)
 
