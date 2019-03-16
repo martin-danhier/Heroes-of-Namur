@@ -5,25 +5,156 @@ import os
 # Display user interface
 
 
-def display_ui(players, map):
+def display_ui(players, map, database):
     """ Displays the board (with colors) and statistics of the players.
 
     Parameters
     ----------
     players : data of player heroes and creatures (dict)
     map: data of the map (spawns, spur, size, etc...) (dict)
+    database = data of hero classes (dict)
 
     Notes
     -----
-    For the formats of players and map, see rapport_gr_02_part_02.
+    For the formats of players, database and map, see rapport_gr_02_part_02.
 
     Version
     -------
-    specification : Guillaume Nizet (v.2 02/03/19)
-    implementation : prenom nom (v.1 06/03/19)
+    specification : Guillaume Nizet, Martin Danhier (v.2 16/03/19)
+    implementation : Guillaume Nizet (v.2 16/03/19)
     
     """
-    pass
+    board = "\n     "
+    # Get a list of str with the stats
+    stats = create_stats(players, database).split('\n')
+
+    # Get data
+    width = map["size"][0]
+    height = map["size"][1]
+
+    # Generate dict with coords to color
+    colored_coords = {"spur": []}
+    # Get colored borders around spur
+    for coords in map["spur"]:
+        colored_coords["spur"] += get_coords_to_color((coords[0] * 2, coords[1] * 4 - 2))
+    # Get colored borders around players spawn points
+    colored_coords["spawn_player 1"] = get_coords_to_color((map["spawns"]["Player 1"][0] * 2, map["spawns"]["Player 1"][1] * 4 - 2))
+    colored_coords["spawn_player 2"] = get_coords_to_color((map["spawns"]["Player 2"][0] * 2, map["spawns"]["Player 2"][1] * 4 - 2))
+    # Get player coords
+    player_coords = {}
+    for player in players:
+        for character in players[player]:
+            coords = players[player][character]['coords']
+            # If the character is a creature
+            if player == 'creatures':
+                player_coords[coords] = ('blue', '*')
+            else:
+                # Get the number of players on the same box
+                players_count = 0
+                for other_character in players[player]:
+                    if players[player][other_character]['coords'] == coords:
+                        players_count += 1
+
+                # If there are several characters on the box, their count is displayer
+                if players_count > 1:
+                    type = str(players_count)
+
+                # If there is only 1 player on the box, its type is displayed
+                else:
+                    if players[player][character]['type'] == 'barbarian':
+                        type = '🔰'
+                    elif players[player][character]['type'] == 'mage':
+                        type = 'ϟ'
+                    elif players[player][character]['type'] == 'healer':
+                        type = '+'
+                    elif players[player][character]['type'] == 'rogue':
+                        type = '🔪' 
+                # If the character is owned by the first player (human)
+                if player == 'Player 1':
+                    player_coords[coords] = ('dark_green', type)
+                # If the character is owned by the second player (IA ; enemy)
+                elif player == 'Player 2':
+                    player_coords[coords] = ('red', type)
+
+    # Add column numbers
+    for col in range(map['size'][1]):
+        if col + 1 < 10:
+            board += '  %d ' % (col + 1)
+        else:
+            board += '  %d' % (col + 1)
+    board += '\n'
+
+    # Add board
+    for y_pos in range(1, (height + 1) * 2):
+        # Add tabulation to border lines
+        if y_pos % 2 != 0:
+            board += '   '
+            
+        # For each column
+        x_pos = 0
+        while x_pos < (4 * width) + 1:
+
+            # Select color
+            if (y_pos, x_pos) in colored_coords["spur"]:
+                color = colored.fg('cyan')
+            elif (y_pos, x_pos) in colored_coords["spawn_player 1"]:
+                color = colored.fg('green')
+            elif (y_pos, x_pos) in colored_coords["spawn_player 2"]:
+                color = colored.fg('red')
+            else:
+                color = colored.attr('reset')
+                   
+            # First board line
+            if y_pos == 1:
+                board += create_line_char('╔', '╦', '╗', x_pos, y_pos, color, width)
+
+            # Last board line
+            elif y_pos == ((height * 2) + 1):  # on the last row
+                board += create_line_char('╚', '╩', '╝', x_pos, y_pos, color, width)
+
+            #Between the first and the last row
+            else:
+                # On center line of row
+                if y_pos % 2 == 0:
+                    # Display row number at the beginning of the line
+                    if x_pos == 0:
+                        y_row = y_pos//2
+                        if y_row < 10:
+                            offset = '   '
+                        else:
+                            offset = '  '
+                        board += '%s%s %s║' % (offset, y_row, color)
+                    # Board line
+                    elif x_pos % 4 == 0:
+                        board += '%s║' % color
+                    # Tile content
+                    else:
+                        # Display player                        
+                        if (x_pos//4 + 1, y_pos//2) in player_coords:
+                            tile_content = '%s%s %s %s' % (colored.attr('reset'), colored.bg(player_coords[(x_pos//4 + 1, y_pos//2)][0]), player_coords[(x_pos//4 + 1, y_pos//2)][1], colored.attr('reset'))
+                        else:
+                            tile_content = '   '
+
+                        board += '%s' % tile_content
+                        x_pos += 2
+
+                elif y_pos != 1:
+                    # Board line
+                    board += create_line_char('╠', '╬', '╣', x_pos, y_pos, color, width)
+    
+            x_pos += 1
+
+        # Add stats
+        stat_line = ''
+        if y_pos-1 < len(stats):
+            stat_line = stats[y_pos-1]
+        board += '%s    %s\n' %  (colored.attr('reset'),stat_line)
+
+    # Clear screen
+    os.system('cls') # windows
+    os.system('clear') # linux
+    # Print board
+    print(board)
 
 
 def get_coords_to_color(coords):
@@ -123,7 +254,7 @@ def create_stats(players, database):
 
 # ----
 
-def create_line_char(first, cross, last, y, x, color, width):
+def create_line_char(first, cross, last, x, y, color, width):
     """ Create and color a border character.
 
     Parameters
@@ -131,8 +262,8 @@ def create_line_char(first, cross, last, y, x, color, width):
     first: first intersection character of the line. (str)
     cross: intersection character in the middle of the line. (str)
     last: last intersection character of the line. (str)
-    y: the ordinate of the character (int)
     x: the abcissa of the character (int)
+    y: the ordinate of the character (int)
     color: the color of the character (str)
     width: the width of the map (number of columns) (int)
 
@@ -142,7 +273,7 @@ def create_line_char(first, cross, last, y, x, color, width):
 
     Version
     -------
-    specification : Martin Danhier (v.2 01/03/19)
+    specification : Martin Danhier (v.3 16/03/19)
     implementation : Martin Danhier (v.2 02/03/19)
     """
     if x == 0:  # on the first position
