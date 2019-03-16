@@ -131,7 +131,7 @@ def display_ui(players, map, database):
                     else:
                         # Display player                        
                         if (x_pos//4 + 1, y_pos//2) in player_coords:
-                            tile_content = '%s %s %s' % (colored.bg(player_coords[(x_pos//4 + 1, y_pos//2)][0]), player_coords[(x_pos//4 + 1, y_pos//2)][1], colored.attr('reset'))
+                            tile_content = '%s%s %s %s' % (colored.attr('reset'), colored.bg(player_coords[(x_pos//4 + 1, y_pos//2)][0]), player_coords[(x_pos//4 + 1, y_pos//2)][1], colored.attr('reset'))
                         else:
                             tile_content = '   '
 
@@ -254,7 +254,7 @@ def create_stats(players, database):
 
 # ----
 
-def create_line_char(first, cross, last, y, x, color, width):
+def create_line_char(first, cross, last, x, y, color, width):
     """ Create and color a border character.
 
     Parameters
@@ -262,8 +262,8 @@ def create_line_char(first, cross, last, y, x, color, width):
     first: first intersection character of the line. (str)
     cross: intersection character in the middle of the line. (str)
     last: last intersection character of the line. (str)
-    y: the ordinate of the character (int)
     x: the abcissa of the character (int)
+    y: the ordinate of the character (int)
     color: the color of the character (str)
     width: the width of the map (number of columns) (int)
 
@@ -273,7 +273,7 @@ def create_line_char(first, cross, last, y, x, color, width):
 
     Version
     -------
-    specification : Martin Danhier (v.2 01/03/19)
+    specification : Martin Danhier (v.3 16/03/19)
     implementation : Martin Danhier (v.2 02/03/19)
     """
     if x == 0:  # on the first position
@@ -646,106 +646,6 @@ def main():
     implementation : prenom nom (v.2 08/03/19)
 
     """
-    map = {
-    "size": (20, 20),
-    "spawns": {
-        "Player 1": (1, 1),
-        "Player 2": (20, 20)
-    },
-    "spur": [(5, 5), (5, 6), (6, 6), (6, 5)]
-    }
-
-    players = {
-    "Player 1": {
-        "Michel": {
-            "type": "barbarian",
-            "level": '1',
-            "hp": 10,
-            "xp": 42,
-            "coords": (14, 14),
-            "cooldown": []
-        },
-        "Kevin": {
-            "type": "mage",
-            "level": '2',
-            "hp": 10,
-            "xp": 42,
-            "coords": (4, 6),
-            "cooldown": [1]
-        },
-        "Jean": {
-            "type": "rogue",
-            "level": '2',
-            "hp": 10,
-            "xp": 42,
-            "coords": (7, 8),
-            "cooldown": [4]
-        },
-        "Baptiste": {
-            "type": "healer",
-            "level": '2',
-            "hp": 10,
-            "xp": 42,
-            "coords": (9, 2),
-            "cooldown": [0]
-        }
-    },
-    "Player 2": {
-        "Klein": {
-            "type": "rogue",
-            "level": '2',
-            "hp": 10,
-            "xp": 42,
-            "coords": (16, 3),
-            "cooldown": [4]
-        },
-        "Bob": {
-            "type": "barbarian",
-            "level": '1',
-            "hp": 10,
-            "xp": 42,
-            "coords": (11, 10),
-            "cooldown": []
-        }
-    },
-    "creatures": {
-        "Blork": {
-            "coords": (12, 15)
-        }
-    }
-
-
-    }
-    database = {
-    'barbarian': {
-        '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2},
-        '2': {'victory_pts': 100, 'hp': 13, 'dmg': 3, 'abilities': [{'name': 'energise', 'radius': 1, 'x': 1, 'cd': 1}]},
-        '3': {'victory_pts': 200, 'hp': 16, 'dmg': 4, 'abilities': [{'name': 'energise', 'radius': 2, 'x': 1, 'cd': 1}, {'name': 'stun', 'radius': 1, 'x': 1, 'cd': 1}]},
-        '4': {'victory_pts': 400, 'hp': 19, 'dmg': 5, 'abilities': [{'name': 'energise', 'radius': 3, 'x': 2, 'cd': 1}, {'name': 'stun', 'radius': 2, 'x': 2, 'cd': 1}]},
-        '5': {'victory_pts': 800, 'hp': 22, 'dmg': 6, 'abilities': [{'name': 'energise', 'radius': 4, 'x': 2, 'cd': 1}, {'name': 'stun', 'radius': 3, 'x': 3, 'cd': 1}]}
-    },
-    'healer': {
-        '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2},
-        '2': {'victory_pts': 100, 'hp': 11, 'dmg': 2, 'abilities': [{'name': 'invigorate', 'radius': 1, 'x': 1, 'cd': 1}]},
-        '3': {'victory_pts': 200, 'hp': 12, 'dmg': 3, 'abilities': [{'name': 'invigorate', 'radius': 2, 'x': 2, 'cd': 1}, {'name': 'immunise', 'radius': 1, 'cd': 3}]},
-        '4': {'victory_pts': 400, 'hp': 13, 'dmg': 3, 'abilities': [{'name': 'invigorate', 'radius': 3, 'x': 3, 'cd': 1}, {'name': 'immunise', 'radius': 2, 'cd': 3}]},
-        '5': {'victory_pts': 800, 'hp': 14, 'dmg': 4, 'abilities': [{'name': 'invigorate', 'radius': 4, 'x': 4, 'cd': 1}, {'name': 'immunise', 'radius': 3, 'cd': 3}]}
-    },
-    'mage': {
-        '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2},
-        '2': {'victory_pts': 100, 'hp': 12, 'dmg': 3, 'abilities': [{'name': 'fulgura', 'radius': 1, 'x': 3, 'cd': 1}]},
-        '3': {'victory_pts': 200, 'hp': 14, 'dmg': 4, 'abilities': [{'name': 'fulgura', 'radius': 2, 'x': 3, 'cd': 1}, {'name': 'ovibus', 'radius': 1, 'x': 1, 'cd': 3}]},
-        '4': {'victory_pts': 400, 'hp': 16, 'dmg': 5, 'abilities': [{'name': 'fulgura', 'radius': 3, 'x': 4, 'cd': 1}, {'name': 'ovibus', 'radius': 2, 'x': 2, 'cd': 3}]},
-        '5': {'victory_pts': 800, 'hp': 18, 'dmg': 6, 'abilities': [{'name': 'fulgura', 'radius': 4, 'x': 4, 'cd': 1}, {'name': 'ovibus', 'radius': 3, 'x': 2, 'cd': 3}]}
-    },
-    'rogue': {
-        '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2},
-        '2': {'victory_pts': 100, 'hp': 12, 'dmg': 3, 'abilities': [{'name': 'reach', 'radius': 1, 'cd': 1}]},
-        '3': {'victory_pts': 200, 'hp': 14, 'dmg': 4, 'abilities': [{'name': 'reach', 'radius': 2, 'cd': 1}, {'name': 'burst', 'radius': 1, 'x': 1, 'cd': 1}]},
-        '4': {'victory_pts': 400, 'hp': 16, 'dmg': 5, 'abilities': [{'name': 'reach', 'radius': 3, 'cd': 1}, {'name': 'burst', 'radius': 2, 'x': 2, 'cd': 1}]},
-        '5': {'victory_pts': 800, 'hp': 18, 'dmg': 6, 'abilities': [{'name': 'reach', 'radius': 4, 'cd': 1}, {'name': 'burst', 'radius': 3, 'x': 3, 'cd': 1}]}
-    }}
-    display_ui(players, map, database)
     #Step 1 : create map and implements data
     #Step 2 : create 4 heros/player
     ##LOOP##
