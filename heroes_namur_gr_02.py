@@ -123,31 +123,6 @@ def create_stats(players, database):
 
 # ----
 
-
-def convert_to_true_coords(coords):
-    """ Converts the given tile coordinates to absolute char coordinates.
-
-    Parameters
-    ----------
-    coords: the tile coordinates to convert (tuple).
-
-    Returns
-    -------
-    true_coords: the coordinates of the center character of the tile. (tuple)
-
-    Notes
-    -----
-    A typical 'coord' tuple is in the format ( row (int), column (int) ).
-
-    Version
-    -------
-    specification : Martin Danhier (v.2 02/03/19)
-    implementation : prenom nom (v.1 06/03/19)
-    
-    """
-    pass
-
-
 def create_line_char(first, cross, last, y, x, color, width):
     """ Create and color a border character.
 
@@ -182,7 +157,6 @@ def create_line_char(first, cross, last, y, x, color, width):
 
 ### INPUT ###
 # Process input
-
 
 def create_character(players, map, command, player):
     """ Parse the input command and create the players.
