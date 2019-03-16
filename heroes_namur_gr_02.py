@@ -5,27 +5,28 @@ import os
 # Display user interface
 
 
-def display_ui(players, map):
+def display_ui(players, map, database):
     """ Displays the board (with colors) and statistics of the players.
 
     Parameters
     ----------
     players : data of player heroes and creatures (dict)
     map: data of the map (spawns, spur, size, etc...) (dict)
+    database = data of hero classes (dict)
 
     Notes
     -----
-    For the formats of players and map, see rapport_gr_02_part_02.
+    For the formats of players, database and map, see rapport_gr_02_part_02.
 
     Version
     -------
-    specification : Guillaume Nizet (v.2 02/03/19)
-    implementation : Guillaume Nizet (v.1 07/03/19)
+    specification : Guillaume Nizet, Martin Danhier (v.2 16/03/19)
+    implementation : Guillaume Nizet (v.2 16/03/19)
     
     """
     board = "\n     "
     # Get a list of str with the stats
-    stats = create_stats(players).split('\n')
+    stats = create_stats(players, database).split('\n')
 
     # Get data
     width = map["size"][0]
@@ -37,8 +38,8 @@ def display_ui(players, map):
     for coords in map["spur"]:
         colored_coords["spur"] += get_coords_to_color((coords[0] * 2, coords[1] * 4 - 2))
     # Get colored borders around players spawn points
-    colored_coords["spawn_player1"] = get_coords_to_color((map["spawns"]["player1"][0] * 2, map["spawns"]["player1"][1] * 4 - 2))
-    colored_coords["spawn_player2"] = get_coords_to_color((map["spawns"]["player2"][0] * 2, map["spawns"]["player2"][1] * 4 - 2))
+    colored_coords["spawn_player 1"] = get_coords_to_color((map["spawns"]["Player 1"][0] * 2, map["spawns"]["Player 1"][1] * 4 - 2))
+    colored_coords["spawn_player 2"] = get_coords_to_color((map["spawns"]["Player 2"][0] * 2, map["spawns"]["Player 2"][1] * 4 - 2))
     # Get player coords
     player_coords = {}
     for player in players:
@@ -69,10 +70,10 @@ def display_ui(players, map):
                     elif players[player][character]['type'] == 'rogue':
                         type = '🔪' 
                 # If the character is owned by the first player (human)
-                if player == 'player1':
+                if player == 'Player 1':
                     player_coords[coords] = ('dark_green', type)
                 # If the character is owned by the second player (IA ; enemy)
-                elif player == 'player2':
+                elif player == 'Player 2':
                     player_coords[coords] = ('red', type)
 
     # Add column numbers
@@ -96,9 +97,9 @@ def display_ui(players, map):
             # Select color
             if (y_pos, x_pos) in colored_coords["spur"]:
                 color = colored.fg('cyan')
-            elif (y_pos, x_pos) in colored_coords["spawn_player1"]:
+            elif (y_pos, x_pos) in colored_coords["spawn_player 1"]:
                 color = colored.fg('green')
-            elif (y_pos, x_pos) in colored_coords["spawn_player2"]:
+            elif (y_pos, x_pos) in colored_coords["spawn_player 2"]:
                 color = colored.fg('red')
             else:
                 color = colored.attr('reset')
@@ -645,6 +646,106 @@ def main():
     implementation : prenom nom (v.2 08/03/19)
 
     """
+    map = {
+    "size": (20, 20),
+    "spawns": {
+        "Player 1": (1, 1),
+        "Player 2": (20, 20)
+    },
+    "spur": [(5, 5), (5, 6), (6, 6), (6, 5)]
+    }
+
+    players = {
+    "Player 1": {
+        "Michel": {
+            "type": "barbarian",
+            "level": '1',
+            "hp": 10,
+            "xp": 42,
+            "coords": (14, 14),
+            "cooldown": []
+        },
+        "Kevin": {
+            "type": "mage",
+            "level": '2',
+            "hp": 10,
+            "xp": 42,
+            "coords": (4, 6),
+            "cooldown": [1]
+        },
+        "Jean": {
+            "type": "rogue",
+            "level": '2',
+            "hp": 10,
+            "xp": 42,
+            "coords": (7, 8),
+            "cooldown": [4]
+        },
+        "Baptiste": {
+            "type": "healer",
+            "level": '2',
+            "hp": 10,
+            "xp": 42,
+            "coords": (9, 2),
+            "cooldown": [0]
+        }
+    },
+    "Player 2": {
+        "Klein": {
+            "type": "rogue",
+            "level": '2',
+            "hp": 10,
+            "xp": 42,
+            "coords": (16, 3),
+            "cooldown": [4]
+        },
+        "Bob": {
+            "type": "barbarian",
+            "level": '1',
+            "hp": 10,
+            "xp": 42,
+            "coords": (11, 10),
+            "cooldown": []
+        }
+    },
+    "creatures": {
+        "Blork": {
+            "coords": (12, 15)
+        }
+    }
+
+
+    }
+    database = {
+    'barbarian': {
+        '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2},
+        '2': {'victory_pts': 100, 'hp': 13, 'dmg': 3, 'abilities': [{'name': 'energise', 'radius': 1, 'x': 1, 'cd': 1}]},
+        '3': {'victory_pts': 200, 'hp': 16, 'dmg': 4, 'abilities': [{'name': 'energise', 'radius': 2, 'x': 1, 'cd': 1}, {'name': 'stun', 'radius': 1, 'x': 1, 'cd': 1}]},
+        '4': {'victory_pts': 400, 'hp': 19, 'dmg': 5, 'abilities': [{'name': 'energise', 'radius': 3, 'x': 2, 'cd': 1}, {'name': 'stun', 'radius': 2, 'x': 2, 'cd': 1}]},
+        '5': {'victory_pts': 800, 'hp': 22, 'dmg': 6, 'abilities': [{'name': 'energise', 'radius': 4, 'x': 2, 'cd': 1}, {'name': 'stun', 'radius': 3, 'x': 3, 'cd': 1}]}
+    },
+    'healer': {
+        '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2},
+        '2': {'victory_pts': 100, 'hp': 11, 'dmg': 2, 'abilities': [{'name': 'invigorate', 'radius': 1, 'x': 1, 'cd': 1}]},
+        '3': {'victory_pts': 200, 'hp': 12, 'dmg': 3, 'abilities': [{'name': 'invigorate', 'radius': 2, 'x': 2, 'cd': 1}, {'name': 'immunise', 'radius': 1, 'cd': 3}]},
+        '4': {'victory_pts': 400, 'hp': 13, 'dmg': 3, 'abilities': [{'name': 'invigorate', 'radius': 3, 'x': 3, 'cd': 1}, {'name': 'immunise', 'radius': 2, 'cd': 3}]},
+        '5': {'victory_pts': 800, 'hp': 14, 'dmg': 4, 'abilities': [{'name': 'invigorate', 'radius': 4, 'x': 4, 'cd': 1}, {'name': 'immunise', 'radius': 3, 'cd': 3}]}
+    },
+    'mage': {
+        '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2},
+        '2': {'victory_pts': 100, 'hp': 12, 'dmg': 3, 'abilities': [{'name': 'fulgura', 'radius': 1, 'x': 3, 'cd': 1}]},
+        '3': {'victory_pts': 200, 'hp': 14, 'dmg': 4, 'abilities': [{'name': 'fulgura', 'radius': 2, 'x': 3, 'cd': 1}, {'name': 'ovibus', 'radius': 1, 'x': 1, 'cd': 3}]},
+        '4': {'victory_pts': 400, 'hp': 16, 'dmg': 5, 'abilities': [{'name': 'fulgura', 'radius': 3, 'x': 4, 'cd': 1}, {'name': 'ovibus', 'radius': 2, 'x': 2, 'cd': 3}]},
+        '5': {'victory_pts': 800, 'hp': 18, 'dmg': 6, 'abilities': [{'name': 'fulgura', 'radius': 4, 'x': 4, 'cd': 1}, {'name': 'ovibus', 'radius': 3, 'x': 2, 'cd': 3}]}
+    },
+    'rogue': {
+        '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2},
+        '2': {'victory_pts': 100, 'hp': 12, 'dmg': 3, 'abilities': [{'name': 'reach', 'radius': 1, 'cd': 1}]},
+        '3': {'victory_pts': 200, 'hp': 14, 'dmg': 4, 'abilities': [{'name': 'reach', 'radius': 2, 'cd': 1}, {'name': 'burst', 'radius': 1, 'x': 1, 'cd': 1}]},
+        '4': {'victory_pts': 400, 'hp': 16, 'dmg': 5, 'abilities': [{'name': 'reach', 'radius': 3, 'cd': 1}, {'name': 'burst', 'radius': 2, 'x': 2, 'cd': 1}]},
+        '5': {'victory_pts': 800, 'hp': 18, 'dmg': 6, 'abilities': [{'name': 'reach', 'radius': 4, 'cd': 1}, {'name': 'burst', 'radius': 3, 'x': 3, 'cd': 1}]}
+    }}
+    display_ui(players, map, database)
     #Step 1 : create map and implements data
     #Step 2 : create 4 heros/player
     ##LOOP##
