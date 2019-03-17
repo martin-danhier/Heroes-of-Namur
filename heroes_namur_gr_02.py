@@ -216,7 +216,7 @@ def read_file(path):
     Version
     -------
     specification : Jonathan Nhouyvanisvong (v.4 15/03/19)
-    implementation : Jonathan Nhouyvanisvong (v.3 14/03/19)
+    implementation : Jonathan Nhouyvanisvong (v.4 17/03/19)
     
     """
     # data.hon : map, spawn, spur, creatures
@@ -224,35 +224,56 @@ def read_file(path):
     # players = {'player_name' : {'heros_name' : 'stats_heros'}, 'creatures' : {{'hp' : , 'dmg' : , 'radius' : , 'xp' : , 'coords' : []}, ...}
     # map = {'size' : (,), 'win_turns' : ' ', 'spawns' : {'player' : (,), 'player_bot' : (,)}, 'citadel' : [(,), (,)]}
 
-    fh = open('data.hon', 'r')
-    map = {}
+    param_file = open('../Test/param.hon', 'r')
+    param_list = param_file.readlines()
+    param_file.close()
     # fct split()
     # delete /n and space
-    for line in fh.readlines():
-        if line == 'map:':
-            map[size] = 
-            map[win_turns] = 
-            pass
-            #coords map
-            ## (range, column, turns)
-        elif line == 'spawn:': #spawn about players
-            map[spawns] = 
-            pass
-            #coords spawn
-            ## (range, column) x2
-        elif line == 'spur:': #spawn about citadel
-            map[spawns][citadel] = 
-            pass
-            #coords spur
-            ## (range, column) x4
-        elif line == 'creatures:':
-            players[creatures] = 
-            pass
-            #coords creatures
-            ## (range, column, hp, dmg, rayon_influence, victory_pts) x ?
-    #lines = fh.readlines()
-    #fh.close()
-    pass
+    for id in range(len(param_list)):
+        param_list[id] = param_list[id].replace('\n', '')
+    # param_list = ['map:', '39 40 25', 'spawn:', '20 3', '20 38', 'spur:', '20 38', '20 39', '21 38', '21 39', 'creatures:', 'bear 10 10 20 5 3 100', 'wolf 15 10 10 3 2 50']
+
+    for id in range(len(param_list)): #check all elements
+        if param_list[id] == 'map:':
+            #coords map ## (range, column, nb_win_turns)
+            param_map = param_list[id + 1].split()
+            map['size'] = (param_map[0], param_map[1])
+            map['win_turns'] = param_map[2]
+
+
+        elif param_list[id] == 'spawn:': #spawn about players
+            #coords spawn ## (range, column) x2
+
+            #add while coordinates concerned spawns
+            check_id = 1
+            while param_list[id + check_id] != 'map:' or param_list[id + check_id] != 'spur:' or param_list[id + check_id] != 'creatures:':
+                param_spawns = param_list[id + check_id].split()
+                # map['spawns'][...] = (param_spawns[0], param_spawns[1])
+                check_id += 1
+
+        elif param_list[id] == 'spur:': #spawn about citadel
+            #coords spur ## (range, column) x4
+            #add while coordinates concerned spur
+            check_id = 1
+            while param_list[id + check_id] != 'map:' or param_list[id + check_id] != 'spawn:' or param_list[id + check_id] != 'creatures:':
+                param_spur = param_list[id + check_id].split()
+                map['spawns']['citadel'] = [(param_spur[0], param_list[1])]
+                check_id += 1
+
+        elif param_list[id] == 'creatures:':
+            #coords creatures ## (range, column, hp, dmg, rayon_influence, victory_pts) x ?
+            #add while coordinates concerned creatures
+            check_id = 1
+            while param_list[id + check_id] != 'map:' or param_list[id + check_id] != 'spawn:' or param_list[id + check_id] != 'spur:':
+                param_creatures = param_list[id + check_id].split()
+                players['creatures'][param_creatures[0]]['coords'] = [(param_creatures[1], param_creatures[2])]
+                players['creatures'][param_creatures[0]]['hp'] = param_creatures[3]
+                players['creatures'][param_creatures[0]]['dmg'] = param_creatures[4]
+                players['creatures'][param_creatures[0]]['radius'] = param_creatures[5]
+                players['creatures'][param_creatures[0]]['xp'] = param_creatures[6]
+                check_id += 1
+
+    return map, players
 
 ### CLEANING ###
 # Clean and apply bonuses
