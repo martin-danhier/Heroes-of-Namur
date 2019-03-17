@@ -1,5 +1,3 @@
-from math import sqrt
-
 ### UI ###
 # Display user interface
 
@@ -447,9 +445,7 @@ def get_distance(coords1, coords2):
     """
 
     # Euclidian distance formula
-    return sqrt((coords2[0] - coords1[0]) ** 2 + (coords2[1] - coords1[1]) ** 2)
-    # wall ? enemy (or not) ? objectifs ?
-    # TODO
+    return (coords2[0] - coords1[0]) ** 2 + (coords2[1] - coords1[1]) ** 2) ** 0.5
 
 def get_tile_info(coords):
     """ Get the details of the given tile.
