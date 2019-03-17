@@ -299,14 +299,15 @@ def use_special_ability(order, players, map):
     #execute bonus/malus concerning active skill
     pass
 
-def attack(order, players, map):
+def attack(order, players, map, database):
     """ Tries to execute the given attack order.
 
     Parameters
     ----------
-    order: the attack order. (dict)
-    players : data of player heroes and creatures. (dict)
-    map: data of the map (spawns, spur, size, etc...). (dict)
+    order: the attack order (dict)
+    players : data of player heroes and creatures (dict)
+    map: data of the map (spawns, spur, size, etc...) (dict)
+    database: data of hero classes (dict)
 
     Notes
     -----
@@ -323,12 +324,20 @@ def attack(order, players, map):
     Version
     -------
     specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
-    implementation : prenom nom (v.2 08/03/19)
+    implementation : Guillaume Nizet (v.1 17/03/19)
     
     """
-    #analyze surface : is it any enemies ? -> are_coords_in_range(source, target, range)
-    #TODO
-    pass
+    # If the target tile is occupied by a player or a creature and if it's not the spawn point of any player and if it's not farther than square root of 2 (to be able to attack diagonally)
+    if get_tile_info(order['target'], players, map) == 'player' and order['target'] != map['spawns']['Player 1'] and order['target'] != map['spawns']['Player 2'] and get_distance(players[order['player']][order['hero']]['coords'], order['target']) <= sqrt(2):
+        for player in players:
+            for hero in players[player]:
+                if players[player][hero]['coords'] == order['target']:
+                    # If the target is going to be killed, its hp is set back to 0
+                    if players[player][hero]['hp'] - database[players[order['player']][order['hero']]['type']][players[order['player']][order['hero']]['level']]['dmg'] <= 0:
+                        players[player][hero]['hp']  = 0
+                    # Otherwise, the damage is applied
+                    else:
+                        players[player][hero]['hp'] -= database[players[order['player']][order['hero']]['type']][players[order['player']][order['hero']]['level']]['dmg']
 
 
 def move_on(order, players, map):
