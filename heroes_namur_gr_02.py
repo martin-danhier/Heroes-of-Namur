@@ -149,8 +149,9 @@ def create_character(players, map, command, player):
     #create 4 heros/player
     #choose heros_name
     #choose heros : barbarian, healer, mage, rogue
-    #TODO
-    pass
+    
+    for hero in command.split(' '):
+        players[player].update({ hero.split(':')[0] : { 'type' : hero.split(':')[1], 'level' : 1, 'hp' : 10, 'xp' : 0, 'coords' : map['spawns'][player], 'cooldown' : []}})
 
 
 
