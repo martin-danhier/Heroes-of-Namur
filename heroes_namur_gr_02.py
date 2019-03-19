@@ -207,73 +207,61 @@ def read_file(path):
     map: data of the map (spawns, spur, size, etc...). (dict)
     players: data of players (players, creatures) (dict)
 
-
     Notes
     -----
     For the format of 'map', see rapport_gr_02_part_02.
     The format of a typical map file is described in the instructions, p8.
+    The 'players' dictionnary will be incomplete, use create_character() to add heroes.
 
     Version
     -------
     specification : Jonathan Nhouyvanisvong (v.4 15/03/19)
-    implementation : Jonathan Nhouyvanisvong (v.4 17/03/19)
+    implementation : Martin Danhier (v.5 19/03/19)
     
     """
-    # data.hon : map, spawn, spur, creatures
-    # NEED
-    # players = {'player_name' : {'heros_name' : 'stats_heros'}, 'creatures' : {{'hp' : , 'dmg' : , 'radius' : , 'xp' : , 'coords' : []}, ...}
-    # map = {'size' : (,), 'win_turns' : ' ', 'spawns' : {'player' : (,), 'player_bot' : (,)}, 'citadel' : [(,), (,)]}
-
-    param_file = open('../Test/param.hon', 'r')
-    param_list = param_file.readlines()
+    # Get lines from the given file.
+    param_file = open(path, 'r')
+    param_list = [line.strip('\n') for line in param_file.readlines()]
     param_file.close()
-    # fct split()
-    # delete /n and space
-    for id in range(len(param_list)):
-        param_list[id] = param_list[id].replace('\n', '')
-    # param_list = ['map:', '39 40 25', 'spawn:', '20 3', '20 38', 'spur:', '20 38', '20 39', '21 38', '21 39', 'creatures:', 'bear 10 10 20 5 3 100', 'wolf 15 10 10 3 2 50']
 
-    for id in range(len(param_list)): #check all elements
-        if param_list[id] == 'map:':
-            #coords map ## (range, column, nb_win_turns)
-            param_map = param_list[id + 1].split()
-            map['size'] = (param_map[0], param_map[1])
-            map['win_turns'] = param_map[2]
+    # Initialize the data dictionaries.
+    players = {'creatures': {}}
+    map = {'spawns': {}, 'spur': [], 'player_in_citadel': ('', 0)}
 
+    # Initialize some variables for the loop.
+    current = ''
+    line_in_current = 0
 
-        elif param_list[id] == 'spawn:': #spawn about players
-            #coords spawn ## (range, column) x2
+    # For each line,
+    for line in param_list:
+        # Check if a new file section has been reached.
+        if line in ('map:', 'spawn:', 'spur:', 'creatures:'):
+            current = line
+            line_in_current = 0
+        else:
+            # Split the data.
+            info = line.split(' ')
 
-            #add while coordinates concerned spawns
-            check_id = 1
-            while param_list[id + check_id] != 'map:' or param_list[id + check_id] != 'spur:' or param_list[id + check_id] != 'creatures:':
-                param_spawns = param_list[id + check_id].split()
-                # map['spawns'][...] = (param_spawns[0], param_spawns[1])
-                check_id += 1
+            # Save the values in the corresponding data dictionnary.
+            if current == 'map:':
+                map['size'] = (int(info[0]), int(info[1]))
+                map['nb_turns_to_win'] = int(info[2])
+            elif current == 'spawn:':
+                map['spawns']['Player %d' % line_in_current] = (
+                    int(info[0]), int(info[1]))
+                # Initialize a dictionary for the heroes of that player.
+                players['Player %d' % line_in_current] = {}
+            elif current == 'spur:':
+                map['spur'].append((int(info[0]), int(info[1])))
+            elif current == 'creatures:':
+                players['creatures'][info[0]] = {'coords': (int(info[1]), int(info[2])), 'health': int(
+                    info[3]), 'dmg': int(info[4]), 'radius': int(info[5]), 'xp': int(info[6])}
 
-        elif param_list[id] == 'spur:': #spawn about citadel
-            #coords spur ## (range, column) x4
-            #add while coordinates concerned spur
-            check_id = 1
-            while param_list[id + check_id] != 'map:' or param_list[id + check_id] != 'spawn:' or param_list[id + check_id] != 'creatures:':
-                param_spur = param_list[id + check_id].split()
-                map['spawns']['citadel'] = [(param_spur[0], param_list[1])]
-                check_id += 1
+        # Increment the line counter.
+        line_in_current += 1
 
-        elif param_list[id] == 'creatures:':
-            #coords creatures ## (range, column, hp, dmg, rayon_influence, victory_pts) x ?
-            #add while coordinates concerned creatures
-            check_id = 1
-            while param_list[id + check_id] != 'map:' or param_list[id + check_id] != 'spawn:' or param_list[id + check_id] != 'spur:':
-                param_creatures = param_list[id + check_id].split()
-                players['creatures'][param_creatures[0]]['coords'] = [(param_creatures[1], param_creatures[2])]
-                players['creatures'][param_creatures[0]]['hp'] = param_creatures[3]
-                players['creatures'][param_creatures[0]]['dmg'] = param_creatures[4]
-                players['creatures'][param_creatures[0]]['radius'] = param_creatures[5]
-                players['creatures'][param_creatures[0]]['xp'] = param_creatures[6]
-                check_id += 1
-
-    return map, players
+    # Return the final dictionaries.
+    return players, map
 
 ### CLEANING ###
 # Clean and apply bonuses
