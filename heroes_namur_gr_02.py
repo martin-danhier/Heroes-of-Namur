@@ -318,26 +318,31 @@ def attack(order, players, map, database):
             'action' : 'fight',
             'target' : ( x (int), y (int) ) #optional
         }
-    For the formats of 'players' and 'map', see rapport_gr_02_part_02.
+    For the formats of 'players', 'database' and 'map', see rapport_gr_02_part_02.
     The 'players' dictionary may be updated.
 
     Version
     -------
-    specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
-    implementation : Guillaume Nizet (v.1 17/03/19)
+    specification : Jonathan Nhouyvanisvong (v.4 19/03/19)
+    implementation : Guillaume Nizet (v.2 19/03/19)
     
     """
     # If the target tile is occupied by a player or a creature and if it's not the spawn point of any player and if it's not farther than square root of 2 (to be able to attack diagonally)
     if get_tile_info(order['target'], players, map) == 'player' and order['target'] != map['spawns']['Player 1'] and order['target'] != map['spawns']['Player 2'] and get_distance(players[order['player']][order['hero']]['coords'], order['target']) <= sqrt(2):
+        
+        # Then find the player or the creature on that tile.
         for player in players:
             for hero in players[player]:
                 if players[player][hero]['coords'] == order['target']:
-                    # If the target is going to be killed, its hp is set back to 0
-                    if players[player][hero]['hp'] - database[players[order['player']][order['hero']]['type']][players[order['player']][order['hero']]['level']]['dmg'] <= 0:
-                        players[player][hero]['hp']  = 0
-                    # Otherwise, the damage is applied
+                    
+                    # health of the target = its previous health - damage points of the active hero.
+                    target_hp = players[player][hero]['hp'] - database[players[order['player']][order['hero']]['type']][players[order['player']][order['hero']]['level']]['dmg']
+                    
+                    # If the target is going to be killed, its hp is set back to 0.
+                    if target_hp <= 0:
+                        players[player][hero]['hp'] = 0
                     else:
-                        players[player][hero]['hp'] -= database[players[order['player']][order['hero']]['type']][players[order['player']][order['hero']]['level']]['dmg']
+                        players[player][hero]['hp'] = target_hp
 
 
 def move_on(order, players, map):
