@@ -403,32 +403,63 @@ def read_file(path):
     Returns
     -------
     map: data of the map (spawns, spur, size, etc...). (dict)
+    players: data of players (players, creatures) (dict)
 
     Notes
     -----
     For the format of 'map', see rapport_gr_02_part_02.
     The format of a typical map file is described in the instructions, p8.
+    The 'players' dictionnary will be incomplete, use create_character() to add heroes.
 
     Version
     -------
-    specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
-    implementation : Jonathan Nhouyvanisvong (v.2 07/03/19)
+    specification : Jonathan Nhouyvanisvong (v.4 15/03/19)
+    implementation : Martin Danhier (v.5 19/03/19)
     
     """
+    # Get lines from the given file.
+    param_file = open(path, 'r')
+    param_list = [line.strip('\n') for line in param_file.readlines()]
+    param_file.close()
 
-    #coords map
-    ## (range, column, turns)
+    # Initialize the data dictionaries.
+    players = {'creatures': {}}
+    map = {'spawns': {}, 'spur': [], 'player_in_citadel': ('', 0)}
 
-    #coords spawn
-    ## (range, column) x2
+    # Initialize some variables for the loop.
+    current = ''
+    line_in_current = 0
 
-    #coords spur
-    ## (range, column) x4
+    # For each line,
+    for line in param_list:
+        # Check if a new file section has been reached.
+        if line in ('map:', 'spawn:', 'spur:', 'creatures:'):
+            current = line
+            line_in_current = 0
+        else:
+            # Split the data.
+            info = line.split(' ')
 
-    #coords creatures
-    ## (range, column, hp, dmg, rayon_influence, victory_pts) x ?
+            # Save the values in the corresponding data dictionnary.
+            if current == 'map:':
+                map['size'] = (int(info[0]), int(info[1]))
+                map['nb_turns_to_win'] = int(info[2])
+            elif current == 'spawn:':
+                map['spawns']['Player %d' % line_in_current] = (
+                    int(info[0]), int(info[1]))
+                # Initialize a dictionary for the heroes of that player.
+                players['Player %d' % line_in_current] = {}
+            elif current == 'spur:':
+                map['spur'].append((int(info[0]), int(info[1])))
+            elif current == 'creatures:':
+                players['creatures'][info[0]] = {'coords': (int(info[1]), int(info[2])), 'health': int(
+                    info[3]), 'dmg': int(info[4]), 'radius': int(info[5]), 'xp': int(info[6])}
 
-    pass
+        # Increment the line counter.
+        line_in_current += 1
+
+    # Return the final dictionaries.
+    return players, map
 
 ### CLEANING ###
 # Clean and apply bonuses
