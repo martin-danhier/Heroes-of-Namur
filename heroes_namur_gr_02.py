@@ -291,12 +291,55 @@ def use_special_ability(order, players, map):
     Version
     -------
     specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
-    implementation : prenom nom (v.2 08/03/19)
+    implementation : Jonathan Nhouyvanisvong (v.3 20/03/19)
     
     """
     #compare class & level required
     #check ability
     #execute bonus/malus concerning active skill
+
+    #if order['action'] in ('energise', 'stun', 'invigorate', 'immunise', 'fulgura', 'ovibus', 'reach', 'burst'):
+
+    #who want to execute ability
+
+    #lvl required - 
+    if order['action'] in ('energise', 'invigorate', 'fulgura', 'reach'): #lvl 2
+        lvl = 2
+    if order['action'] in ('stun', 'immunise', 'ovibus', 'burst'): #lvl 3
+        lvl = 3
+
+    if players[order['player']][order['hero']['level'] >= lvl:
+        order_done = order['action']
+        hero_type = players[order['player']][order['hero']]['type']
+
+    #type of ability
+
+    if hero_type == 'barbarian':
+    ##energise
+        if order_done == 'energise' and players[order['player']][order['hero']]['cooldown'][0] == 0:
+    ##stun
+        if order_done == 'stun' and players[order['player']][order['hero']]['cooldown'][1] == 0:
+
+    if hero_type == 'healer':
+    ##invigorate
+        if order_done == 'invigorate' and players[order['player']][order['hero']]['cooldown'][0] == 0:
+    ##immunise
+        if order_done == 'immunise' and players[order['player']][order['hero']]['cooldown'][1] == 0:
+
+    if hero_type == 'mage':
+    ##fulgura
+        if order_done == 'fulgura' and players[order['player']][order['hero']]['cooldown'][0] == 0:
+    ##ovibus
+        if order_done == 'ovibus' and players[order['player']][order['hero']]['cooldown'][1] == 0:
+
+    if hero_type == 'rogue':
+    ##reach
+        if order_done == 'reach' and players[order['player']][order['hero']]['cooldown'][0] == 0:
+    # if get_tile_info(order['target'], players, map) == 'clear':
+    #     players[order['player']][order['hero']]['coords'] = order['target']
+    ##burst
+        if order_done == 'burst' and players[order['player']][order['hero']]['cooldown'][1] == 0:
+
     #TODO
     pass
 
