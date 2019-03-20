@@ -335,13 +335,16 @@ def attack(order, players, map, database):
         
         # Process abilities that can modify the damage
 
+        # Get active effects
+        active_effects = players[order['player']][order['hero']]['active_effects']
+        
         # Energise increases the damage
-        if 'energise' in players[order['player']][order['hero']]['active_effects']:
-            damage += players[order['player']][order['hero']]['active_effects']['energise'][1]
+        if 'energise' in active_effects:
+            damage += active_effects['energise'][1]
         
         # Stun decreases the damage
-        if 'stun' in players[order['player']][order['hero']]['active_effects']:
-            damage -= players[order['player']][order['hero']]['active_effects']['stun'][1]
+        if 'stun' in active_effects:
+            damage -= active_effects['stun'][1]
 
         # Damage cannot be negative
         if damage < 0:
