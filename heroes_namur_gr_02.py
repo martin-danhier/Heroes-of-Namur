@@ -152,12 +152,15 @@ def create_character(players, map, command, player):
     pass
 
 
-def parse_command(command):
+def parse_command(player, command, players, database):
     """ Parse the input into a list of actions.
 
     Parameters
     ----------
+    player: the player that entered the command (str)
     command: the input string to be parsed (str)
+    players: data of player heroes and creatures. (dict)
+    database : data of hero classes (dict)
 
     Returns
     -------
@@ -173,22 +176,87 @@ def parse_command(command):
             'action' : action (str) (can be the name of an ability (as 'fulgura') or 'attack' or 'fight'),
             'target' : ( x (int), y (int) ) #optional
         }
+    For the formats of 'players' and 'database', see rapport_gr_02_part_2.
 
     Version
     -------
-    specification : Martin Danhier (v.2 02/03/2019)
-    implementation : prenom nom (v.2 08/03/19)
-    
-    """
-    #Syntax command
-    # nom:type #type of character (create)
-    # nom:capacity #use capacity
-    # OR -> nom:capacity:r-c #use capacity, position required
+    specification : Martin Danhier (v.3 20/03/2019)
+    implementation : Martin Danhier (v.1 20/03/2019)
 
-    # nom:@r-c #move
-    # nom:*r-c #attack
-    
-    #TODO
+    """
+
+    actions = []
+    abilities_requiring_target = ('immunise', 'fulgura', 'ovibus', 'reach')
+    other_abilities = ('energise', 'stun', 'invigorate', 'burst')
+
+    # For each order
+    for order_index in range(command.split(' ')):
+        info = command.split(' ')[order_index].split(':')
+        # Basic check: it's useless to lose time if it is false
+        if (len(info) == 2 or len(info) == 3) and order_index < 4:
+
+            # Step 1 : CHECK HERO
+            if len(info[0]) > 0 and len(info[1]) > 1:
+                found = False
+                # Check in actions
+                for checked_order in actions:
+                    if checked_order['hero'] == info[0]:
+                        found = True
+                # A hero can receive maximum one order each turn
+                if not found:
+                    exists = False
+                    # Does this hero even exist ?
+                    for checked_player in players:
+                        for checked_hero in players[checked_player]:
+                            if checked_hero == info[0]:
+                                exists = True
+                    if exists and 'ovibus' not in players[player][info[0]]['active_effects']:
+                        # the hero exists and can be ordered something
+
+                        # Step 2: GET ACTION AND TARGET
+                        target = ''
+                        action_name = ''
+                        # Without third info
+                        if len(info) == 2:
+                            # Ability
+                            if info[1] in other_abilities:
+                                action_name = info[1]
+                            else:
+                                # Attack or move
+                                target = info[1][1:]
+                                if info[1][0] == '@':
+                                    action_name = 'move'
+                                elif info[1][0] == '*':
+                                    action_name = 'attack'
+                        # With third info
+                        elif info[1] in abilities_requiring_target and len(info[2]) >= 3:
+                            action_name = info[1]
+                            target = info[2]
+
+                        if action_name != '':
+
+                            valid = False
+                            # Step 3 : CHECK THE ACTION
+                            if action_name in ('attack', 'move'):
+                                valid = True
+                            else:
+                                # Check if the given ability is available for the hero (right class, right level and cooldown = 0)
+                                available_abilities = database[players[player][info[0]]['type']][players[player][info[0]]['level']]['abilities']
+                                for index in range(len(available_abilities)):
+                                    if info[1] == available_abilities[index]['name'] and players[player][info[0]]['cooldown'][index] == 0:
+                                        valid = True
+
+                            # Step 4: STORE THE ACTION
+                            if valid:
+                                if target == '':
+                                    actions.append(
+                                        {'player': player, 'hero': info[0], 'action': action_name})
+                                else:
+                                    # parse the coordinates before storing
+                                    splitted_target = target.split('-')
+                                    if len(splitted_target) == 2 and splitted_target[0].isdigit() and splitted_target[1].isdigit():
+                                        actions.append({'player': player, 'hero': info[0], 'action': action_name, 'target': (int(splitted_target[0]), int(splitted_target[1]))})
+    return actions
 
 
 ### GENERATION ###
