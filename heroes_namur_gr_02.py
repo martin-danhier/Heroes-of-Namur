@@ -308,23 +308,57 @@ def create_character(players, map, command, player):
     Version
     -------
     specification : Jonathan Nhouyvanisvong (v.3 02/03/2019)
-    implementation : prenom nom (v.2 08/03/19)
+    implementation : Guillaume Nizet (v.3 20/03/19)
     
     """
+    # First, check the validity of the command
 
-    #create 4 heros/player
-    #choose heros
+    alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    list_types = ['mage', 'barbarian', 'healer', 'rogue']
 
-    pass
+    command_is_valid = True
+
+    orders = command.split(' ')
+    for order_index in range(len(orders)):
+        if order_index < 4:
+            info = orders[order_index].split(':')
+            if len(info) == 2:
+                if len(info[0]) != 0 and len(info[1]) != 0:
+                    for character in info[0]:
+
+                        # If the name contains numbers or symbols
+                        if character not in alphabet:
+                            command_is_valid = False
+
+                    # If the hero type in not valid
+                    if info[1] not in list_types:
+                        command_is_valid = False
+
+                # If the given hero name or type is empty
+                else:
+                    command_is_valid = False
+            
+            # If the command is not in the format 'name' : 'type'
+            else:
+                command_is_valid = False
+
+            # Do not add heroes that have the same name (keeping the first one)
+            if command_is_valid and info[0] not in players[player]:
+                    players[player][info[0]] = { 'type' : info[1], 'level' : 1, 'hp' : 10, 'xp' : 0, 'coords' : map['spawns'][player], 'cooldown' : [], 'active_effects' : []}
+
+
 
 # -----
 
-def parse_command(command):
+def parse_command(player, command, players, database):
     """ Parse the input into a list of actions.
 
     Parameters
     ----------
+    player: the player that entered the command (str)
     command: the input string to be parsed (str)
+    players: data of player heroes and creatures. (dict)
+    database : data of hero classes (dict)
 
     Returns
     -------
@@ -340,22 +374,87 @@ def parse_command(command):
             'action' : action (str) (can be the name of an ability (as 'fulgura') or 'attack' or 'fight'),
             'target' : ( x (int), y (int) ) #optional
         }
+    For the formats of 'players' and 'database', see rapport_gr_02_part_2.
 
     Version
     -------
-    specification : Martin Danhier (v.2 02/03/2019)
-    implementation : prenom nom (v.2 08/03/19)
-    
+    specification : Martin Danhier (v.3 20/03/2019)
+    implementation : Martin Danhier (v.1 20/03/2019)
+
     """
-    #Syntax command
-    # nom:type #type of character (create)
-    # nom:capacity #use capacity
-    # OR -> nom:capacity:r-c #use capacity, position required
 
-    # nom:@r-c #move
-    # nom:*r-c #attack
+    actions = []
+    abilities_requiring_target = ('immunise', 'fulgura', 'ovibus', 'reach')
+    other_abilities = ('energise', 'stun', 'invigorate', 'burst')
 
+    # For each order
+    for order_index in range(command.split(' ')):
+        info = command.split(' ')[order_index].split(':')
+        # Basic check: it's useless to lose time if it is false
+        if (len(info) == 2 or len(info) == 3) and order_index < 4:
 
+            # Step 1 : CHECK HERO
+            if len(info[0]) > 0 and len(info[1]) > 1:
+                found = False
+                # Check in actions
+                for checked_order in actions:
+                    if checked_order['hero'] == info[0]:
+                        found = True
+                # A hero can receive maximum one order each turn
+                if not found:
+                    exists = False
+                    # Does this hero even exist ?
+                    for checked_player in players:
+                        for checked_hero in players[checked_player]:
+                            if checked_hero == info[0]:
+                                exists = True
+                    if exists and 'ovibus' not in players[player][info[0]]['active_effects']:
+                        # the hero exists and can be ordered something
+
+                        # Step 2: GET ACTION AND TARGET
+                        target = ''
+                        action_name = ''
+                        # Without third info
+                        if len(info) == 2:
+                            # Ability
+                            if info[1] in other_abilities:
+                                action_name = info[1]
+                            else:
+                                # Attack or move
+                                target = info[1][1:]
+                                if info[1][0] == '@':
+                                    action_name = 'move'
+                                elif info[1][0] == '*':
+                                    action_name = 'attack'
+                        # With third info
+                        elif info[1] in abilities_requiring_target and len(info[2]) >= 3:
+                            action_name = info[1]
+                            target = info[2]
+
+                        if action_name != '':
+
+                            valid = False
+                            # Step 3 : CHECK THE ACTION
+                            if action_name in ('attack', 'move'):
+                                valid = True
+                            else:
+                                # Check if the given ability is available for the hero (right class, right level and cooldown = 0)
+                                available_abilities = database[players[player][info[0]]['type']][players[player][info[0]]['level']]['abilities']
+                                for index in range(len(available_abilities)):
+                                    if info[1] == available_abilities[index]['name'] and players[player][info[0]]['cooldown'][index] == 0:
+                                        valid = True
+
+                            # Step 4: STORE THE ACTION
+                            if valid:
+                                if target == '':
+                                    actions.append(
+                                        {'player': player, 'hero': info[0], 'action': action_name})
+                                else:
+                                    # parse the coordinates before storing
+                                    splitted_target = target.split('-')
+                                    if len(splitted_target) == 2 and splitted_target[0].isdigit() and splitted_target[1].isdigit():
+                                        actions.append({'player': player, 'hero': info[0], 'action': action_name, 'target': (int(splitted_target[0]), int(splitted_target[1]))})
+    return actions
 
 
 ### GENERATION ###
@@ -372,32 +471,63 @@ def read_file(path):
     Returns
     -------
     map: data of the map (spawns, spur, size, etc...). (dict)
+    players: data of players (players, creatures) (dict)
 
     Notes
     -----
     For the format of 'map', see rapport_gr_02_part_02.
     The format of a typical map file is described in the instructions, p8.
+    The 'players' dictionnary will be incomplete, use create_character() to add heroes.
 
     Version
     -------
-    specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
-    implementation : Jonathan Nhouyvanisvong (v.2 07/03/19)
+    specification : Jonathan Nhouyvanisvong (v.4 15/03/19)
+    implementation : Martin Danhier (v.5 19/03/19)
     
     """
+    # Get lines from the given file.
+    param_file = open(path, 'r')
+    param_list = [line.strip('\n') for line in param_file.readlines()]
+    param_file.close()
 
-    #coords map
-    ## (range, column, turns)
+    # Initialize the data dictionaries.
+    players = {'creatures': {}}
+    map = {'spawns': {}, 'spur': [], 'player_in_citadel': ('', 0)}
 
-    #coords spawn
-    ## (range, column) x2
+    # Initialize some variables for the loop.
+    current = ''
+    line_in_current = 0
 
-    #coords spur
-    ## (range, column) x4
+    # For each line,
+    for line in param_list:
+        # Check if a new file section has been reached.
+        if line in ('map:', 'spawn:', 'spur:', 'creatures:'):
+            current = line
+            line_in_current = 0
+        else:
+            # Split the data.
+            info = line.split(' ')
 
-    #coords creatures
-    ## (range, column, hp, dmg, rayon_influence, victory_pts) x ?
+            # Save the values in the corresponding data dictionnary.
+            if current == 'map:':
+                map['size'] = (int(info[0]), int(info[1]))
+                map['nb_turns_to_win'] = int(info[2])
+            elif current == 'spawn:':
+                map['spawns']['Player %d' % line_in_current] = (
+                    int(info[0]), int(info[1]))
+                # Initialize a dictionary for the heroes of that player.
+                players['Player %d' % line_in_current] = {}
+            elif current == 'spur:':
+                map['spur'].append((int(info[0]), int(info[1])))
+            elif current == 'creatures:':
+                players['creatures'][info[0]] = {'coords': (int(info[1]), int(info[2])), 'health': int(
+                    info[3]), 'dmg': int(info[4]), 'radius': int(info[5]), 'xp': int(info[6])}
 
-    pass
+        # Increment the line counter.
+        line_in_current += 1
+
+    # Return the final dictionaries.
+    return players, map
 
 ### CLEANING ###
 # Clean and apply bonuses
@@ -466,16 +596,16 @@ def use_special_ability(order, players, map):
     #execute bonus/malus concerning active skill
     pass
 
-# -----
 
-def attack(order, players, map):
+def attack(order, players, map, database):
     """ Tries to execute the given attack order.
 
     Parameters
     ----------
-    order: the attack order. (dict)
-    players : data of player heroes and creatures. (dict)
-    map: data of the map (spawns, spur, size, etc...). (dict)
+    order: the attack order (dict)
+    players : data of player heroes and creatures (dict)
+    map: data of the map (spawns, spur, size, etc...) (dict)
+    database: data of hero classes (dict)
 
     Notes
     -----
@@ -486,17 +616,55 @@ def attack(order, players, map):
             'action' : 'fight',
             'target' : ( x (int), y (int) ) #optional
         }
-    For the formats of 'players' and 'map', see rapport_gr_02_part_02.
+    For the formats of 'players', 'database' and 'map', see rapport_gr_02_part_02.
     The 'players' dictionary may be updated.
 
     Version
     -------
-    specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
-    implementation : prenom nom (v.2 08/03/19)
+    specification : Jonathan Nhouyvanisvong (v.4 19/03/19)
+    implementation : Guillaume Nizet (v.2 19/03/19)
     
     """
-    #analyze surface : is it any enemies ? -> are_coords_in_range(source, target, range)
-    pass
+    # If the target tile is occupied by a player or a creature and if it's not the spawn point of any player and if it's not farther than square root of 2 (to be able to attack diagonally)
+    if get_tile_info(order['target'], players, map) == 'player' and order['target'] != map['spawns']['Player 1'] and order['target'] != map['spawns']['Player 2'] and get_distance(players[order['player']][order['hero']]['coords'], order['target']) <= sqrt(2):
+        
+        # Base damage of the hero, based on its type and level
+        damage = database[players[order['player']][order['hero']]['type']][players[order['player']][order['hero']]['level']]['dmg']
+        
+        # Process abilities that can modify the damage
+
+        # Get active effects
+        active_effects = players[order['player']][order['hero']]['active_effects']
+        
+        # Energise increases the damage
+        if 'energise' in active_effects:
+            damage += active_effects['energise'][1]
+        
+        # Stun decreases the damage
+        if 'stun' in active_effects:
+            damage -= active_effects['stun'][1]
+
+        # Damage cannot be negative
+        if damage < 0:
+            damage = 0
+
+        # Then find the player or the creature on that tile
+        for player in players:
+            for hero in players[player]:
+                if players[player][hero]['coords'] == order['target']:
+
+                    # If the target is affected by the ability 'immunise'
+                    if 'immunise' in players[player][hero]['active_effects']:
+                        damage = 0
+                    
+                    # Health of the target = its previous health - damage points of the active hero
+                    target_hp = players[player][hero]['hp'] - damage
+                    
+                    # If the target is going to be killed, its hp is set back to 0.
+                    if target_hp <= 0:
+                        players[player][hero]['hp'] = 0
+                    else:
+                        players[player][hero]['hp'] = target_hp
 
 # -----
 
