@@ -330,13 +330,34 @@ def attack(order, players, map, database):
     # If the target tile is occupied by a player or a creature and if it's not the spawn point of any player and if it's not farther than square root of 2 (to be able to attack diagonally)
     if get_tile_info(order['target'], players, map) == 'player' and order['target'] != map['spawns']['Player 1'] and order['target'] != map['spawns']['Player 2'] and get_distance(players[order['player']][order['hero']]['coords'], order['target']) <= sqrt(2):
         
-        # Then find the player or the creature on that tile.
+        # Base damage of the hero, based on its type and level
+        damage = database[players[order['player']][order['hero']]['type']][players[order['player']][order['hero']]['level']]['dmg']
+        
+        # Process abilities that can modify the damage
+
+        # Energise increases the damage
+        if 'energise' in players[order['player']][order['hero']]['active_effects']:
+            damage += players[order['player']][order['hero']]['active_effects']['energise'][1]
+        
+        # Stun decreases the damage
+        if 'stun' in players[order['player']][order['hero']]['active_effects']:
+            damage -= players[order['player']][order['hero']]['active_effects']['stun'][1]
+
+        # Damage cannot be negative
+        if damage < 0:
+            damage = 0
+
+        # Then find the player or the creature on that tile
         for player in players:
             for hero in players[player]:
                 if players[player][hero]['coords'] == order['target']:
+
+                    # If the target is affected by the ability 'immunise'
+                    if 'immunise' in players[player][hero]['active_effects']:
+                        damage = 0
                     
-                    # health of the target = its previous health - damage points of the active hero.
-                    target_hp = players[player][hero]['hp'] - database[players[order['player']][order['hero']]['type']][players[order['player']][order['hero']]['level']]['dmg']
+                    # Health of the target = its previous health - damage points of the active hero
+                    target_hp = players[player][hero]['hp'] - damage
                     
                     # If the target is going to be killed, its hp is set back to 0.
                     if target_hp <= 0:
