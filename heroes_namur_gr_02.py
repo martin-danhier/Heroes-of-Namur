@@ -151,7 +151,7 @@ def create_character(players, map, command, player):
     #choose heros : barbarian, healer, mage, rogue
     
     for hero in command.split(' '):
-        players[player].update({ hero.split(':')[0] : { 'type' : hero.split(':')[1], 'level' : 1, 'hp' : 10, 'xp' : 0, 'coords' : map['spawns'][player], 'cooldown' : []}})
+        players[player][hero.split(':')[0]] = { 'type' : hero.split(':')[1], 'level' : 1, 'hp' : 10, 'xp' : 0, 'coords' : map['spawns'][player], 'cooldown' : []}
 
 
 
