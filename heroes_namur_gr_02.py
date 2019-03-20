@@ -308,7 +308,7 @@ def use_special_ability(order, players, map):
     if order['action'] in ('stun', 'immunise', 'ovibus', 'burst'): #lvl 3
         lvl = 3
 
-    if players[order['player']][order['hero']['level'] >= lvl:
+    if players[order['player']][order['hero']['level']] >= lvl:
         order_done = order['action']
         hero_type = players[order['player']][order['hero']]['type']
 
@@ -317,28 +317,36 @@ def use_special_ability(order, players, map):
     if hero_type == 'barbarian':
     ##energise
         if order_done == 'energise' and players[order['player']][order['hero']]['cooldown'][0] == 0:
+            pass
     ##stun
         if order_done == 'stun' and players[order['player']][order['hero']]['cooldown'][1] == 0:
+            pass
 
     if hero_type == 'healer':
     ##invigorate
         if order_done == 'invigorate' and players[order['player']][order['hero']]['cooldown'][0] == 0:
+            pass
     ##immunise
         if order_done == 'immunise' and players[order['player']][order['hero']]['cooldown'][1] == 0:
+            pass
 
     if hero_type == 'mage':
     ##fulgura
         if order_done == 'fulgura' and players[order['player']][order['hero']]['cooldown'][0] == 0:
+            pass
     ##ovibus
         if order_done == 'ovibus' and players[order['player']][order['hero']]['cooldown'][1] == 0:
+            pass
 
     if hero_type == 'rogue':
     ##reach
         if order_done == 'reach' and players[order['player']][order['hero']]['cooldown'][0] == 0:
+            pass
     # if get_tile_info(order['target'], players, map) == 'clear':
     #     players[order['player']][order['hero']]['coords'] = order['target']
     ##burst
         if order_done == 'burst' and players[order['player']][order['hero']]['cooldown'][1] == 0:
+            pass
 
     #TODO
     pass
