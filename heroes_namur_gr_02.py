@@ -142,7 +142,7 @@ def create_character(players, map, command, player):
     Version
     -------
     specification : Jonathan Nhouyvanisvong (v.3 02/03/2019)
-    implementation : prenom nom (v.2 08/03/19)
+    implementation : Guillaume Nizet (v.3 20/03/19)
     
     """
     # First, check the validity of the command
@@ -152,38 +152,33 @@ def create_character(players, map, command, player):
 
     command_is_valid = True
 
-    for info in command.split(' '):
-        if ':' in info:
-            if len(info.split(':')[0]) != 0 and len(info.split(':')[1]) != 0:
-                for character in info.split(':')[0]:
+    orders = command.split(' ')
+    for order_index in range(len(orders)):
+        if order_index < 4:
+            info = orders[order_index].split(':')
+            if len(info) == 2:
+                if len(info[0]) != 0 and len(info[1]) != 0:
+                    for character in info[0]:
 
-                    # If the name contains numbers or symbols
-                    if character not in alphabet:
+                        # If the name contains numbers or symbols
+                        if character not in alphabet:
+                            command_is_valid = False
+
+                    # If the hero type in not valid
+                    if info[1] not in list_types:
                         command_is_valid = False
 
-                # If the hero type in not valid
-                if info.split(':')[1] not in list_types:
+                # If the given hero name or type is empty
+                else:
                     command_is_valid = False
-
-            # If the given hero name or type is empty
+            
+            # If the command is not in the format 'name' : 'type'
             else:
                 command_is_valid = False
-        
-        # If the command is not in the format 'name' : 'type'
-        else:
-            command_is_valid = False
 
-    list_heroes = []
-
-    if command_is_valid:
-        # The list_heroes' elements are in the format ('name', 'type')
-        for hero in command.split(' '):   
-            list_heroes.append((hero.split(':')[0], hero.split(':')[1]))
-
-    for hero in list_heroes:
-        # Do not add heroes that have the same name (keeping the first one) and keep the number of heroes up to 4
-        if hero[0] not in players[player] and len(players[player]) < 4:
-            players[player][hero[0]] = { 'type' : hero[1], 'level' : 1, 'hp' : 10, 'xp' : 0, 'coords' : map['spawns'][player], 'cooldown' : []}
+            # Do not add heroes that have the same name (keeping the first one)
+            if command_is_valid and info[0] not in players[player]:
+                    players[player][info[0]] = { 'type' : info[1], 'level' : 1, 'hp' : 10, 'xp' : 0, 'coords' : map['spawns'][player], 'cooldown' : [], 'active_effects' : []}
 
 
 
