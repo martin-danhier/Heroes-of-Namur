@@ -472,49 +472,58 @@ def get_tile_info(coords):
 ### MAIN ###
 # Entry point of the game
 
-def main():
+def main(file, player_1_is_AI = False, player_2_is_AI = True):
     """ Manages the global course of the in-game events.
+
+    Parameters
+    ----------
+    file: the path of the .hon file used to generate the map. (str)
+    player_1_is_AI: If True, an artificial player will be used instead of an input. (boolean, default False)
+    player_2_is_AI: If True, an artificial player will be used instead of an input. (boolean, default True)
 
     Version:
     --------
-    specification : Guillaume Nizet (v.2 03/03/19)
-    implementation : prenom nom (v.2 08/03/19)
+    specification : Guillaume Nizet, Martin Danhier (v.3 20/03/19)
+    implementation : Martiin Danhier (v.2 20/03/19)
 
     """
 
-    # Create the constant database dictionary containg the 
+    # Create the constant database dictionary containg the data of each class at each level
     database = {
         'barbarian': {
-            '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2},
+            '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2, 'abilities':[]},
             '2': {'victory_pts': 100, 'hp': 13, 'dmg': 3, 'abilities': [{'name': 'energise', 'radius': 1, 'x': 1, 'cd': 1}]},
             '3': {'victory_pts': 200, 'hp': 16, 'dmg': 4, 'abilities': [{'name': 'energise', 'radius': 2, 'x': 1, 'cd': 1}, {'name': 'stun', 'radius': 1, 'x': 1, 'cd': 1}]},
             '4': {'victory_pts': 400, 'hp': 19, 'dmg': 5, 'abilities': [{'name': 'energise', 'radius': 3, 'x': 2, 'cd': 1}, {'name': 'stun', 'radius': 2, 'x': 2, 'cd': 1}]},
             '5': {'victory_pts': 800, 'hp': 22, 'dmg': 6, 'abilities': [{'name': 'energise', 'radius': 4, 'x': 2, 'cd': 1}, {'name': 'stun', 'radius': 3, 'x': 3, 'cd': 1}]}
         },
         'healer': {
-            '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2},
+            '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2, 'abilities':[]},
             '2': {'victory_pts': 100, 'hp': 11, 'dmg': 2, 'abilities': [{'name': 'invigorate', 'radius': 1, 'x': 1, 'cd': 1}]},
             '3': {'victory_pts': 200, 'hp': 12, 'dmg': 3, 'abilities': [{'name': 'invigorate', 'radius': 2, 'x': 2, 'cd': 1}, {'name': 'immunise', 'radius': 1, 'cd': 3}]},
             '4': {'victory_pts': 400, 'hp': 13, 'dmg': 3, 'abilities': [{'name': 'invigorate', 'radius': 3, 'x': 3, 'cd': 1}, {'name': 'immunise', 'radius': 2, 'cd': 3}]},
             '5': {'victory_pts': 800, 'hp': 14, 'dmg': 4, 'abilities': [{'name': 'invigorate', 'radius': 4, 'x': 4, 'cd': 1}, {'name': 'immunise', 'radius': 3, 'cd': 3}]}
         },
         'mage': {
-            '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2},
+            '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2, 'abilities':[]},
             '2': {'victory_pts': 100, 'hp': 12, 'dmg': 3, 'abilities': [{'name': 'fulgura', 'radius': 1, 'x': 3, 'cd': 1}]},
             '3': {'victory_pts': 200, 'hp': 14, 'dmg': 4, 'abilities': [{'name': 'fulgura', 'radius': 2, 'x': 3, 'cd': 1}, {'name': 'ovibus', 'radius': 1, 'x': 1, 'cd': 3}]},
             '4': {'victory_pts': 400, 'hp': 16, 'dmg': 5, 'abilities': [{'name': 'fulgura', 'radius': 3, 'x': 4, 'cd': 1}, {'name': 'ovibus', 'radius': 2, 'x': 2, 'cd': 3}]},
             '5': {'victory_pts': 800, 'hp': 18, 'dmg': 6, 'abilities': [{'name': 'fulgura', 'radius': 4, 'x': 4, 'cd': 1}, {'name': 'ovibus', 'radius': 3, 'x': 2, 'cd': 3}]}
         },
         'rogue': {
-            '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2},
+            '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2, 'abilities':[]},
             '2': {'victory_pts': 100, 'hp': 12, 'dmg': 3, 'abilities': [{'name': 'reach', 'radius': 1, 'cd': 1}]},
             '3': {'victory_pts': 200, 'hp': 14, 'dmg': 4, 'abilities': [{'name': 'reach', 'radius': 2, 'cd': 1}, {'name': 'burst', 'radius': 1, 'x': 1, 'cd': 1}]},
             '4': {'victory_pts': 400, 'hp': 16, 'dmg': 5, 'abilities': [{'name': 'reach', 'radius': 3, 'cd': 1}, {'name': 'burst', 'radius': 2, 'x': 2, 'cd': 1}]},
             '5': {'victory_pts': 800, 'hp': 18, 'dmg': 6, 'abilities': [{'name': 'reach', 'radius': 4, 'cd': 1}, {'name': 'burst', 'radius': 3, 'x': 3, 'cd': 1}]}
         }
-    #TODO: ajouter des paramètres dans la spec
+
+    
 
     # Step 1 : create map and implements data
+    map, players = read_file(file)
+
     # Step 2 : create 4 heros/player
     ##LOOP##
     # Step 3 : give order (store in list)
@@ -522,6 +531,3 @@ def main():
     # Step 5 : Lauch orders
     # Step 6 : Second clear
     # Step 7 : Check if "game over" (nb turns finished ?, 1 heros remaining ?, nb turns passed in citadel)
-
-
-main()
