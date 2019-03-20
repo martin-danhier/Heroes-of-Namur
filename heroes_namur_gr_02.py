@@ -145,13 +145,45 @@ def create_character(players, map, command, player):
     implementation : prenom nom (v.2 08/03/19)
     
     """
-    #choose player_name
-    #create 4 heros/player
-    #choose heros_name
-    #choose heros : barbarian, healer, mage, rogue
-    
-    for hero in command.split(' '):
-        players[player][hero.split(':')[0]] = { 'type' : hero.split(':')[1], 'level' : 1, 'hp' : 10, 'xp' : 0, 'coords' : map['spawns'][player], 'cooldown' : []}
+    # First, check the validity of the command
+
+    alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    list_types = ['mage', 'barbarian', 'healer', 'rogue']
+
+    command_is_valid = True
+
+    for info in command.split(' '):
+        if ':' in info:
+            if len(info.split(':')[0]) != 0 and len(info.split(':')[1]) != 0:
+                for character in info.split(':')[0]:
+
+                    # If the name contains numbers or symbols
+                    if character not in alphabet:
+                        command_is_valid = False
+
+                # If the hero type in not valid
+                if info.split(':')[1] not in list_types:
+                    command_is_valid = False
+
+            # If the given hero name or type is empty
+            else:
+                command_is_valid = False
+        
+        # If the command is not in the format 'name' : 'type'
+        else:
+            command_is_valid = False
+
+    list_heroes = []
+
+    if command_is_valid:
+        # The list_heroes' elements are in the format ('name', 'type')
+        for hero in command.split(' '):   
+            list_heroes.append((hero.split(':')[0], hero.split(':')[1]))
+
+    for hero in list_heroes:
+        # Do not add heroes that have the same name (keeping the first one) and keep the number of heroes up to 4
+        if hero[0] not in players[player] and len(players[player]) < 4:
+            players[player][hero[0]] = { 'type' : hero[1], 'level' : 1, 'hp' : 10, 'xp' : 0, 'coords' : map['spawns'][player], 'cooldown' : []}
 
 
 
