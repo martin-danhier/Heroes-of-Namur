@@ -1,30 +1,165 @@
+import colored
+import os
+
 ### UI ###
 # Display user interface
 
 
-def display_ui(players, map):
+def display_ui(players, map, database):
     """ Displays the board (with colors) and statistics of the players.
 
     Parameters
     ----------
     players : data of player heroes and creatures (dict)
     map: data of the map (spawns, spur, size, etc...) (dict)
+    database = data of hero classes (dict)
 
     Notes
     -----
-    For the formats of players and map, see rapport_gr_02_part_02.
+    For the formats of players, database and map, see rapport_gr_02_part_02.
 
     Version
     -------
-    specification : Guillaume Nizet (v.2 02/03/19)
-    implementation : prenom nom (v.1 06/03/19)
+    specification : Guillaume Nizet, Martin Danhier (v.2 16/03/19)
+    implementation : Guillaume Nizet (v.2 16/03/19)
     
     """
-    pass
+    board = "\n     "
+    # Get a list of str with the stats
+    stats = create_stats(players, database).split('\n')
 
+    # Get data
+    width = map["size"][0]
+    height = map["size"][1]
+
+    # Generate dict with coords to color
+    colored_coords = {"spur": []}
+    # Get colored borders around spur
+    for coords in map["spur"]:
+        colored_coords["spur"] += get_coords_to_color((coords[0] * 2, coords[1] * 4 - 2))
+    # Get colored borders around players spawn points
+    colored_coords["spawn_player 1"] = get_coords_to_color((map["spawns"]["Player 1"][0] * 2, map["spawns"]["Player 1"][1] * 4 - 2))
+    colored_coords["spawn_player 2"] = get_coords_to_color((map["spawns"]["Player 2"][0] * 2, map["spawns"]["Player 2"][1] * 4 - 2))
+    # Get player coords
+    player_coords = {}
+    for player in players:
+        for character in players[player]:
+            coords = players[player][character]['coords']
+            # If the character is a creature
+            if player == 'creatures':
+                player_coords[coords] = ('blue', '*')
+            else:
+                # Get the number of players on the same box
+                players_count = 0
+                for other_character in players[player]:
+                    if players[player][other_character]['coords'] == coords:
+                        players_count += 1
+
+                # If there are several characters on the box, their count is displayer
+                if players_count > 1:
+                    type = str(players_count)
+
+                # If there is only 1 player on the box, its type is displayed
+                else:
+                    if players[player][character]['type'] == 'barbarian':
+                        type = '🔰'
+                    elif players[player][character]['type'] == 'mage':
+                        type = 'ϟ'
+                    elif players[player][character]['type'] == 'healer':
+                        type = '+'
+                    elif players[player][character]['type'] == 'rogue':
+                        type = '🔪' 
+                # If the character is owned by the first player (human)
+                if player == 'Player 1':
+                    player_coords[coords] = ('dark_green', type)
+                # If the character is owned by the second player (IA ; enemy)
+                elif player == 'Player 2':
+                    player_coords[coords] = ('red', type)
+
+    # Add column numbers
+    for col in range(map['size'][1]):
+        if col + 1 < 10:
+            board += '  %d ' % (col + 1)
+        else:
+            board += '  %d' % (col + 1)
+    board += '\n'
+
+    # Add board
+    for y_pos in range(1, (height + 1) * 2):
+        # Add tabulation to border lines
+        if y_pos % 2 != 0:
+            board += '   '
+            
+        # For each column
+        x_pos = 0
+        while x_pos < (4 * width) + 1:
+
+            # Select color
+            if (y_pos, x_pos) in colored_coords["spur"]:
+                color = colored.fg('cyan')
+            elif (y_pos, x_pos) in colored_coords["spawn_player 1"]:
+                color = colored.fg('green')
+            elif (y_pos, x_pos) in colored_coords["spawn_player 2"]:
+                color = colored.fg('red')
+            else:
+                color = colored.attr('reset')
+                   
+            # First board line
+            if y_pos == 1:
+                board += create_line_char('╔', '╦', '╗', x_pos, y_pos, color, width)
+
+            # Last board line
+            elif y_pos == ((height * 2) + 1):  # on the last row
+                board += create_line_char('╚', '╩', '╝', x_pos, y_pos, color, width)
+
+            #Between the first and the last row
+            else:
+                # On center line of row
+                if y_pos % 2 == 0:
+                    # Display row number at the beginning of the line
+                    if x_pos == 0:
+                        y_row = y_pos//2
+                        if y_row < 10:
+                            offset = '   '
+                        else:
+                            offset = '  '
+                        board += '%s%s %s║' % (offset, y_row, color)
+                    # Board line
+                    elif x_pos % 4 == 0:
+                        board += '%s║' % color
+                    # Tile content
+                    else:
+                        # Display player                        
+                        if (x_pos//4 + 1, y_pos//2) in player_coords:
+                            tile_content = '%s%s %s %s' % (colored.attr('reset'), colored.bg(player_coords[(x_pos//4 + 1, y_pos//2)][0]), player_coords[(x_pos//4 + 1, y_pos//2)][1], colored.attr('reset'))
+                        else:
+                            tile_content = '   '
+
+                        board += '%s' % tile_content
+                        x_pos += 2
+
+                elif y_pos != 1:
+                    # Board line
+                    board += create_line_char('╠', '╬', '╣', x_pos, y_pos, color, width)
+    
+            x_pos += 1
+
+        # Add stats
+        stat_line = ''
+        if y_pos-1 < len(stats):
+            stat_line = stats[y_pos-1]
+        board += '%s    %s\n' %  (colored.attr('reset'),stat_line)
+
+    # Clear screen
+    os.system('cls') # windows
+    os.system('clear') # linux
+    # Print board
+    print(board)
+
+# -----
 
 def get_coords_to_color(coords):
-    """ Generates the coordinates that need to be colored around the given coordinates. 
+    """ Returns the coordinates that need to be colored around the given coordinates. 
 
     Parameters
     ----------
@@ -41,61 +176,86 @@ def get_coords_to_color(coords):
     Version:
     --------
     specification : Guillaume Nizet (v.2 02/03/19)
-    implementation : prenom nom (v.1 06/03/19)
+    implementation : Guillaume Nizet (v.2 04/03/19)
     
     """
-    pass
+    coords_to_color = []
+    # For each character around the coord
+    for row in range(coords[0]-1, coords[0] + 2):
+        for col in range(coords[1]-2, coords[1]+3):
 
+            # If it is a border (not center), add it
+            if row != coords[0] or col not in range(coords[1]-1, coords[1]+2):
+                coords_to_color.append((row, col))
+    return coords_to_color
 
-def create_stats(players):
+# -----
+
+def create_stats(players, database):
     """ Generates a string containing the stats of the players.
 
     Parameters:
     -----------
     players : data of player heroes and creatures (dict)
+    database = data of hero classes (dict)
 
     Returns
     -------
-    stats : a multiline string countaining the graphical representation of the stats. (str)
+    stats : a multiline string containing the graphical representation of the stats. (str)
 
     Notes
     -----
-    For the format of players, see rapport_gr_02_part_02.
+    For the formats of players and database, see rapport_gr_02_part_02.
 
     Version
     -------
-    specification : Martin Danhier (v.3 02/03/19)
-    implementation : prenom nom (v.1 06/03/19)
-    
+    specification : Martin Danhier (v.4 15/03/19)
+    implementation : Martin Danhier (v.2 15/03/19)
+
     """
-    pass
+    stats = "Stats\n-----"
+    # Define colors that will be used for each player
+    player_colors = {'Player 1': 'green', 'Player 2': 'light_red'}
 
+    # For each player (not including creatures)
+    for player in players:
+        if player != 'creatures':
+            # Add the name of the player
+            stats += "\n\n%s:" % colored.stylize(player, colored.fg(player_colors[player]))
 
-def convert_to_true_coords(coords):
-    """ Converts the given tile coordinates to absolute char coordinates.
+            # Add hero data
+            for hero in players[player]:
+                stats += '\n - \'%s\', %s:\n   (HP: %s, XP: %s, LVL: %s)\n   Position: (%s, %s)' % (
+                    colored.stylize(hero, colored.fg(player_colors[player])), players[player][hero]['type'],
+                    colored.stylize(players[player][hero]['hp'], colored.fg('light_goldenrod_1')), colored.stylize(players[player][hero]['xp'], colored.fg('light_goldenrod_1')), colored.stylize(players[player][hero]['level'], colored.fg('light_goldenrod_1')),
+                    colored.stylize(players[player][hero]['coords'][0], colored.fg('light_goldenrod_1')), colored.stylize(players[player][hero]['coords'][1], colored.fg('light_goldenrod_1')))
+                
+                # Display abilities stats.
+                nb_abilities = len(players[player][hero]['cooldown'])
 
-    Parameters
-    ----------
-    coords: the tile coordinates to convert (tuple).
+                # Display them if there are some abilities to display
+                if (nb_abilities > 0):
+                    stats += '\n   Special abilities: '    
+                    for index_ability in range(nb_abilities):
+                        # Get data from databases.
+                        ability_name = database[players[player][hero]['type']][players[player][hero]['level']]['abilities'][index_ability]['name']
+                        ability_cooldown = players[player][hero]['cooldown'][index_ability]
+                        # Add the name of the ability and the number of turns left before being able to use it again.
+                        if ability_cooldown == 0:
+                            stats += ' %s (%s)' % (ability_name, colored.stylize('ready', colored.fg('light_goldenrod_1')))
+                        else:
+                            stats += '%s (%s turns left)' % (ability_name, colored.stylize(ability_cooldown, colored.fg('light_goldenrod_1')))
+                        # Add a comma to separate abilities
+                        if nb_abilities > 1 and index_ability < nb_abilities - 1:
+                            stats += ','
+                else:
+                    stats += "\n   No special ability."
+    # Return the full stats string
+    return stats
 
-    Returns
-    -------
-    true_coords: the coordinates of the center character of the tile. (tuple)
+# -----
 
-    Notes
-    -----
-    A typical 'coord' tuple is in the format ( row (int), column (int) ).
-
-    Version
-    -------
-    specification : Martin Danhier (v.2 02/03/19)
-    implementation : prenom nom (v.1 06/03/19)
-    
-    """
-    pass
-
-
-def create_line_char(first, cross, last, y, x, color, width):
+def create_line_char(first, cross, last, x, y, color, width):
     """ Create and color a border character.
 
     Parameters
@@ -103,8 +263,8 @@ def create_line_char(first, cross, last, y, x, color, width):
     first: first intersection character of the line. (str)
     cross: intersection character in the middle of the line. (str)
     last: last intersection character of the line. (str)
-    y: the ordinate of the character (int)
     x: the abcissa of the character (int)
+    y: the ordinate of the character (int)
     color: the color of the character (str)
     width: the width of the map (number of columns) (int)
 
@@ -114,15 +274,21 @@ def create_line_char(first, cross, last, y, x, color, width):
 
     Version
     -------
-    specification : Martin Danhier (v.2 01/03/19)
-    implementation : prenom nom (v.1 06/03/19)
-    
+    specification : Martin Danhier (v.3 16/03/19)
+    implementation : Martin Danhier (v.2 02/03/19)
     """
-    pass
+    if x == 0:  # on the first position
+        return '%s  %s' % (color, first)
+    elif x < (width * 4):
+        if x % 4 != 0:
+            return '%s═' % color
+        else:
+            return '%s%s' % (color, cross)
+    elif x == (width * 4):  # on the last position
+        return '%s%s' % (color, last)
 
 ### INPUT ###
 # Process input
-
 
 def create_character(players, map, command, player):
     """ Parse the input command and create the players.
@@ -142,15 +308,47 @@ def create_character(players, map, command, player):
     Version
     -------
     specification : Jonathan Nhouyvanisvong (v.3 02/03/2019)
-    implementation : prenom nom (v.2 08/03/19)
+    implementation : Guillaume Nizet (v.3 20/03/19)
     
     """
+    # First, check the validity of the command
 
-    #create 4 heros/player
-    #choose heros
+    alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    list_types = ['mage', 'barbarian', 'healer', 'rogue']
 
-    pass
+    command_is_valid = True
 
+    orders = command.split(' ')
+    for order_index in range(len(orders)):
+        if order_index < 4:
+            info = orders[order_index].split(':')
+            if len(info) == 2:
+                if len(info[0]) != 0 and len(info[1]) != 0:
+                    for character in info[0]:
+
+                        # If the name contains numbers or symbols
+                        if character not in alphabet:
+                            command_is_valid = False
+
+                    # If the hero type in not valid
+                    if info[1] not in list_types:
+                        command_is_valid = False
+
+                # If the given hero name or type is empty
+                else:
+                    command_is_valid = False
+            
+            # If the command is not in the format 'name' : 'type'
+            else:
+                command_is_valid = False
+
+            # Do not add heroes that have the same name (keeping the first one)
+            if command_is_valid and info[0] not in players[player]:
+                    players[player][info[0]] = { 'type' : info[1], 'level' : 1, 'hp' : 10, 'xp' : 0, 'coords' : map['spawns'][player], 'cooldown' : [], 'active_effects' : []}
+
+
+
+# -----
 
 def parse_command(command):
     """ Parse the input into a list of actions.
@@ -205,32 +403,63 @@ def read_file(path):
     Returns
     -------
     map: data of the map (spawns, spur, size, etc...). (dict)
+    players: data of players (players, creatures) (dict)
 
     Notes
     -----
     For the format of 'map', see rapport_gr_02_part_02.
     The format of a typical map file is described in the instructions, p8.
+    The 'players' dictionnary will be incomplete, use create_character() to add heroes.
 
     Version
     -------
-    specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
-    implementation : Jonathan Nhouyvanisvong (v.2 07/03/19)
+    specification : Jonathan Nhouyvanisvong (v.4 15/03/19)
+    implementation : Martin Danhier (v.5 19/03/19)
     
     """
+    # Get lines from the given file.
+    param_file = open(path, 'r')
+    param_list = [line.strip('\n') for line in param_file.readlines()]
+    param_file.close()
 
-    #coords map
-    ## (range, column, turns)
+    # Initialize the data dictionaries.
+    players = {'creatures': {}}
+    map = {'spawns': {}, 'spur': [], 'player_in_citadel': ('', 0)}
 
-    #coords spawn
-    ## (range, column) x2
+    # Initialize some variables for the loop.
+    current = ''
+    line_in_current = 0
 
-    #coords spur
-    ## (range, column) x4
+    # For each line,
+    for line in param_list:
+        # Check if a new file section has been reached.
+        if line in ('map:', 'spawn:', 'spur:', 'creatures:'):
+            current = line
+            line_in_current = 0
+        else:
+            # Split the data.
+            info = line.split(' ')
 
-    #coords creatures
-    ## (range, column, hp, dmg, rayon_influence, victory_pts) x ?
+            # Save the values in the corresponding data dictionnary.
+            if current == 'map:':
+                map['size'] = (int(info[0]), int(info[1]))
+                map['nb_turns_to_win'] = int(info[2])
+            elif current == 'spawn:':
+                map['spawns']['Player %d' % line_in_current] = (
+                    int(info[0]), int(info[1]))
+                # Initialize a dictionary for the heroes of that player.
+                players['Player %d' % line_in_current] = {}
+            elif current == 'spur:':
+                map['spur'].append((int(info[0]), int(info[1])))
+            elif current == 'creatures:':
+                players['creatures'][info[0]] = {'coords': (int(info[1]), int(info[2])), 'health': int(
+                    info[3]), 'dmg': int(info[4]), 'radius': int(info[5]), 'xp': int(info[6])}
 
-    pass
+        # Increment the line counter.
+        line_in_current += 1
+
+    # Return the final dictionaries.
+    return players, map
 
 ### CLEANING ###
 # Clean and apply bonuses
@@ -298,6 +527,7 @@ def use_special_ability(order, players, map):
     #check ability
     #execute bonus/malus concerning active skill
     pass
+
 
 def attack(order, players, map, database):
     """ Tries to execute the given attack order.
@@ -368,13 +598,14 @@ def attack(order, players, map, database):
                     else:
                         players[player][hero]['hp'] = target_hp
 
+# -----
 
 def move_on(order, players, map):
     """ Tries to execute the given move order.
 
     Parameters
     ----------
-    order: the attack order. (dict)
+    order: the move order. (dict)
     players : data of player heroes and creatures. (dict)
     map: data of the map (spawns, spur, size, etc...). (dict)
 
@@ -396,8 +627,9 @@ def move_on(order, players, map):
     implementation : prenom nom (v.2 08/03/19)
     
     """
-    #analyze map : wall ? player ? -> are_coords_in_range(source, target, range)
-    pass
+    # If the target tile is clear and not farther than square root of 2 (to be able to move diagonally)
+    if get_tile_info(order['target'], players, map) == 'clear' and get_distance(players[order['player']][order['hero']]['coords'], order['target']) <= sqrt(2):
+        players[order['player']][order['hero']]['coords'] = order['target']
 
 
 ### CREATURES ###
@@ -479,18 +711,24 @@ def get_distance(coords1, coords2):
     Version
     -------
     specification: Martin Danhier (v.3 08/03/19)
-    implementation : prenom nom (v.2 08/03/19)
-    
-    """
-    #wall ? enemy (or not) ? objectifs ? 
+    implementation : Guillaume Nizet (v.1 16/03/19)
 
-def get_tile_info(coords):
+    """
+
+    # Euclidian distance formula
+    return (coords2[0] - coords1[0]) ** 2 + (coords2[1] - coords1[1]) ** 2) ** 0.5
+
+# -----
+
+def get_tile_info(coords, players, map):
     """ Get the details of the given tile.
-    
+
     Parameters
     ----------
-    coords: the coordinates of a tile.
-    
+    coords: the coordinates of a tile. (tuple)
+    players : data of player heroes and creatures (dict)
+    map: data of the map (spawns, spur, size, etc...) (dict)
+
     Returns
     -------
     info : the details of the tile (str).
@@ -501,12 +739,26 @@ def get_tile_info(coords):
         'wall' if the tile doesn't exist.
         'player' if the tile contains a hero or a creature.
         'clear' if the tile is clear.
+    For the formats of players and map, see rapport_gr_02_part_02.
+    A typical 'coord' tuple is in the format ( row (int), column (int) ).
 
     Version
     -------
-    specification: Martin Danhier (v.1 08/03/2019)
-    implementation: void
+    specification: Martin Danhier (v.2 16/03/2019)
+    implementation: Martin Danhier (v.1 16/03/2019)
     """
+    # If the coordinates are out of the map.
+    if coords[0] <= 0 or coords[0] > map['size'][0] or coords[1] <= 0 or coords[1] > map['size'][1]:
+        return 'wall'
+    else:
+        # For each hero / creature, check if its coords are equal to tested ones.
+        for player in players:
+            for individual in players[player]:
+                if players[player][individual]['coords'] == coords:
+                    return 'player'
+        # If this code is reached, then the tile is clear.
+        return 'clear'
+
 
 ### MAIN ###
 # Entry point of the game
