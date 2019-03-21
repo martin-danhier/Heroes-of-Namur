@@ -422,7 +422,7 @@ def think(players, map, database, player):
     command = ''
 
     for hero in players[player]:
-        # Choose coords to move/attack OR ability
+        # Generate target coordinates
         choice = randint(0, 3)
         coords_1 = randint(1,4)
         coords_2 = randint(1,4)
@@ -440,8 +440,6 @@ def think(players, map, database, player):
                 order.append(str(hero) + ':' + str(capacity[id]) + ':' + str(coords)) # nom:capacity:r-c
             else:
                 order.append(str(hero) + ':' + capacity[id]) # nom:capacity
-        # else: #choice == 0: #nothing
-        #     order += ''
     
     #store commands
     for index, order_done in enumerate(order):
