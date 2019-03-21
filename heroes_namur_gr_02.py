@@ -256,11 +256,21 @@ def clean(players):
     """
 
     #creatures dispawn
+    #check all map
+    #if hp_creatures == 0:
+        # remove creatures of players
 
     #heroes revives in their spawn
+    #check all map
+    #if hp_hero == 0:
+        #Player 1, Spawn 1 ; Player 2, Spawn 2
 
     #attributes bonus
-    # spec à revoir : il y aura sûrement besoin de "database"
+    #check dispawn creatures
+    #check victory_pts for many creatures
+    #check area influence
+
+    ### spec à revoir : il y aura sûrement besoin de "database"
     #TODO
     pass
 
