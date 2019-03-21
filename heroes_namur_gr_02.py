@@ -414,49 +414,42 @@ def think(players, map, database, player):
     Version
     -------
     specification : Martin Danhier (v.2 02/03/19)
-    implementation : prenom nom (v.1 06/03/19)
+    implementation : Jonathan Nhouyvanisvong (v.2 21/03/19)
 
     """
-
-    #Syntax command
-    # nom:type #type of character (create)
-    # nom:capacity #use capacity
-    # OR -> nom:capacity:r-c #use capacity, position required
-
-    # nom:@r-c #move
-    # nom:*r-c #attack
-    choice = randint(0, 3)
     order = []
-    capacity = ['energise', 'invigorate', 'fulgura', 'reach', 'stun', 'immunise', 'ovibus', 'burst']
+    capacity = ('energise', 'invigorate', 'stun', 'burst', 'immunise', 'fulgura', 'ovibus', 'reach')
+    command = ''
 
-    for hero in players["player"]:
-        #choose coords to move/attack OR ability
-        coords_1 = randint(0,5)
-        coords_2 = randint(0,5)
-        
+    for hero in players[player]:
+        # Choose coords to move/attack OR ability
+        choice = randint(0, 3)
+        coords_1 = randint(1,4)
+        coords_2 = randint(1,4)
         coords = '%d-%d' % (coords_1, coords_2)
 
-        if choice == 1: #move - 8 directions
-            order.append(hero + ':@' + coords)
-        elif choice == 2: #attack - 8 directions
-            order.append(hero + ':*' + coords)
-        elif choice == 3: #ability - 8 directions
-            id = randint(0, len(capacity)-1)
-            order.append(hero + ':' + capacity[id])
+        # Check choice
+        if choice == 1: #move
+            order.append(str(hero) + ':@' + str(coords)) # nom:@r-c
+            print('contenu order = %s' % order)
+        elif choice == 2: #attack
+            order.append(str(hero) + ':*' + str(coords)) # nom:*r-c
+        elif choice == 3: #use ability 
+            id = randint(0, len(capacity) - 1)
+            if capacity[id] in capacity[4:]: # capacity which need coords
+                order.append(str(hero) + ':' + str(capacity[id]) + ':' + str(coords)) # nom:capacity:r-c
+            else:
+                order.append(str(hero) + ':' + capacity[id]) # nom:capacity
         # else: #choice == 0: #nothing
         #     order += ''
     
-    #use_special_ability
-    
+    #store commands
     for index, order_done in enumerate(order):
-        command += order_done[index]
-        if index != len(order):
+        command += order_done
+        if index != len(order) - 1:
             command += ' '
 
     return command
-
-    #TODO: ia naive
-
 
 
 ### TOOLS ###
