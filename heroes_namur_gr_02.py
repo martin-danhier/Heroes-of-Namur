@@ -818,7 +818,6 @@ def think(players, map, database, player):
         # Check choice
         if choice == 1: #move
             order.append(str(hero) + ':@' + str(coords)) # nom:@r-c
-            print('contenu order = %s' % order)
         elif choice == 2: #attack
             order.append(str(hero) + ':*' + str(coords)) # nom:*r-c
         elif choice == 3: #use ability 
@@ -990,10 +989,7 @@ def main(file, AI_repartition = { 'Player 1' : False, 'Player 2' : True}, player
                 # Display UI several times to prevent cheating if there are more than one human player.
                 display_ui(players, map, database)
                 if AI_repartition[player]: # AI
-                    ### /!\ TODO /!\ ###
-                    # THINK not implemented yet
-                    # command = think (players, map, database, player)
-                    command = 'bloup'
+                    command = think(players, map, database, player)
                 else: # Human
                     command = input('%s, Enter orders:\n>>> ' % colored.stylize(player, colored.fg('light_%s' % map['player_colors'][player])))
                 
@@ -1016,10 +1012,15 @@ def main(file, AI_repartition = { 'Player 1' : False, 'Player 2' : True}, player
         # Step 6 : Second clear
         # clean(players)
 
+        # Update cooldowns and counters
+        # TODO
+
         # Step 7 : Check if the game is over
-        if map['player_in_citadel'][1] == map['nb_turns_to_win']:
+        if map['player_in_citadel'][1] - 1 == map['nb_turns_to_win']:
             print('%s WON OMFG WAAAAAAAAA DUIhskfusfd sf!!!!!!!1!!' % map['player_in_citadel'][0])
             game_is_over = True
         elif map['nb_turns_without_action'] == 40:
             print('It\'s a tie !')
             game_is_over = True
+
+        
