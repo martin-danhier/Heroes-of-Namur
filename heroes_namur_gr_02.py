@@ -1,3 +1,5 @@
+from random import randint
+
 ### UI ###
 # Display user interface
 
@@ -416,10 +418,40 @@ def think(players, map, database, player):
 
     """
 
-    for hero in players['player']
-    #move, attack, use_special_ability, nothing
+    #Syntax command
+    # nom:type #type of character (create)
+    # nom:capacity #use capacity
+    # OR -> nom:capacity:r-c #use capacity, position required
+
+    # nom:@r-c #move
+    # nom:*r-c #attack
+    choice = randint(0, 3)
+    order = []
+    capacity = ['energise', 'invigorate', 'fulgura', 'reach', 'stun', 'immunise', 'ovibus', 'burst']
+
+    for hero in players["player"]:
+        #choose coords to move/attack OR ability
+        coords_1 = randint(0,5)
+        coords_2 = randint(0,5)
+        
+        coords = '%d-%d' % (coords_1, coords_2)
+
+        if choice == 1: #move - 8 directions
+            order.append(hero + ':@' + coords)
+        elif choice == 2: #attack - 8 directions
+            order.append(hero + ':*' + coords)
+        elif choice == 3: #ability - 8 directions
+            id = randint(0, len(capacity)-1)
+            order.append(hero + ':' + capacity[id])
+        # else: #choice == 0: #nothing
+        #     order += ''
     
-    command = ''
+    #use_special_ability
+    
+    for index, order_done in enumerate(order):
+        command += order_done[index]
+        if index != len(order):
+            command += ' '
 
     return command
 
