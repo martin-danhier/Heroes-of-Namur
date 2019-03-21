@@ -415,6 +415,14 @@ def think(players, map, database, player):
     implementation : prenom nom (v.1 06/03/19)
 
     """
+
+    for hero in players['player']
+    #move, attack, use_special_ability, nothing
+    
+    command = ''
+
+    return command
+
     #TODO: ia naive
 
 
