@@ -1,3 +1,5 @@
+from math import ceil
+
 ### UI ###
 # Display user interface
 
@@ -235,12 +237,14 @@ def read_file(path):
 ### CLEANING ###
 # Clean and apply bonuses
 
-def clean(players):
+def clean(players, map, database): # add database to check lvl up - don't forget to add in specs
     """ Cleans the board (managing death and levels).
 
     Parameters
     ----------
     players : data of player heroes and creatures. (dict)
+    map: data of the map (spawns, spur, size, etc...) (dict)
+    database : data of hero classes (dict)
 
     Notes
     -----
@@ -251,28 +255,78 @@ def clean(players):
     Version
     -------
     specification : Guillaume Nizet (v.4 02/03/19)
-    implementation : prenom nom (v.2 08/03/19)
+    implementation : Jonathan Nhouyvanisvong (v.3 21/03/19)
     
     """
+    list_dead_creatures = []
+    list_hero = []
 
-    #creatures dispawn
-    #check all map
-    #if hp_creatures == 0:
-        # remove creatures of players
+    #Check creatures dispawn
+    for creature in players['creatures']:
+        if creature['hp'] == 0:
+            list_dead_creatures.append(creature)
+            victory_pts = creature['victory_pts'] # check victory_pts for many creatures
+            radius_influence = creature['radius'] # check radius of influence
 
-    #heroes revives in their spawn
-    #check all map
-    #if hp_hero == 0:
-        #Player 1, Spawn 1 ; Player 2, Spawn 2
+            # Check if hero in radius of influence
+            for player in players:
+                if player != 'creatures':
+                    for hero in players[player]:
+                        if get_distance(hero['coords'], creature['coords']) <= radius_influence:
+                            list_hero.append(hero)
+                            nb_players += 1
+            
+            # IF no heroes in radius of influence
+            # ELSE 'ignore instructions'
+            if list_hero == []: 
+                # Check again but the cloest heroes
+                distance = 0
+                for player in players:
+                    if player != 'creatures':
+                        for hero in players[player]:
+                            distance_checked = get_distance(players[player][hero]['coords'], creature['coords'])
+                            if list_hero == [] & distance == 0:
+                                list_hero.append(hero)
+                                distance = distance_checked
+                            elif distance > distance_checked: # Reset new distance & closest hero(es)
+                                distance = distance_checked
+                                list_hero = [hero]
+                            elif distance == distance_checked: # Add hero
+                                list_hero.append(hero)
+                            # else: # distance < distance_checked
+            
+            # Attributes bonus (decimal : superior value)
+            victory_pts = ceil(victory_pts / len(list_hero))
 
-    #attributes bonus
-    #check dispawn creatures
-    #check victory_pts for many creatures
-    #check area influence
+            for player in players:
+                for hero in players[player]:
+                    if hero in list_hero:
+                        players[player][hero]['xp'] += victory_pts
+    #END for creature in players['creatures']#
+
+
+    # Remove dead creatures of players
+    for remove in list_dead_creatures:
+        if remove in players['creatures']:
+          del players['creatures'][remove]
+
+    # Heroes revives in their spawn
+    for player in players:
+        for hero in players[player]:
+            if hero['hp'] == 0:
+                players[player][hero]['coords'] = map['spawns'][player] # Player 1, Spawn 1 ; Player 2, Spawn 2, etc.
+            # & turn finished for dead heroes (& They can't receive dmg and capacity)
+
+    #Check the higher levels to apply
+    for player in players:
+        for hero in players[player]:
+            for victory_pts_checked in database[hero['type']]:
+                if victory_pts_checked['victory_pts'] <= hero['xp']:
+                    players[player][hero]['level'] = victory_pts_checked
+                    players[player][hero]['hp'] = victory_pts_checked['hp'] # Ask if hp is reset or keep received dmg ?
+                    players[player][hero]['dmg'] = victory_pts_checked['dmg']
 
     ### spec à revoir : il y aura sûrement besoin de "database"
-    #TODO
-    pass
 
 ### ACTIONS ###
 # Execute orders
