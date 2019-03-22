@@ -812,12 +812,8 @@ def think(players, map, database, player):
         # Generate target coordinates
         choice = randint(0, 3)
         hero_coords = players[player][hero]['coords'] # (..., ...)
-        if choice == 1 or choice == 2:
-            for index in range(len(hero_coords)):
-                if index == 0:
-                    coords_1 = hero_coords[index] + randint(-1, 1)
-                else:
-                    coords_2 = hero_coords[index] + randint(-1, 1)
+        coords_1 = hero_coords[0] + randint(-1, 1)
+        coords_2 = hero_coords[1] + randint(-1, 1)
         coords = '%d-%d' % (coords_1, coords_2)
 
         # keep to reflect about ability
