@@ -239,7 +239,6 @@ def create_stats(players, map, database):
             
             # Add hero data
             for hero in players[player]:
-                
                 active_effects = players[player][hero]['active_effects']
                 hero_class_data = database[players[player][hero]['type']][players[player][hero]['level']]
 
@@ -577,8 +576,8 @@ def read_file(path):
     # Return the final dictionaries.
     return players, map
 
-### CLEANING ###
-# Clean and apply bonuses
+### CLEAN AND UPDATES ###
+# Clean, apply bonuses, update cooldowns...
 
 
 def clean(players):
@@ -608,9 +607,61 @@ def clean(players):
     #attributes bonus
     pass
 
+def update_counters(players, map):
+    """ Decrements cooldowns and increments turn counters.
+
+    Parameters
+    ----------
+    players : data of player heroes and creatures. (dict)
+    map: data of the map (spawns, spur, size, etc...). (dict)
+
+    Notes
+    -----
+    For the formats of 'players' and 'map', see rapport_gr_02_part_02.
+    The 'players' and 'map' dictionaries may be updated.
+
+    Version
+    -------
+    specification: Martin Danhier (v.1 22/03/2018)
+    implementation: Martin Danhier (v.1 22/03/2018)
+    """
+    # For each hero that is not a creature
+    for player in players:
+        if player != 'creatures':
+            for hero in players[player]:
+                
+                # Step 1: DECREMENT ABILITIES COOLDOWN
+                # For each cooldown of that hero
+                cooldowns = players[player][hero]['cooldown']
+                for cooldown_index in range(len(cooldowns)):
+                    # Decrement the cooldown if it is strictly positive (0 = ready to use)
+                    if cooldowns[cooldown_index] > 0:
+                       cooldowns[cooldown_index] -= 1
+
+                # Step 2: DECREMENT ACTIVE EFFECTS COOLDOWN
+                # For each active effect of that hero
+                effects = players[player][hero]['active_effects']
+                new_dict = {}
+                for effect in effects:
+                    # Decrement the cooldown (0 = end of the effect)
+                    effects[effect] = (effects[effect][0] - 1, effects[effect][1])
+                    # If the cooldown of an effect reached 0, remove that effect
+                    # <=> only keep the elements with a strictly positive cooldown
+                    # This workaround avoids the RuntimeError "dict changed size during iteration"
+                    if effects[effect][0] > 0:
+                        new_dict[effect] = effects[effect]
+                players[player][hero]['active_effects'] = new_dict
+
+    # Increment turn counter
+    map['nb_turns'] += 1
+    # Increment turns without action counter
+    map['nb_turns_without_action'] += 1
+    # Increment citadel counter
+    if map['player_in_citadel'][0] != '':
+        map['player_in_citadel'] = (map['players_in_citadel'][0], map['players_in_citadel'][1] + 1)
+
 ### ACTIONS ###
 # Execute orders
-
 
 def use_special_ability(order, players, map):
     """ Tries to execute the given ability order.
@@ -714,6 +765,9 @@ def attack(order, players, map, database):
                         players[player][hero]['hp'] = 0
                     else:
                         players[player][hero]['hp'] = target_hp
+                    
+                    # Reset no-action counter
+                    map['nb_turns_without_action'] = 0
 
 # -----
 
@@ -1019,7 +1073,7 @@ def main(file, AI_repartition = { 'Player 1' : False, 'Player 2' : True}, player
         # clean(players)
 
         # Update cooldowns and counters
-        # TODO
+        update_counters(players, map)
 
         # Step 7 : Check if the game is over
         if map['player_in_citadel'][1] - 1 == map['nb_turns_to_win']:
