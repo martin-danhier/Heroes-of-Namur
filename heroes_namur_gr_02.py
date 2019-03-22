@@ -1026,7 +1026,12 @@ def main(file, AI_repartition = { 'Player 1' : False, 'Player 2' : True}, player
     players, map = read_file('test.hon')
 
     # Save the player colors
-    map['player_colors'] = {'Player %d' % (index + 1) : player_colors[index] for index in range(len(player_colors))}
+    # Change line 1034 with the instruction below
+    for index in range(len(player_colors)):
+        map['player_colors']['Player %d' % (index + 1)] = player_colors['Player %d' % (index + 1)]
+
+    # /!\ Bug -> KeyError '0' below /!\
+    # map['player_colors'] = {'Player %d' % (index + 1) : player_colors[index] for index in range(len(player_colors))}
     
     # Convert AI repartition to a dictionary
     AI_repartition = {'Player %d' % (index + 1) : AI_repartition[index] for index in range(len(AI_repartition))}
