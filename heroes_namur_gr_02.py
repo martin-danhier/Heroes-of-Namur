@@ -267,7 +267,7 @@ def clean(players):
 # Execute orders
 
 
-def use_special_ability(order, players, map):
+def use_special_ability(order, players, map, database):
     """ Tries to execute the given ability order.
 
     Parameters
@@ -275,6 +275,7 @@ def use_special_ability(order, players, map):
     order: the ability order. (dict)
     players : data of player heroes and creatures. (dict)
     map: data of the map (spawns, spur, size, etc...). (dict)
+    database : data of hero classes (dict)
 
     Notes
     -----
@@ -285,7 +286,7 @@ def use_special_ability(order, players, map):
             'action' : 'ability_name',
             'target' : ( x (int), y (int) ) #optional
         }
-    For the formats of 'players' and 'map', see rapport_gr_02_part_02.
+    For the formats of 'players', 'database' and 'map', see rapport_gr_02_part_02.
     The 'players' dictionary may be updated.
 
     Version
