@@ -847,8 +847,8 @@ def get_tile_info(coords, players, map):
     specification: Martin Danhier (v.2 16/03/2019)
     implementation: Martin Danhier (v.1 16/03/2019)
     """
-    # If the coordinates are out of the map.
-    if coords[0] <= 0 or coords[0] > map['size'][0] or coords[1] <= 0 or coords[1] > map['size'][1]:
+    # If the coordinates are out of the map or if the coordinates are part of the spur while it is still locked.
+    if coords[0] <= 0 or coords[0] > map['size'][0] or coords[1] <= 0 or coords[1] > map['size'][1] or (coords in map['spur'] and map['nb_turns'] <= 20):
         return 'wall'
     else:
         # For each hero / creature, check if its coords are equal to tested ones.
