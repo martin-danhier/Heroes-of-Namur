@@ -223,8 +223,6 @@ def create_stats(players, map, database):
 
     """
     stats = '=== TURN #%s ===' % colored.stylize(map['nb_turns'],colored.fg('light_goldenrod_1'))
-    if len(players['Player 2']) > 0:
-        players['Player 2']['Blork']['active_effects'] = { 'fulgura': (1, 0)}
 
     # For each player (not including creatures)
     for player in players:
@@ -395,7 +393,7 @@ def create_character(players, map, command, player):
 
             # Do not add heroes that have the same name (keeping the first one)
             if command_is_valid and info[0] not in players[player]:
-                    players[player][info[0]] = { 'type' : info[1], 'level' : '1', 'hp' : 10, 'xp' : 0, 'coords' : map['spawns'][player], 'cooldown' : [], 'active_effects' : []}
+                    players[player][info[0]] = { 'type' : info[1], 'level' : '1', 'hp' : 10, 'xp' : 0, 'coords' : map['spawns'][player], 'cooldown' : [], 'active_effects' : {}}
 
 
 
@@ -570,7 +568,7 @@ def read_file(path):
             elif current == 'spur:':
                 map['spur'].append((int(info[0]), int(info[1])))
             elif current == 'creatures:':
-                players['creatures'][info[0]] = {'coords': (int(info[1]), int(info[2])), 'health': int(
+                players['creatures'][info[0]] = {'coords': (int(info[1]), int(info[2])), 'hp': int(
                     info[3]), 'dmg': int(info[4]), 'radius': int(info[5]), 'xp': int(info[6])}
 
         # Increment the line counter.
@@ -703,8 +701,9 @@ def attack(order, players, map, database):
             for hero in players[player]:
                 if players[player][hero]['coords'] == order['target']:
 
+
                     # If the target is affected by the ability 'immunise'
-                    if 'immunise' in players[player][hero]['active_effects']:
+                    if player != 'creatures' and 'immunise' in players[player][hero]['active_effects']:
                         damage = 0
                     
                     # Health of the target = its previous health - damage points of the active hero
@@ -812,12 +811,9 @@ def think(players, map, database, player):
         # Generate target coordinates
         choice = randint(0, 3)
         hero_coords = players[player][hero]['coords'] # (..., ...)
-        if choice == 1 or choice == 2:
-            for index in range(len(hero_coords)):
-                if index == 0:
-                    coords_1 = hero_coords[index] + randint(-1, 1)
-                else:
-                    coords_2 = hero_coords[index] + randint(-1, 1)
+        
+        coords_1 = hero_coords[0] + (randint(0, 1) * 2) - 1
+        coords_2 = hero_coords[1] + (randint(0, 1) * 2) - 1
         coords = '%d-%d' % (coords_1, coords_2)
 
         # keep to reflect about ability
