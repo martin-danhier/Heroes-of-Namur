@@ -263,18 +263,17 @@ def clean(players, map, database): # add database to check lvl up - don't forget
 
     #Check creatures dispawn
     for creature in players['creatures']:
-        if creature['hp'] == 0:
+        if players['creatures'][creature]['hp'] == 0:
             list_dead_creatures.append(creature)
-            victory_pts = creature['victory_pts'] # check victory_pts for many creatures
-            radius_influence = creature['radius'] # check radius of influence
+            victory_pts = players['creatures'][creature]['victory_pts'] # check victory_pts for many creatures
+            radius_influence = players['creatures'][creature]['radius'] # check radius of influence
 
             # Check if hero in radius of influence
             for player in players:
                 if player != 'creatures':
                     for hero in players[player]:
-                        if get_distance(hero['coords'], creature['coords']) <= radius_influence:
+                        if get_distance(players[player][hero]['coords'], players['creatures'][creature]['coords']) <= radius_influence:
                             list_hero.append(hero)
-                            nb_players += 1
             
             # IF no heroes in radius of influence
             # ELSE 'ignore instructions'
@@ -284,7 +283,7 @@ def clean(players, map, database): # add database to check lvl up - don't forget
                 for player in players:
                     if player != 'creatures':
                         for hero in players[player]:
-                            distance_checked = get_distance(players[player][hero]['coords'], creature['coords'])
+                            distance_checked = get_distance(players[player][hero]['coords'], players['creatures'][creature]['coords'])
                             if list_hero == [] & distance == 0:
                                 list_hero.append(hero)
                                 distance = distance_checked
@@ -294,7 +293,7 @@ def clean(players, map, database): # add database to check lvl up - don't forget
                             elif distance == distance_checked: # Add hero
                                 list_hero.append(hero)
                             # else: # distance < distance_checked
-            
+
             # Attributes bonus (decimal : superior value)
             victory_pts = ceil(victory_pts / len(list_hero))
 
@@ -308,25 +307,23 @@ def clean(players, map, database): # add database to check lvl up - don't forget
     # Remove dead creatures of players
     for remove in list_dead_creatures:
         if remove in players['creatures']:
-          del players['creatures'][remove]
+            del players['creatures'][remove]
 
     # Heroes revives in their spawn
     for player in players:
         for hero in players[player]:
-            if hero['hp'] == 0:
+            if players[player][hero]['hp'] == 0:
                 players[player][hero]['coords'] = map['spawns'][player] # Player 1, Spawn 1 ; Player 2, Spawn 2, etc.
-            # & turn finished for dead heroes (& They can't receive dmg and capacity)
+            # & turn finished for dead heroes (& They can't receive dmg and capacity) - Apply with function rules ?
 
     #Check the higher levels to apply
     for player in players:
         for hero in players[player]:
-            for victory_pts_checked in database[hero['type']]:
-                if victory_pts_checked['victory_pts'] <= hero['xp']:
-                    players[player][hero]['level'] = victory_pts_checked
-                    players[player][hero]['hp'] = victory_pts_checked['hp'] # Ask if hp is reset or keep received dmg ?
-                    players[player][hero]['dmg'] = victory_pts_checked['dmg']
-
-    ### spec à revoir : il y aura sûrement besoin de "database"
+            for lvl_checked in database[players[player][hero]['type']]:
+                hero_type = players[player][hero]['type']
+                if database[hero_type][lvl_checked]['victory_pts'] <= players[player][hero]['xp']:
+                    players[player][hero]['level'] = lvl_checked
+                    players[player][hero]['hp'] = database[hero_type][lvl_checked]['hp'] # Ask if hp is reset or keep received dmg ?
 
 ### ACTIONS ###
 # Execute orders
