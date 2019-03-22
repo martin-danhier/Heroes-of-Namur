@@ -584,7 +584,7 @@ def read_file(path):
 # Clean, apply bonuses, update cooldowns...
 
 
-def clean(players):
+def clean(players, map, database):
     """ Cleans the board (managing death and levels).
 
     Parameters
@@ -667,7 +667,7 @@ def update_counters(players, map):
 ### ACTIONS ###
 # Execute orders
 
-def use_special_ability(order, players, map):
+def use_special_ability(order, players, map, database):
     """ Tries to execute the given ability order.
 
     Parameters
@@ -1061,7 +1061,9 @@ def main(file, AI_repartition = { 'Player 1' : False, 'Player 2' : True}, player
                 orders += parse_command(player, command, players, database)
 
         # Step 4 : Use special abilities
-        # TODO missing function USE_SPECIAL_ABILITY
+        for order in orders:
+            if order['action'] not in ('attack', 'move'):
+                use_special_ability(order, players, map, database)
 
         # Step 4 : First clear
         clean(players, map, database)
