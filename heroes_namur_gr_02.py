@@ -251,8 +251,8 @@ def create_stats(players, map, database):
                     damage -= active_effects['stun'][1] #new damage = initial damage - x
                 if 'energise' in active_effects:
                     damage += active_effects['energise'][1] #new damage = initial damage + x
-                if damage < 0:
-                    damage = 0 #no negative damage
+                if damage < 1:
+                    damage = 1 #no damage below 1
 
                 # Color damage
                 if damage < hero_class_data['dmg']:
@@ -694,9 +694,9 @@ def attack(order, players, map, database):
         if 'stun' in active_effects:
             damage -= active_effects['stun'][1]
 
-        # Damage cannot be negative
-        if damage < 0:
-            damage = 0
+        # Damage cannot be less than 1
+        if damage < 1:
+            damage = 1
 
         # Then find the player or the creature on that tile
         for player in players:
