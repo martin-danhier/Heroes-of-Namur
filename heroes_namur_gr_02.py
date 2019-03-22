@@ -1064,7 +1064,7 @@ def main(file, AI_repartition = { 'Player 1' : False, 'Player 2' : True}, player
         # TODO missing function USE_SPECIAL_ABILITY
 
         # Step 4 : First clear
-        # clean(players)
+        clean(players, map, database)
 
         # Step 5 : Move & Fight
         for order in orders:
@@ -1074,7 +1074,7 @@ def main(file, AI_repartition = { 'Player 1' : False, 'Player 2' : True}, player
                 move_on (order, players, map)
 
         # Step 6 : Second clear
-        # clean(players)
+        clean(players, map, database)
 
         # Update cooldowns and counters
         update_counters(players, map)
