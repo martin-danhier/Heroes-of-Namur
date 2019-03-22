@@ -2,6 +2,7 @@
 import colored
 import os
 from random import randint
+import platform # used to determine the os to know which clear command to use (clear or cls)
 
 ### UI ###
 # Display user interface
@@ -159,8 +160,11 @@ def display_ui(players, map, database):
             board += ' ' * (width * 4 + 10) + stat_line + '\n'
 
     # Clear screen
-    os.system('cls') # windows
-    os.system('clear') # linux
+    if platform.system == 'Windows':
+        os.system('cls') # windows
+    else:
+        os.system('clear') # linux, mac
+
     # Print board
     print(board)
 
