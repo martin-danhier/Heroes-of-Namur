@@ -53,17 +53,17 @@ def display_ui(players, map, database):
             if player == 'creatures':
                 player_coords[coords] = ('magenta', '*')
             else:
-                # Get the number of players on the same box
+                # Get the number of players on the same tile
                 players_count = 0
                 for other_character in players[player]:
                     if players[player][other_character]['coords'] == coords:
                         players_count += 1
 
-                # If there are several characters on the box, their count is displayer
+                # If there are several characters on the tile, their count is displayer
                 if players_count > 1:
                     type = str(players_count)
 
-                # If there is only 1 player on the box, its type is displayed
+                # If there is only 1 player on the tile, its type is displayed
                 else:
                     if players[player][character]['type'] == 'barbarian':
                         type = 'B'
@@ -161,9 +161,9 @@ def display_ui(players, map, database):
 
     # Clear screen
     if platform.system == 'Windows':
-        os.system('cls') # windows
+        os.system('cls') # Windows
     else:
-        os.system('clear') # linux, mac
+        os.system('clear') # Linux, Mac
 
     # Print board
     print(board)
@@ -460,7 +460,7 @@ def parse_command(player, command, players, database):
                         if checked_hero == info[0]:
                             exists = True
                     if exists and 'ovibus' not in players[player][info[0]]['active_effects']:
-                        # the hero exists and can be ordered something
+                        # The hero exists and can be ordered something
 
                         # Step 2: GET ACTION AND TARGET
                         target = ''
@@ -501,7 +501,7 @@ def parse_command(player, command, players, database):
                                     actions.append(
                                         {'player': player, 'hero': info[0], 'action': action_name})
                                 else:
-                                    # parse the coordinates before storing
+                                    # Parse the coordinates before storing
                                     splitted_target = target.split('-')
                                     if len(splitted_target) == 2 and splitted_target[0].isdigit() and splitted_target[1].isdigit():
                                         actions.append({'player': player, 'hero': info[0], 'action': action_name, 'target': (int(splitted_target[0]), int(splitted_target[1]))})
@@ -729,6 +729,7 @@ def attack(order, players, map, database):
     
     """
     # If the target tile is occupied by a player or a creature and if it's not the spawn point of any player and if it's not farther than square root of 2 (to be able to attack diagonally)
+    # get_tile_info() returns 'player' even if the tile is occupied by a creature
     if get_tile_info(order['target'], players, map) == 'player' and order['target'] != map['spawns']['Player 1'] and order['target'] != map['spawns']['Player 2'] and get_distance(players[order['player']][order['hero']]['coords'], order['target']) <= 2 ** 0.5:
         
         # Base damage of the hero, based on its type and level
@@ -755,7 +756,6 @@ def attack(order, players, map, database):
         for player in players:
             for hero in players[player]:
                 if players[player][hero]['coords'] == order['target']:
-
 
                     # If the target is affected by the ability 'immunise'
                     if player != 'creatures' and 'immunise' in players[player][hero]['active_effects']:
@@ -799,7 +799,7 @@ def move_on(order, players, map):
     Version
     -------
     specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
-    implementation : prenom nom (v.2 08/03/19)
+    implementation : Guillaume Nizet (v.1 16/03/19)
     
     """
     # If the target tile is clear and not farther than square root of 2 (to be able to move diagonally)
@@ -959,7 +959,7 @@ def get_tile_info(coords, players, map):
     implementation: Martin Danhier (v.1 16/03/2019)
     """
     # If the coordinates are out of the map or if the coordinates are part of the spur while it is still locked.
-    if coords[0] <= 0 or coords[0] > map['size'][0] or coords[1] <= 0 or coords[1] > map['size'][1] or (coords in map['spur'] and map['nb_turns'] <= 20):
+    if coords[0] <= 0 or coords[0] > map['size'][0] or coords[1] <= 0 or coords[1] > map['size'][1] or (coords in map['spur'] and map['nb_turns'] < 20):
         return 'wall'
     else:
         # For each hero / creature, check if its coords are equal to tested ones.
