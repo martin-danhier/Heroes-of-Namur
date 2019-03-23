@@ -357,8 +357,20 @@ def move_on(order, players, map):
     implementation : prenom nom (v.2 08/03/19)
     
     """
-    # If the target tile is clear and not farther than square root of 2 (to be able to move diagonally)
-    if get_tile_info(order['target'], players, map) == 'clear' and get_distance(players[order['player']][order['hero']]['coords'], order['target']) <= sqrt(2):
+    #Check if the target tile is a not a spawn point
+
+    tile_not_on_a_spawn_point = True
+
+    for player in map['spawns']:
+        if order['target'] == map['spawns'][player]:
+            tile_not_on_a_spawn_point = False
+
+    # If the target tile:
+    # - is clear
+    # - it is not farther than square root of 2 (to be able to move diagonally)
+    # - it is not on a spawn point
+
+    if get_tile_info(order['target'], players, map) == 'clear' and get_distance(players[order['player']][order['hero']]['coords'], order['target']) <= (2 ** 0.5) and tile_not_on_a_spawn_point:
         players[order['player']][order['hero']]['coords'] = order['target']
 
 
