@@ -974,7 +974,7 @@ def get_tile_info(coords, players, map):
 ### MAIN ###
 # Entry point of the game
 
-def main(file, AI_repartition = { 'Player 1' : False, 'Player 2' : True}, player_colors = { 'Player 1' : 'green', 'Player 2' : 'red'} ):
+def main(file, AI_repartition = (False, True), player_colors = ('green', 'red')):
     """ Manages the global course of the in-game events.
 
     Parameters
@@ -1088,5 +1088,3 @@ def main(file, AI_repartition = { 'Player 1' : False, 'Player 2' : True}, player
         elif map['nb_turns_without_action'] == 40:
             print('It\'s a tie !')
             game_is_over = True
-
-        
