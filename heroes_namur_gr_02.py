@@ -1026,7 +1026,8 @@ def main(file, AI_repartition = { 'Player 1' : False, 'Player 2' : True}, player
     players, map = read_file('test.hon')
 
     # Save the player colors
-    # Change line 1034 with the instruction below
+    # Change line 1035 with the instruction below
+    map['player_colors'] = {}
     for index in range(len(player_colors)):
         map['player_colors']['Player %d' % (index + 1)] = player_colors['Player %d' % (index + 1)]
 
