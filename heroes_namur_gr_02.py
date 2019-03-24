@@ -802,8 +802,6 @@ def move_on(order, players, map):
     implementation : Guillaume Nizet (v.1 16/03/19)
     
     """
-<<<<<<< HEAD
-=======
     #Check if the target tile is a not a spawn point
 
     tile_not_on_a_spawn_point = True
@@ -819,7 +817,6 @@ def move_on(order, players, map):
 
     if get_tile_info(order['target'], players, map) == 'clear' and get_distance(players[order['player']][order['hero']]['coords'], order['target']) <= (2 ** 0.5) and tile_not_on_a_spawn_point:
         players[order['player']][order['hero']]['coords'] = order['target']
->>>>>>> master
 
 
 ### CREATURES ###
