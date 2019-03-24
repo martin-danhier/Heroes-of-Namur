@@ -1,4 +1,4 @@
-from math import ceil
+import math
 
 ### UI ###
 # Display user interface
@@ -237,7 +237,7 @@ def read_file(path):
 ### CLEANING ###
 # Clean and apply bonuses
 
-def clean(players, map, database): # add database to check lvl up - don't forget to add in specs
+def clean(players, map, database):
     """ Cleans the board (managing death and levels).
 
     Parameters
@@ -249,7 +249,7 @@ def clean(players, map, database): # add database to check lvl up - don't forget
     Notes
     -----
     'players' can be updated if a hero or a creature is killed.
-    For the format of 'players', see rapport_gr_02_part_02.
+    For the format of 'players', 'map' and 'database' see rapport_gr_02_part_02.
     More details about the rules of the cleaning can be found in the instructions, p10.
 
     Version
@@ -258,83 +258,86 @@ def clean(players, map, database): # add database to check lvl up - don't forget
     implementation : Jonathan Nhouyvanisvong (v.4 24/03/19)
     
     """
-    list_dead_creatures = []
-    dict_hero = {}
+    dead_creatures = []
 
-    #Check creatures dispawn
+    # Check creatures dispawn
+
+    # For each dead creature
     for creature in players['creatures']:
         if players['creatures'][creature]['hp'] == 0:
-            list_dead_creatures.append(creature)
-            victory_pts = players['creatures'][creature]['xp'] # check victory_pts for many creatures
-            radius_influence = players['creatures'][creature]['radius'] # check radius of influence
+            
+            selected_heroes = []
 
-            # Check if hero in radius of influence
+            # Get the data of that creature
+            dead_creatures.append(creature) 
+            victory_points = players['creatures'][creature]['xp']
+            radius = players['creatures'][creature]['radius']
+
+            # Store the heroes that are in the radius of influence
+            hero_in_radius = False
             for player in players:
                 if player != 'creatures':
-                    dict_hero[player] = []
+
                     for hero in players[player]:
-                        if get_distance(players[player][hero]['coords'], players['creatures'][creature]['coords']) <= radius_influence:
-                            dict_hero[player].append(hero)
-            
-            # Check contents of dict_hero
-            hero_in_radius = False
-            for player in dict_hero:
-                if not hero_in_radius:
-                    if dict_hero[player] != []:
-                        hero_in_radius = True
-            # IF no heroes in radius, do below ELSE 'ignore instructions'
+                        if math.ceil(get_distance(players[player][hero]['coords'], players['creatures'][creature]['coords'])) <= radius:
+                            selected_heroes.append((player, hero))
+                            hero_in_radius = True
+
+            # If there is no hero in the radius, get the closest heroes
             if not hero_in_radius:
-                # Check again the closest heroes
-                distance = 0
+                min_distance = -1
+                # For each hero
                 for player in players:
                     if player != 'creatures':
                         for hero in players[player]:
-                            distance_checked = ceil(get_distance(players[player][hero]['coords'], players['creatures'][creature]['coords']))
-                            print('distance checked = ', distance_checked)
-                            if distance == 0:
-                                dict_hero[player].append(hero)
-                                distance = distance_checked
-                            elif distance > distance_checked: # Reset new distance & closest hero(es)
-                                dict_hero = {}
-                                dict_hero[player] = hero
-                                distance = distance_checked
-                            elif distance == distance_checked: # Add hero
-                                dict_hero[player].append(hero)
 
-            # Attributes bonus (decimal : superior value)
-            nb_hero = 0
-            for player in dict_hero:
-                nb_hero += len(dict_hero[player])
-            victory_pts = ceil(victory_pts / nb_hero)
+                            checked_distance = math.ceil(get_distance(players[player][hero]['coords'], players['creatures'][creature]['coords']))
+                            
+                            # First checked hero : initialisation
+                            if min_distance == -1:
+                                selected_heroes = []
+                                selected_heroes.append((player, hero))
+                                min_distance = checked_distance
+
+                            # If distance is smaller than the current min distance
+                            elif checked_distance < min_distance:
+                                # Reset the closest heroes and save the current one
+                                selected_heroes = []
+                                selected_heroes.append((player, hero))
+                                min_distance = checked_distance
+                            
+                            # If distance is equal to the current min distance : save this hero as well
+                            elif checked_distance == min_distance:
+                                selected_heroes.append((player, hero))
+
+            # Calculate bonus
+            victory_points = math.ceil(victory_points / len(selected_heroes))
             
-            for player in players:
-                if player != 'creatures':
-                    for hero in players[player]:
-                        if player in dict_hero and hero in dict_hero[player]:
-                            players[player][hero]['xp'] += victory_pts
-    #END Loop check out dead creatures#
-    
+            for hero in selected_heroes:
+                players[hero[0]][hero[1]]['xp'] += victory_points
+        
 
-    # Remove dead creatures of players
-    for remove in list_dead_creatures:
-        if remove in players['creatures']:
-            del players['creatures'][remove]
+    # Remove dead creatures
+    for creature in dead_creatures:
+        players['creatures'].pop(creature)
 
-    # The dead heroes resurrected in their spawn
-    for player in players:
-        for hero in players[player]:
-            if players[player][hero]['hp'] == 0:
-                players[player][hero]['coords'] = map['spawns'][player] # Player 1 -> Spawn 1 ; Player 2 -> Spawn 2 ; etc.
-
-    #Check the higher levels to apply
+    # For each hero
     for player in players:
         if player != 'creatures':
             for hero in players[player]:
+
                 hero_type = players[player][hero]['type']
-                for lvl_checked in database[hero_type]:
-                    if players[player][hero]['xp'] >= database[hero_type][lvl_checked]['victory_pts'] :
-                        players[player][hero]['level'] = lvl_checked
-                        players[player][hero]['hp'] = database[hero_type][lvl_checked]['hp']
+
+                # If this hero is dead, replace it in its spawn and restore its health
+                if players[player][hero]['hp'] == 0:
+                    players[player][hero]['coords'] = map['spawns'][player]
+                    players[player][hero]['hp'] = database[hero_type][players[player][hero][level]]['hp']
+
+                # Check if a hero level up
+                for level in database[hero_type]:
+                    if players[player][hero]['xp'] >= database[hero_type][level]['victory_pts'] :
+                        players[player][hero]['level'] = level
+                        players[player][hero]['hp'] = database[hero_type][level]['hp']
 
 ### ACTIONS ###
 # Execute orders
