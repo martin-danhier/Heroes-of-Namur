@@ -572,7 +572,7 @@ def read_file(path):
                 map['spur'].append((int(info[0]), int(info[1])))
             elif current == 'creatures:':
                 players['creatures'][info[0]] = {'coords': (int(info[1]), int(info[2])), 'hp': int(
-                    info[3]), 'dmg': int(info[4]), 'radius': int(info[5]), 'xp': int(info[6])}
+                    info[3]), 'dmg': int(info[4]), 'radius': int(info[5]), 'xp': int(info[6]), 'ability_affectation_memory' : 0}
 
         # Increment the line counter.
         line_in_current += 1
@@ -707,9 +707,15 @@ def update_counters(players, map):
     specification: Martin Danhier (v.1 22/03/2018)
     implementation: Martin Danhier (v.1 22/03/2018)
     """
-    # For each hero that is not a creature
+    # For each hero or creature
     for player in players:
-        if player != 'creatures':
+        if player == 'creatures':
+            for creature in players['creatures']:
+                # Decrement the abilty affectation memory.
+                # It is used to trigger a creature action.
+                if players['creatures'][creature]['ability_affectation_memory'] > 0:
+                    players['creatures'][creature]['ability_affectation_memory'] -= 1
+        else:
             for hero in players[player]:
                 
                 # Step 1: DECREMENT ABILITIES COOLDOWN
@@ -916,7 +922,7 @@ def process_creatures(players):
     --------
     specification : Guillaume Nizet (v.2 03/03/19)
     """
-    pass
+    #TODO
 
 
 ### AI ###
