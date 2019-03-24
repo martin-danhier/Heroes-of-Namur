@@ -226,11 +226,46 @@ def create_stats(players, map, database):
     implementation : Martin Danhier (v.2 15/03/19)
 
     """
-    stats = '=== TURN #%s ===' % colored.stylize(map['nb_turns'],colored.fg('light_goldenrod_1'))
+    stats = ''
+    creature_stats = '\n\n%s:' % colored.stylize('Creatures', colored.fg('light_magenta'))
 
-    # For each player (not including creatures)
+    # For each player or creature
     for player in players:
-        if player != 'creatures':
+        if player == 'creatures':
+            # Add creature data
+            for creature in players['creatures']:
+                active_effects = players['creatures'][creature]['active_effects']
+                
+                # Get damage
+                damage = players['creatures'][creature]['dmg']
+                if 'stun' in active_effects:
+                    damage -= active_effects['stun'][1] #new damage = initial damage - x
+                if damage < 1:
+                    damage = 1 #no damage below 1
+
+                # Color damage
+                if damage < players['creatures'][creature]['dmg']:
+                    damage_color = 'light_red'
+                else:
+                    damage_color = 'light_goldenrod_1'
+                damage = colored.stylize('%d' % damage, colored.fg(damage_color))
+                
+                creature_stats += '\n - %s:\n   (HP: %s, XP: %s, RADIUS: %s, DMG: %s)\n   Position: (%s, %s)' % (colored.stylize(creature, colored.fg('light_magenta')),colored.stylize(players['creatures'][creature]['hp'], colored.fg('light_goldenrod_1')), colored.stylize(players['creatures'][creature]['xp'], colored.fg('light_goldenrod_1')), colored.stylize(players['creatures'][creature]['radius'], colored.fg('light_goldenrod_1')), damage, colored.stylize(players['creatures'][creature]['coords'][0], colored.fg('light_goldenrod_1')), colored.stylize(players['creatures'][creature]['coords'][1], colored.fg('light_goldenrod_1')))
+                
+                # Display active effects
+                if len(active_effects) > 0:
+                    index = 0
+                    creature_stats += '\n   Active effects: '
+                    for effect in active_effects:
+                        creature_stats += '%s (%s turns left)' % (effect, colored.stylize(active_effects[effect][0], colored.fg('light_goldenrod_1')))
+                        # Add a comma to separate effects
+                        if index < len(active_effects) - 1:
+                            creature_stats += ', '
+                        # Add a new line after the second effect
+                        if index == 1 and len(active_effects) > 2:
+                            creature_stats += '\n' + ' ' * 19
+                        index += 1
+        else:
             # Add the name of the player
             if len(players[player]) > 0:
                 stats += "\n\n%s:" % colored.stylize(player, colored.fg('light_%s' % map['player_colors'][player]))
@@ -292,18 +327,43 @@ def create_stats(players, map, database):
                     stats += "\n   No special ability."
 
                 # Display active effects
-                index = 0
                 if len(active_effects) > 0:
+                    index = 0
                     stats += '\n   Active effects: '
                     for effect in active_effects:
                         stats += '%s (%s turns left)' % (effect, colored.stylize(active_effects[effect][0], colored.fg('light_goldenrod_1')))
                         # Add a comma to separate effects
                         if index < len(active_effects) - 1:
                             stats += ', '
+                        # Add a new line after the second effect
+                        if index == 1 and len(active_effects) > 2:
+                            stats += '\n' + ' ' * 19
                         index += 1
 
+    # Merge stats and creature stats
+    line_counter = 0
+    full_stats = '=== TURN #%s ===' % colored.stylize(map['nb_turns'],colored.fg('light_goldenrod_1'))
+    splitted_stats = stats.split('\n')
+    splitted_creature_stats = creature_stats.split('\n')
+    while line_counter < len(splitted_stats) or line_counter < len(splitted_creature_stats):
+        line = '\n'
+        if line_counter < len(splitted_stats):
+            line += splitted_stats[line_counter]
+        if line_counter < len(splitted_creature_stats):
+            # Fix the length error caused by the color codes in the str
+            colors = ['light_goldenrod_1', 'light_magenta'] + ['light_' + map['player_colors'][player] for player in map['player_colors']]
+            error = 4 * (len(line.split(colored.attr('reset'))) - 1) + len(line.split('\u0336')) - 1
+            for color in colors:
+                error += len(colored.fg(color)) * (len(line.split(colored.fg(color))) - 1)
+                
+            line += ' ' * (75 - len(line) + error) + splitted_creature_stats[line_counter]
+
+        full_stats += line
+        line_counter += 1
+
+
     # Return the full stats string
-    return stats
+    return full_stats
 
 # -----
 
@@ -572,7 +632,7 @@ def read_file(path):
                 map['spur'].append((int(info[0]), int(info[1])))
             elif current == 'creatures:':
                 players['creatures'][info[0]] = {'coords': (int(info[1]), int(info[2])), 'hp': int(
-                    info[3]), 'dmg': int(info[4]), 'radius': int(info[5]), 'xp': int(info[6])}
+                    info[3]), 'dmg': int(info[4]), 'radius': int(info[5]), 'xp': int(info[6]), 'active_effects' : {}}
 
         # Increment the line counter.
         line_in_current += 1
@@ -1175,6 +1235,6 @@ def main(file, AI_repartition = (False, True), player_colors = ('green', 'red'))
         if map['player_in_citadel'][1] - 1 == map['nb_turns_to_win']:
             print('%s WON OMFG WAAAAAAAAA DUIhskfusfd sf!!!!!!!1!!' % map['player_in_citadel'][0])
             game_is_over = True
-        elif map['nb_turns_without_action'] == 40:
+        elif map['nb_turns_without_action'] == 4000: #for testing purposes
             print('It\'s a tie !')
             game_is_over = True
