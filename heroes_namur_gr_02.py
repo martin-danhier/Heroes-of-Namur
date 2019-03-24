@@ -267,7 +267,7 @@ def clean(players):
 # Execute orders
 
 
-def use_special_ability(order, players, map, database):
+def use_special_ability(order, players, map, database): #add database to check stats ability
     """ Tries to execute the given ability order.
 
     Parameters
@@ -275,7 +275,6 @@ def use_special_ability(order, players, map, database):
     order: the ability order. (dict)
     players : data of player heroes and creatures. (dict)
     map: data of the map (spawns, spur, size, etc...). (dict)
-    database : data of hero classes (dict)
 
     Notes
     -----
@@ -286,55 +285,146 @@ def use_special_ability(order, players, map, database):
             'action' : 'ability_name',
             'target' : ( x (int), y (int) ) #optional
         }
-    For the formats of 'players', 'database' and 'map', see rapport_gr_02_part_02.
+    For the formats of 'players' and 'map', see rapport_gr_02_part_02.
     The 'players' dictionary may be updated.
 
     Version
     -------
     specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
-    implementation : Jonathan Nhouyvanisvong (v.3 20/03/19)
+    implementation : Jonathan Nhouyvanisvong (v.4 24/03/19)
     
     """
-    #compare class & level required
-    #check ability
-    #execute bonus/malus concerning active skill
-
     order_done = order['action']
+    hero_type = players[order['player']][order['hero']]['type']
+    hero_lvl = players[order['player']][order['hero']]['level']
 
-    #type of ability
-
+    # Type of ability
     ##energise
     if order_done == 'energise' and players[order['player']][order['hero']]['cooldown'][0] == 0:
-            pass
+        # Useful variables
+        capacity_dmg = database[hero_type][hero_lvl]['abilities'][0]['x']
+        capacity_radius = database[hero_type][hero_lvl]['abilities'][0]['radius']
+
+        # Check allies in radius of influence
+        for hero in players[order['player']]:
+            if get_distance(players[order['player']][order['hero']]['coords'], players[order['player']][hero]['coords']) <= capacity_radius:
+                players[order['player']][hero]['active_effects'][order_done] = (1, capacity_dmg)
+
+        players[order['player']][order['hero']]['cooldown'][0] = database[hero_type][hero_lvl]['abilities'][0]['cooldown']
+
     ##stun
-    if order_done == 'stun' and players[order['player']][order['hero']]['cooldown'][1] == 0:
-            pass
+    elif order_done == 'stun' and players[order['player']][order['hero']]['cooldown'][1] == 0:
+        # Useful variables
+        capacity_dmg = database[hero_type][hero_lvl]['abilities'][1]['x']
+        capacity_radius = database[hero_type][hero_lvl]['abilities'][1]['radius']
+
+        # Check ennemies in radius of influence
+        for player in players:
+            if player != order['player']:
+                for hero in players[player]:
+                    if get_distance(players[order['player']][order['hero']]['coords'], players[player][hero]['coords']) <= capacity_radius:
+                        players[player][hero]['active_effects'][order_done] = (1, capacity_dmg)
+
+        players[order['player']][order['hero']]['cooldown'][1] = database[hero_type][hero_lvl]['abilities'][1]['cooldown']
+
 
     ##invigorate
-    if order_done == 'invigorate' and players[order['player']][order['hero']]['cooldown'][0] == 0:
-            pass
+    elif order_done == 'invigorate' and players[order['player']][order['hero']]['cooldown'][0] == 0:
+        # Useful variables
+        capacity_heal = database[hero_type][hero_lvl]['abilities'][0]['x']
+        capacity_radius = database[hero_type][hero_lvl]['abilities'][0]['radius']
+
+        # Check ennemies in radius of influence
+        for hero in players[order['player']]:
+            if get_distance(players[order['player']][order['hero']]['coords'], players[order['player']][hero]['coords']) <= capacity_radius:
+                
+                players[order['player']][hero]['hp'] += capacity_heal
+                # Check max hp
+                if players[order['player']][hero]['hp'] > database[hero_type][hero_lvl]['hp']:
+                    players[order['player']][hero]['hp'] = database[hero_type][hero_lvl]['hp']
+
+        players[order['player']][order['hero']]['cooldown'][0] = database[hero_type][hero_lvl]['abilities'][0]['cooldown']
+
     ##immunise
-    if order_done == 'immunise' and players[order['player']][order['hero']]['cooldown'][1] == 0:
-            pass
+    elif order_done == 'immunise' and players[order['player']][order['hero']]['cooldown'][1] == 0:
+        # Useful variable
+        capacity_radius = database[hero_type][hero_lvl]['abilities'][1]['radius']
+        
+        # Confirm if coordinates contains player
+        if get_tile_info(order['target'], players, map) == 'player':
+            # Check who is the allied hero here
+            for hero in players[order['player']]:
+                # If ally is in radius & coordinates matches
+                if get_distance(players[order['player']][order['hero']]['coords'], players[order['player']][hero]['coords']) <= capacity_radius \
+                    and players[order['player']][hero]['coords'] == order['target']:
+
+                    players[order['player']][hero]['active_effects'][order_done] = 1
+        players[order['player']][order['hero']]['cooldown'][1] = database[hero_type][hero_lvl]['abilities'][1]['cooldown']
+
 
     ##fulgura
-    if order_done == 'fulgura' and players[order['player']][order['hero']]['cooldown'][0] == 0:
-            pass
+    elif order_done == 'fulgura' and players[order['player']][order['hero']]['cooldown'][0] == 0:
+        # Useful variables
+        capacity_dmg = database[hero_type][hero_lvl]['abilities'][1]['x']
+        capacity_radius = database[hero_type][hero_lvl]['abilities'][1]['radius']
+        
+        # Confirm if coordinates contains player
+        if get_tile_info(order['target'], players, map) == 'player':
+            # Check who is the hero here
+            for player in players:
+                if player != order['player']:
+                    for hero in players[player]:
+                        # If not a hero of player who is given order & ennemy is in radius & coordinates matches
+                        if get_distance(players[order['player']][order['hero']]['coords'], players[player][hero]['coords']) <= capacity_radius \
+                            and players[player][hero]['coords'] == order['target']:
+
+                            players[player][hero]['hp'] -= capacity_dmg
+        players[order['player']][order['hero']]['cooldown'][0] = database[hero_type][hero_lvl]['abilities'][0]['cooldown']
+
     ##ovibus
-    if order_done == 'ovibus' and players[order['player']][order['hero']]['cooldown'][1] == 0:
-            pass
+    elif order_done == 'ovibus' and players[order['player']][order['hero']]['cooldown'][1] == 0:
+        # Useful variables
+        capacity_turns = database[hero_type][hero_lvl]['abilities'][1]['x']
+        capacity_radius = database[hero_type][hero_lvl]['abilities'][1]['radius']
+        
+        # Confirm if coordinates contains player
+        if get_tile_info(order['target'], players, map) == 'player':
+            # Check who is the allied hero here
+            for player in players:
+                if player != order['player']:
+                    for hero in players[order['player']]:
+                        # If ennemy is in radius & coordinates matches 
+                        if get_distance(players[order['player']][order['hero']]['coords'], players[player][hero]['coords']) <= capacity_radius \
+                            and players[order['player']][hero]['coords'] == order['target']:
+
+                            players[player][hero]['active_effects'][order_done] = capacity_turns
+        players[order['player']][order['hero']]['cooldown'][1] = database[hero_type][hero_lvl]['abilities'][1]['cooldown']
+
 
     ##reach
-    if order_done == 'reach' and players[order['player']][order['hero']]['cooldown'][0] == 0:
-            pass
-    # if get_tile_info(order['target'], players, map) == 'clear':
-    #     players[order['player']][order['hero']]['coords'] = order['target']
-    ##burst
-    if order_done == 'burst' and players[order['player']][order['hero']]['cooldown'][1] == 0:
-            pass
+    elif order_done == 'reach' and players[order['player']][order['hero']]['cooldown'][0] == 0:
+        # Useful variable
+        capacity_radius = database[hero_type][hero_lvl]['abilities'][1]['radius']
+        
+        # If tile is clear & target in radius
+        if get_tile_info(order['target'], players, map) == 'clear' and get_distance(players[order['player']][order['hero']]['coords'], order['target']) <= capacity_radius:
+            players[order['player']][order['hero']]['coords'] = order['target']
+        players[order['player']][order['hero']]['cooldown'][0] = database[hero_type][hero_lvl]['abilities'][0]['cooldown']
 
-    #TODO
-    pass
+    ##burst
+    elif order_done == 'burst' and players[order['player']][order['hero']]['cooldown'][1] == 0:
+        # Useful variables
+        capacity_dmg = database[hero_type][hero_lvl]['abilities'][1]['x']
+        capacity_radius = database[hero_type][hero_lvl]['abilities'][1]['radius']
+
+        # Check ennemies in radius of influence
+        for player in players:
+            if player != order['player']:
+                for hero in players[player]:
+                    if get_distance(players[order['player']][order['hero']]['coords'], players[player][hero]['coords']) <= capacity_radius:
+                        players[player][hero]['hp'] -= capacity_dmg
+
+        players[order['player']][order['hero']]['cooldown'][1] = database[hero_type][hero_lvl]['abilities'][1]['cooldown']
 
 
 def attack(order, players, map):
