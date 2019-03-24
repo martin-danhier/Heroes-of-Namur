@@ -331,13 +331,17 @@ def clean(players, map, database):
                 # If this hero is dead, replace it in its spawn and restore its health
                 if players[player][hero]['hp'] == 0:
                     players[player][hero]['coords'] = map['spawns'][player]
-                    players[player][hero]['hp'] = database[hero_type][players[player][hero][level]]['hp']
+                    players[player][hero]['hp'] = database[hero_type][players[player][hero]['level']]['hp']
 
                 # Check if a hero level up
                 for level in database[hero_type]:
-                    if players[player][hero]['xp'] >= database[hero_type][level]['victory_pts'] :
+                    if int(players[player][hero]['level']) < int(level) and players[player][hero]['xp'] >= database[hero_type][level]['victory_pts'] :
+                        # Update stats
                         players[player][hero]['level'] = level
                         players[player][hero]['hp'] = database[hero_type][level]['hp']
+                        # Unlock special ability
+                        if level in ('2', '3'):
+                            players[player][hero]['cooldown'].append(0)
 
 ### ACTIONS ###
 # Execute orders
