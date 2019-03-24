@@ -1,4 +1,4 @@
-
+import math
 import colored
 import os
 from random import randint
@@ -583,33 +583,111 @@ def read_file(path):
 ### CLEAN AND UPDATES ###
 # Clean, apply bonuses, update cooldowns...
 
-
 def clean(players, map, database):
     """ Cleans the board (managing death and levels).
 
     Parameters
     ----------
     players : data of player heroes and creatures. (dict)
+    map: data of the map (spawns, spur, size, etc...) (dict)
+    database : data of hero classes (dict)
 
     Notes
     -----
     'players' can be updated if a hero or a creature is killed.
-    For the format of 'players', see rapport_gr_02_part_02.
+    For the format of 'players', 'map' and 'database' see rapport_gr_02_part_02.
     More details about the rules of the cleaning can be found in the instructions, p10.
 
     Version
     -------
     specification : Guillaume Nizet (v.4 02/03/19)
-    implementation : prenom nom (v.2 08/03/19)
+    implementation : Jonathan Nhouyvanisvong (v.4 24/03/19)
     
     """
+    dead_creatures = []
 
-    #creatures dispawn
+    # Check creatures dispawn
 
-    #heroes revives in their spawn
+    # For each dead creature
+    for creature in players['creatures']:
+        if players['creatures'][creature]['hp'] == 0:
+            
+            selected_heroes = []
 
-    #attributes bonus
-    pass
+            # Get the data of that creature
+            dead_creatures.append(creature) 
+            victory_points = players['creatures'][creature]['xp']
+            radius = players['creatures'][creature]['radius']
+
+            # Store the heroes that are in the radius of influence
+            hero_in_radius = False
+            for player in players:
+                if player != 'creatures':
+
+                    for hero in players[player]:
+                        if math.ceil(get_distance(players[player][hero]['coords'], players['creatures'][creature]['coords'])) <= radius:
+                            selected_heroes.append((player, hero))
+                            hero_in_radius = True
+
+            # If there is no hero in the radius, get the closest heroes
+            if not hero_in_radius:
+                min_distance = -1
+                # For each hero
+                for player in players:
+                    if player != 'creatures':
+                        for hero in players[player]:
+
+                            checked_distance = math.ceil(get_distance(players[player][hero]['coords'], players['creatures'][creature]['coords']))
+                            
+                            # First checked hero : initialisation
+                            if min_distance == -1:
+                                selected_heroes = []
+                                selected_heroes.append((player, hero))
+                                min_distance = checked_distance
+
+                            # If distance is smaller than the current min distance
+                            elif checked_distance < min_distance:
+                                # Reset the closest heroes and save the current one
+                                selected_heroes = []
+                                selected_heroes.append((player, hero))
+                                min_distance = checked_distance
+                            
+                            # If distance is equal to the current min distance : save this hero as well
+                            elif checked_distance == min_distance:
+                                selected_heroes.append((player, hero))
+
+            # Calculate bonus
+            victory_points = math.ceil(victory_points / len(selected_heroes))
+            
+            for hero in selected_heroes:
+                players[hero[0]][hero[1]]['xp'] += victory_points
+        
+
+    # Remove dead creatures
+    for creature in dead_creatures:
+        players['creatures'].pop(creature)
+
+    # For each hero
+    for player in players:
+        if player != 'creatures':
+            for hero in players[player]:
+
+                hero_type = players[player][hero]['type']
+
+                # If this hero is dead, replace it in its spawn and restore its health
+                if players[player][hero]['hp'] == 0:
+                    players[player][hero]['coords'] = map['spawns'][player]
+                    players[player][hero]['hp'] = database[hero_type][players[player][hero]['level']]['hp']
+
+                # Check if a hero level up
+                for level in database[hero_type]:
+                    if int(players[player][hero]['level']) < int(level) and players[player][hero]['xp'] >= database[hero_type][level]['victory_pts'] :
+                        # Update stats
+                        players[player][hero]['level'] = level
+                        players[player][hero]['hp'] = database[hero_type][level]['hp']
+                        # Unlock special ability
+                        if level in ('2', '3'):
+                            players[player][hero]['cooldown'].append(0)
 
 def update_counters(players, map):
     """ Decrements cooldowns and increments turn counters.
