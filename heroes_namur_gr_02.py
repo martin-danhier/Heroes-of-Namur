@@ -255,75 +255,86 @@ def clean(players, map, database): # add database to check lvl up - don't forget
     Version
     -------
     specification : Guillaume Nizet (v.4 02/03/19)
-    implementation : Jonathan Nhouyvanisvong (v.3 21/03/19)
+    implementation : Jonathan Nhouyvanisvong (v.4 24/03/19)
     
     """
     list_dead_creatures = []
-    list_hero = []
+    dict_hero = {}
 
     #Check creatures dispawn
     for creature in players['creatures']:
         if players['creatures'][creature]['hp'] == 0:
             list_dead_creatures.append(creature)
-            victory_pts = players['creatures'][creature]['victory_pts'] # check victory_pts for many creatures
+            victory_pts = players['creatures'][creature]['xp'] # check victory_pts for many creatures
             radius_influence = players['creatures'][creature]['radius'] # check radius of influence
 
             # Check if hero in radius of influence
             for player in players:
                 if player != 'creatures':
+                    dict_hero[player] = []
                     for hero in players[player]:
                         if get_distance(players[player][hero]['coords'], players['creatures'][creature]['coords']) <= radius_influence:
-                            list_hero.append(hero)
+                            dict_hero[player].append(hero)
             
-            # IF no heroes in radius of influence
-            # ELSE 'ignore instructions'
-            if list_hero == []: 
-                # Check again but the cloest heroes
+            # Check contents of dict_hero
+            hero_in_radius = False
+            for player in dict_hero:
+                if not hero_in_radius:
+                    if dict_hero[player] != []:
+                        hero_in_radius = True
+            # IF no heroes in radius, do below ELSE 'ignore instructions'
+            if not hero_in_radius:
+                # Check again the closest heroes
                 distance = 0
                 for player in players:
                     if player != 'creatures':
                         for hero in players[player]:
-                            distance_checked = get_distance(players[player][hero]['coords'], players['creatures'][creature]['coords'])
-                            if list_hero == [] & distance == 0:
-                                list_hero.append(hero)
+                            distance_checked = ceil(get_distance(players[player][hero]['coords'], players['creatures'][creature]['coords']))
+                            print('distance checked = ', distance_checked)
+                            if distance == 0:
+                                dict_hero[player].append(hero)
                                 distance = distance_checked
                             elif distance > distance_checked: # Reset new distance & closest hero(es)
+                                dict_hero = {}
+                                dict_hero[player] = hero
                                 distance = distance_checked
-                                list_hero = [hero]
                             elif distance == distance_checked: # Add hero
-                                list_hero.append(hero)
-                            # else: # distance < distance_checked
+                                dict_hero[player].append(hero)
 
             # Attributes bonus (decimal : superior value)
-            victory_pts = ceil(victory_pts / len(list_hero))
-
+            nb_hero = 0
+            for player in dict_hero:
+                nb_hero += len(dict_hero[player])
+            victory_pts = ceil(victory_pts / nb_hero)
+            
             for player in players:
-                for hero in players[player]:
-                    if hero in list_hero:
-                        players[player][hero]['xp'] += victory_pts
-    #END for creature in players['creatures']#
-
+                if player != 'creatures':
+                    for hero in players[player]:
+                        if player in dict_hero and hero in dict_hero[player]:
+                            players[player][hero]['xp'] += victory_pts
+    #END Loop check out dead creatures#
+    
 
     # Remove dead creatures of players
     for remove in list_dead_creatures:
         if remove in players['creatures']:
             del players['creatures'][remove]
 
-    # Heroes revives in their spawn
+    # The dead heroes resurrected in their spawn
     for player in players:
         for hero in players[player]:
             if players[player][hero]['hp'] == 0:
-                players[player][hero]['coords'] = map['spawns'][player] # Player 1, Spawn 1 ; Player 2, Spawn 2, etc.
-            # & turn finished for dead heroes (& They can't receive dmg and capacity) - Apply with function rules ?
+                players[player][hero]['coords'] = map['spawns'][player] # Player 1 -> Spawn 1 ; Player 2 -> Spawn 2 ; etc.
 
     #Check the higher levels to apply
     for player in players:
-        for hero in players[player]:
-            for lvl_checked in database[players[player][hero]['type']]:
+        if player != 'creatures':
+            for hero in players[player]:
                 hero_type = players[player][hero]['type']
-                if database[hero_type][lvl_checked]['victory_pts'] <= players[player][hero]['xp']:
-                    players[player][hero]['level'] = lvl_checked
-                    players[player][hero]['hp'] = database[hero_type][lvl_checked]['hp'] # Ask if hp is reset or keep received dmg ?
+                for lvl_checked in database[hero_type]:
+                    if players[player][hero]['xp'] >= database[hero_type][lvl_checked]['victory_pts'] :
+                        players[player][hero]['level'] = lvl_checked
+                        players[player][hero]['hp'] = database[hero_type][lvl_checked]['hp']
 
 ### ACTIONS ###
 # Execute orders
