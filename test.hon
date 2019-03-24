@@ -1,7 +1,7 @@
 map:
 20 20 25
 spawn:
-10 3
+10 16
 18 10
 creatures:
 bear 10 10 20 5 3 100
