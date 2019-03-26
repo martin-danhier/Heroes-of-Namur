@@ -343,7 +343,6 @@ def use_special_ability(order, players, map, database): #add database to check s
                 target_hero_type = players[order['player']][hero]['type']
                 target_hero_lvl = players[order['player']][hero]['level']
                 if players[order['player']][hero]['hp'] > database[target_hero_type][target_hero_lvl]['hp']:
-                    print('MAX HP HERE', hero)
                     players[order['player']][hero]['hp'] = database[target_hero_type][target_hero_lvl]['hp']
 
     ## immunise
@@ -367,8 +366,8 @@ def use_special_ability(order, players, map, database): #add database to check s
     elif order_done == 'fulgura' and (players[order['player']][order['hero']]['cooldown'] == [] \
         or players[order['player']][order['hero']]['cooldown'][0] == 0):
         # Useful variables
-        capacity_dmg = database[hero_type][hero_lvl]['abilities'][1]['x']
-        capacity_radius = database[hero_type][hero_lvl]['abilities'][1]['radius']
+        capacity_dmg = database[hero_type][hero_lvl]['abilities'][0]['x']
+        capacity_radius = database[hero_type][hero_lvl]['abilities'][0]['radius']
         
         # Confirm if coordinates contains player
         if get_tile_info(order['target'], players, map) == 'player':
@@ -381,7 +380,7 @@ def use_special_ability(order, players, map, database): #add database to check s
                             and players[player][hero]['coords'] == order['target']:
 
                             players[player][hero]['hp'] -= capacity_dmg
-                            if players[player] == 'creatures':
+                            if player == 'creatures':
                                 players[player][hero]['ability_affectation_memory'] = 2
 
     ## ovibus
@@ -396,13 +395,13 @@ def use_special_ability(order, players, map, database): #add database to check s
             # Check who is the allied hero here
             for player in players:
                 if player != order['player']:
-                    for hero in players[order['player']]:
+                    for hero in players[player]:
                         # If ennemy is in radius & coordinates matches 
                         if get_distance(players[order['player']][order['hero']]['coords'], players[player][hero]['coords']) <= capacity_radius \
-                            and players[order['player']][hero]['coords'] == order['target']:
+                            and players[player][hero]['coords'] == order['target']:
 
                             players[player][hero]['active_effects'][order_done] = capacity_turns
-                            if players[player] == 'creatures':
+                            if player == 'creatures':
                                 players[player][hero]['ability_affectation_memory'] = 2
 
 
