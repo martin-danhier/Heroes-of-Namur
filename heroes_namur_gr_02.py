@@ -625,7 +625,7 @@ def clean(players, map, database):
                 if player != 'creatures':
 
                     for hero in players[player]:
-                        if math.ceil(get_distance(players[player][hero]['coords'], players['creatures'][creature]['coords'])) <= radius:
+                        if math.floor(get_distance(players[player][hero]['coords'], players['creatures'][creature]['coords'])) <= radius:
                             selected_heroes.append((player, hero))
                             hero_in_radius = True
 
@@ -634,7 +634,7 @@ def clean(players, map, database):
                 get_closest_heroes(players['creatures'][creature]['coords'], players, False)
 
             # Calculate bonus
-            victory_points = math.ceil(victory_points / len(selected_heroes))
+            victory_points = math.floor(victory_points / len(selected_heroes))
             
             for hero in selected_heroes:
                 players[hero[0]][hero[1]]['xp'] += victory_points
@@ -975,7 +975,7 @@ def get_distance(coords1, coords2):
 
     Parameters
     ----------
-    coords1: the first pair of coordinates. (tuple)
+    coords1: the first pair of coordinates. (tuple)math.ceil
     coords2: the second pair of coordinates. (tuple)
 
     Returns
@@ -1067,12 +1067,13 @@ def get_closest_heroes(coords, players, restrictive):
     # Initialize the data
     closest_heroes = []
     min_distance = -1
+    
     # For each hero
     for player in players:
         if player != 'creatures':
             for hero in players[player]:
 
-                checked_distance = math.ceil(get_distance(players[player][hero]['coords'], coords))
+                checked_distance = math.floor(get_distance(players[player][hero]['coords'], coords))
                 
                 # First checked hero : initialisation
                 if min_distance == -1:
