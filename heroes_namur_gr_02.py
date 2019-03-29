@@ -817,7 +817,10 @@ def use_special_ability(order, players, map, database):
                             # If the target ennemy is in range and on the target tile, apply ability
                             if get_distance(players[order['player']][order['hero']]['coords'], players[player][hero]['coords']) <= capacity_radius \
                                 and players[player][hero]['coords'] == order['target']:
-                                players[player][hero]['hp'] -= capacity_x
+                                target_hp = players[player][hero]['hp'] - capacity_x
+                                if target_hp < 0:
+                                    target_hp = 0
+                                players[player][hero]['hp'] = target_hp
                                 ability_used = True
                                 # Set the memory to 2 in order to trigger a creature action next turn
                                 if player == 'creatures':
