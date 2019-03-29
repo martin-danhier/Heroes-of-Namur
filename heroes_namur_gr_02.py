@@ -785,8 +785,7 @@ def use_special_ability(order, players, map, database):
         if order_hero_capacity != 'reach':
             capacity_x = database[order_hero_type][order_hero_lvl]['abilities'][0]['x']
         
-        # Insert capacity 0
-        ## energise
+        # Energise
         if order_hero_capacity == 'energise':
             # Check allies in radius of influence
             for hero in players[order['player']]:
@@ -794,6 +793,7 @@ def use_special_ability(order, players, map, database):
                     players[order['player']][hero]['active_effects'][order_hero_capacity] = (1, capacity_x)
                     ability_used = True
 
+        # Invigorate
         elif order_hero_capacity == 'invigorate':
             # Check allies in radius of influence
             for hero in players[order['player']]:
@@ -806,23 +806,24 @@ def use_special_ability(order, players, map, database):
                     if players[order['player']][hero]['hp'] > database[target_hero_type][target_hero_lvl]['hp']:
                         players[order['player']][hero]['hp'] = database[target_hero_type][target_hero_lvl]['hp']
 
-        ## fulgura
+        # Fulgura
         elif order_hero_capacity == 'fulgura':
             # Confirm if coordinates contains player
             if get_tile_info(order['target'], players, map) == 'player':
-                # Check who is the hero here
+                # Try to get the hero on that tile
                 for player in players:
                     if player != order['player']:
                         for hero in players[player]:
-                            # If not a hero of player who is given order & ennemy is in radius & coordinates matches
+                            # If the target ennemy is in range and on the target tile, apply ability
                             if get_distance(players[order['player']][order['hero']]['coords'], players[player][hero]['coords']) <= capacity_radius \
                                 and players[player][hero]['coords'] == order['target']:
                                 players[player][hero]['hp'] -= capacity_x
                                 ability_used = True
+                                # Set the memory to 2 in order to trigger a creature action next turn
                                 if player == 'creatures':
                                     players[player][hero]['ability_affectation_memory'] = 2
 
-        ## reach
+        # Reach
         elif order_hero_capacity == 'reach':
             # If tile is clear & target in radius, teleport player to the target coordinates
             if get_tile_info(order['target'], players, map) == 'clear' and get_distance(players[order['player']][order['hero']]['coords'], order['target']) <= capacity_radius:
@@ -838,58 +839,67 @@ def use_special_ability(order, players, map, database):
         capacity_radius = database[order_hero_type][order_hero_lvl]['abilities'][1]['radius']
         if order_hero_capacity != 'immunise':
             capacity_x = database[order_hero_type][order_hero_lvl]['abilities'][0]['x']
-        # Insert capacity 1
-        ## stun
+        # Stun
         if order_hero_capacity == 'stun':
-            # Check ennemies in radius of influence
+            # Apply ability to each enemy in range
             for player in players:
                 if player != order['player']:
                     for hero in players[player]:
                         if get_distance(players[order['player']][order['hero']]['coords'], players[player][hero]['coords']) <= capacity_radius:
                             players[player][hero]['active_effects'][order_hero_capacity] = (1, capacity_x)
                             ability_used = True
+
+                            # Set the memory to 2 in order to trigger a creature action next turn
                             if player == 'creatures':
                                 players[player][hero]['ability_affectation_memory'] = 2
 
-        ## immunise
+        # Immunise
         elif order_hero_capacity == 'immunise':             
-            # Confirm if coordinates contains player
+            # If there is an entity on the target tile
             if get_tile_info(order['target'], players, map) == 'player':
-                # Check who is the allied hero here
+                # For each hero of the current player
                 for hero in players[order['player']]:
-                    # If ally is in radius & coordinates matches
+                    # If ally is in radius & coordinates matches, apply ability
                     if get_distance(players[order['player']][order['hero']]['coords'], players[order['player']][hero]['coords']) <= capacity_radius \
                             and players[order['player']][hero]['coords'] == order['target']:
 
                         players[order['player']][hero]['active_effects'][order_hero_capacity] = 1
                         ability_used = True
 
-        ## ovibus
+        # Ovibus
         elif order_hero_capacity == 'ovibus':             
-            # Confirm if coordinates contains player
+            # If there is an entity on the target tile
             if get_tile_info(order['target'], players, map) == 'player':
-                # Check who is the allied hero here
+                # For each enemy entity
                 for player in players:
                     if player != order['player']:
                         for hero in players[player]:
-                            # If ennemy is in radius & coordinates matches 
+                            # If enemy is in radius & coordinates matches, apply ability
                             if get_distance(players[order['player']][order['hero']]['coords'], players[player][hero]['coords']) <= capacity_radius \
                                 and players[player][hero]['coords'] == order['target']:
 
                                 players[player][hero]['active_effects'][order_hero_capacity] = capacity_x
                                 ability_used = True
+
+                                # Set the memory to 2 in order to trigger a creature action next turn
                                 if player == 'creatures':
                                     players[player][hero]['ability_affectation_memory'] = 2
 
-        ## burst
+        # Burst
         elif order_hero_capacity == 'burst':
-            # Check ennemies in radius of influence
+            # For each enemy in range, apply ability
             for player in players:
                 if player != order['player']:
                     for hero in players[player]:
                         if get_distance(players[order['player']][order['hero']]['coords'], players[player][hero]['coords']) <= capacity_radius:
-                            players[player][hero]['hp'] -= capacity_x
+                            
+                            target_hp = players[player][hero]['hp'] - capacity_x
+                            if target_hp < 0:
+                                target_hp = 0
+                            players[player][hero]['hp'] = target_hp
                             ability_used = True
+
+                            # Set the memory to 2 in order to trigger a creature action next turn
                             if player == 'creatures':
                                 players[player][hero]['ability_affectation_memory'] = 2
 
