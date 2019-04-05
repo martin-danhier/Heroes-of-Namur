@@ -906,7 +906,7 @@ def move_on(order, players, map):
 ### CREATURES ###
 # Process creatures
 
-def process_creatures(players):
+def process_creatures(players, coords):
     """ Automatically computes an action for a creature to perform.
 
     Parameters:
@@ -921,8 +921,74 @@ def process_creatures(players):
     Version:
     --------
     specification : Guillaume Nizet (v.2 03/03/19)
+    implementation : prenom nom (v.2 08/03/19)
+    
     """
-    #TODO
+
+    # Single creature 
+    action = ''
+
+    # get_closest_heroes() is restrictive : it returns a list of one hero, which is stored in closest_hero
+    closest_hero = get_closest_heroes(coords, players, True)[0]
+
+    # Get the coords of the closest hero
+    for player in players:
+        for hero in players[player]:
+            if closest_hero == (player, hero):
+                closest_hero_coords = players[player][hero]['coords']
+
+    # Get the radius and the name of the creature
+    for player in players:
+        for creature in players[player]:
+            if players[player][creature]['coords'] == coords:
+                creature_radius = players[player][creature]['radius']
+                creature_name = str(creature)
+
+    # Get the distance between the hero and the creature
+    distance_hero_creature = get_distance(coords, closest_hero_coords)
+
+    # If the hero is in the creature radius
+    if  distance_hero_creature <= creature_radius:
+
+        # If the creature is next to the hero
+        if distance_hero_creature == 1:
+
+            # The creature attacks the hero
+            pass
+
+        else:
+
+            # The creature moves towards the hero
+
+            # The creature can move on 9 tiles
+
+            first_loop = True
+
+            # Get the smallest distance
+            for x_coord in range(coords[0] - 1, coords[0] + 1):
+                for y_coord in range(coords[1] - 1, coords[1] + 1):
+
+                    # Get the distance between the checked tile and the hero
+                    distance_hero_tile = get_distance((x_coord ,y_coord), closest_hero_coords)
+
+                    if first_loop:
+                        min_distance = distance_hero_tile
+                        first_loop = False
+
+                    else:
+                        if distance_hero_tile < min_distance:
+                           min_distance = distance_hero_tile
+
+
+            # Get the first coordinates that are at the smallest distance from the closest hero
+            for x_coord in range(coords[0] - 1, coords[0] + 1):
+                for y_coord in range(coords[1] - 1, coords[1] + 1):
+                    if get_distance((x_coord ,y_coord), closest_hero_coords) == min_distance:
+                        # The creature moves on to this tile
+                        order = '%s@%d-%d', (creature_name, x_coord, y_coord)
+
+
+        return order
 
 
 ### AI ###
