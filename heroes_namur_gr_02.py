@@ -1051,7 +1051,7 @@ def get_closest_heroes(coords, players, restrictive):
 
     Returns:
     -------
-    closest_heroes : a list containing the closest heroes, of the type (player (str), hero (str)) (list)
+    closest_heroes : a list containing the closest heroes, which are in of format (player (str), hero (str)) (list)
 
     Notes
     -----
@@ -1061,175 +1061,65 @@ def get_closest_heroes(coords, players, restrictive):
     Version:
     -------
     specification : Guillaume Nizet (v.1 29/03/19)
-    implementation : Guillaume Nizet (v.1 29/03/19)
+    implementation : Guillaume Nizet, Jonathan Nhouyvanisvong, Martin Danhier (v.2 05/05/19)
     """
-
     # Initialize the data
     closest_heroes = []
-    min_distance = -1
-    
-    # For each hero
-    for player in players:
-        if player != 'creatures':
-            for hero in players[player]:
+    temp_closest_heroes = []
+    step = 0
 
-                checked_distance = math.floor(get_distance(players[player][hero]['coords'], coords))
-                
-                # First checked hero : initialisation
-                if min_distance == -1:
-                    closest_heroes = []
-                    closest_heroes.append((player, hero))
-                    min_distance = checked_distance
-
-                # If distance is smaller than the current min distance
-                elif checked_distance < min_distance:
-                    # Reset the closest heroes and save the current one
-                    closest_heroes = []
-                    closest_heroes.append((player, hero))
-                    min_distance = checked_distance
-                
-                # If distance is equal to the current min distance : save this hero as well
-                elif checked_distance == min_distance:
-                    closest_heroes.append((player, hero))
-
-
-    # Get only one hero
-    if restrictive and len(closest_heroes) > 1:
-
-        # Get the heroes with the less HP
-        min_hp = -1
-        temp_closest_heroes = closest_heroes
-
+    while closest_heroes == [] or len(closest_heroes) > 1:
+        min = -1
+        if step != 0 and step <= 4:
+            temp_closest_heroes = closest_heroes
         # For each hero
         for player in players:
             if player != 'creatures':
                 for hero in players[player]:
+                    if (player, hero) in temp_closest_heroes or step == 0:
+                        # Step 0 : Check the distance to get the closest heroes
+                        if step == 0:
+                            checked_value = math.floor(get_distance(
+                                players[player][hero]['coords'], coords))
+                        # Step 1 : If the checked hero is one of the several closest heroes with the same distance
+                        elif step == 1:
+                            checked_value = players[player][hero]['hp']
 
-                    # If the checked hero is one of the several closest heroes
-                    if (player, hero) in temp_closest_heroes:
-                        checked_hp = players[player][hero]['hp']
-                        
+                        # Step 2 : If the checked hero is one of the several closest heroes with the same HP
+                        elif step == 2:
+                            checked_value = players[player][hero]['xp']
+
+                        # Step 3 : If the checked hero is one of the several closest heroes with the same HP and victory points
+                        elif step == 3:
+                            checked_value = hero.lower()
+
+                        # Step 4 : If the checked hero is one of the several closest heroes with the same HP, victory points and name
+                        else:
+                            checked_value = player.lower()
+
                         # First checked hero : initialisation
-                        if min_hp == -1:
-                            closest_heroes = []
-                            closest_heroes.append((player, hero))
-                            min_hp = checked_hp
+                        if min == -1:
+                            closest_heroes = [(player, hero)]
+                            min = checked_value
 
-                        # If hp is smaller than the current min hp
-                        elif checked_hp < min_hp:
-
+                        # If the checked value is smaller than the current min
+                        elif checked_value < min:
                             # Reset the closest heroes and save the current one
-                            closest_heroes = []
+                            closest_heroes = [(player, hero)]
+                            min = checked_value
+
+                        # If the checked value is equal to the current min
+                        elif checked_value == min:
+                            # save this hero as well
                             closest_heroes.append((player, hero))
-                            min_hp = checked_hp
-                        
-                        # If hp is equal to the current min hp : save this hero as well
-                        elif checked_hp == min_hp:
-                            closest_heroes.append((player, hero))
 
-
-        # If there are several closest heroes with the same HP
-        if len(closest_heroes) > 1:
-
-            # Get the heroes with the less victory points
-            min_xp = -1
-            temp_closest_heroes = closest_heroes
-
-            # For each hero
-            for player in players:
-                if player != 'creatures':
-                    for hero in players[player]:
-
-                        # If the checked hero is one of the several closest heroes with the same HP
-                        if (player, hero) in temp_closest_heroes:
-                            checked_xp = players[player][hero]['xp']
-                            
-                            # First checked hero : initialisation
-                            if min_xp == -1:
-                                closest_heroes = []
-                                closest_heroes.append((player, hero))
-                                min_xp = checked_xp
-
-                            # If xp is smaller than the current min xp
-                            elif checked_xp < min_xp:
-                                
-                                # Reset the closest heroes and save the current one
-                                closest_heroes = []
-                                closest_heroes.append((player, hero))
-                                min_xp = checked_xp
-                            
-                            # If xp is equal to the current min xp : save this hero as well
-                            elif checked_xp == min_xp:
-                                closest_heroes.append((player, hero))
-
-
-            # If there are several closest heroes with the same HP and victory points    
-            if len(closest_heroes) > 1:
-                
-                # Get heroes whose names are the last in the alphabetical order
-                min_name = ""
-                temp_closest_heroes = closest_heroes
-
-                # For each hero
-                for player in players:
-                    if player != 'creatures':
-                        for hero in players[player]:
-
-                            # If the checked hero is one of the several closest heroes with the same HP and victory points
-                            if (player, hero) in temp_closest_heroes:
-                                checked_name = hero
-                                
-                                # First checked hero : initialisation
-                                if min_name == "":
-                                    closest_heroes = []
-                                    closest_heroes.append((player, hero))
-                                    min_name = checked_name
-
-                                # If name is smaller than the current min name
-                                elif checked_name < min_name:
-                                    
-                                    # Reset the closest heroes and save the current one
-                                    closest_heroes = []
-                                    closest_heroes.append((player, hero))
-                                    min_name = checked_name
-                                
-                                # If name is equal to the current min name : save this hero as well
-                                elif checked_name == min_name:
-                                    closest_heroes.append((player, hero))
-
-
-                # If there are several closest heroes with the same HP, victory points and name
-                if len(closest_heroes) > 1:
-                    
-                    # Get the one that belongs to the first player
-                    
-                    # For each hero
-                    for player in players:
-                        if players != 'creatures':
-                            for hero in players[player]:
-
-                                # If the checked hero is one of the several closest heroes with the same HP, victory points and name
-                                if (player, hero) in closest_heroes:
-                                    if player == 'Player 1':
-
-                                        # The single closest hero has been found
-                                        return [(player, hero)]
-
-                else:                   
-                    # The single closest hero has been found
-                    return closest_heroes
-            
-            else:
-                # The single closest hero has been found
-                return closest_heroes
-
-        else:
-            # The single closest hero has been found
-            return closest_heroes
-    
-    else:
         # Only return the list of the closest heroes (there might be more than one hero)
-        return closest_heroes
+        if not restrictive:
+            return closest_heroes
+        step += 1
+
+    # restrictive == True: The single closest hero has been found
+    return closest_heroes
 
 
 
