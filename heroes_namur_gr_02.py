@@ -1059,38 +1059,45 @@ def think(players, map, database, player):
     Version
     -------
     specification : Martin Danhier (v.2 02/03/19)
-    implementation : Jonathan Nhouyvanisvong (v.2 21/03/19)
+    implementation : Jonathan Nhouyvanisvong (v.3 29/03/19)
 
     """
+    target_capacity = ('immunise', 'fulgura', 'ovibus', 'reach')
     order = []
-    capacity = ('energise', 'invigorate', 'stun', 'burst', 'immunise', 'fulgura', 'ovibus', 'reach')
     command = ''
 
     for hero in players[player]:
-        # Generate target coordinates
+        # Useful variables
         choice = randint(0, 3)
-        hero_coords = players[player][hero]['coords'] # (..., ...)
+        hero_coords = players[player][hero]['coords']
+        hero_type = players[player][hero]['type']
+        # type : barbarian, healer, mage, rogue
+        hero_lvl = players[player][hero]['level']
+        #radius : 0 1 2 3 4 ; 0 0 1 2 3
         
-        coords_1 = hero_coords[0] + (randint(0, 1) * 2) - 1
-        coords_2 = hero_coords[1] + (randint(0, 1) * 2) - 1
+        # If choice == 1 or 2
+        coords_1 = hero_coords[0] + randint(-1, 1)
+        coords_2 = hero_coords[1] + randint(-1, 1)
         coords = '%d-%d' % (coords_1, coords_2)
 
-        # keep to reflect about ability
+        # If choice == 3 - keep to reflect about ability
         # coords_1 = randint(1,4)
         # coords_2 = randint(1,4)
-        # coords = '%d-%d' % (coords_1, coords_2)
 
         # Check choice
         if choice == 1: #move
-            order.append(str(hero) + ':@' + str(coords)) # nom:@r-c
+            order.append(hero + ':@' + coords) # nom:@r-c
         elif choice == 2: #attack
-            order.append(str(hero) + ':*' + str(coords)) # nom:*r-c
-        elif choice == 3: #use ability 
+            order.append(hero + ':*' + coords) # nom:*r-c
+        elif choice == 3: #use ability
+            capacity = [database[hero_type][hero_lvl]['abilities'][0]['name']]
+            if int(hero_lvl) > 2:
+                capacity.append(database[hero_type][hero_lvl]['abilities'][1]['name'])
             id = randint(0, len(capacity) - 1)
-            if capacity[id] in capacity[4:]: # capacity which need coords
-                order.append(str(hero) + ':' + str(capacity[id]) + ':' + str(coords)) # nom:capacity:r-c
+            if capacity[id] in target_capacity:
+                order.append(hero + ':' + capacity[id] + ':' + coords) # nom:capacity:r-c
             else:
-                order.append(str(hero) + ':' + capacity[id]) # nom:capacity
+                order.append(hero + ':' + capacity[id]) # nom:capacity
     
     #store commands
     for index, order_done in enumerate(order):
