@@ -625,39 +625,16 @@ def clean(players, map, database):
                 if player != 'creatures':
 
                     for hero in players[player]:
-                        if math.ceil(get_distance(players[player][hero]['coords'], players['creatures'][creature]['coords'])) <= radius:
+                        if math.floor(get_distance(players[player][hero]['coords'], players['creatures'][creature]['coords'])) <= radius:
                             selected_heroes.append((player, hero))
                             hero_in_radius = True
 
             # If there is no hero in the radius, get the closest heroes
             if not hero_in_radius:
-                min_distance = -1
-                # For each hero
-                for player in players:
-                    if player != 'creatures':
-                        for hero in players[player]:
-
-                            checked_distance = math.ceil(get_distance(players[player][hero]['coords'], players['creatures'][creature]['coords']))
-                            
-                            # First checked hero : initialisation
-                            if min_distance == -1:
-                                selected_heroes = []
-                                selected_heroes.append((player, hero))
-                                min_distance = checked_distance
-
-                            # If distance is smaller than the current min distance
-                            elif checked_distance < min_distance:
-                                # Reset the closest heroes and save the current one
-                                selected_heroes = []
-                                selected_heroes.append((player, hero))
-                                min_distance = checked_distance
-                            
-                            # If distance is equal to the current min distance : save this hero as well
-                            elif checked_distance == min_distance:
-                                selected_heroes.append((player, hero))
+                get_closest_heroes(players['creatures'][creature]['coords'], players, False)
 
             # Calculate bonus
-            victory_points = math.ceil(victory_points / len(selected_heroes))
+            victory_points = math.floor(victory_points / len(selected_heroes))
             
             for hero in selected_heroes:
                 players[hero[0]][hero[1]]['xp'] += victory_points
@@ -759,6 +736,7 @@ def use_special_ability(order, players, map, database):
     order: the ability order. (dict)
     players : data of player heroes and creatures. (dict)
     map: data of the map (spawns, spur, size, etc...). (dict)
+    database: data of hero classes (dict)
 
     Notes
     -----
@@ -769,19 +747,152 @@ def use_special_ability(order, players, map, database):
             'action' : 'ability_name',
             'target' : ( x (int), y (int) ) #optional
         }
-    For the formats of 'players' and 'map', see rapport_gr_02_part_02.
+    For the formats of 'players', 'database' and 'map', see rapport_gr_02_part_02.
     The 'players' dictionary may be updated.
 
     Version
     -------
     specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
-    implementation : prenom nom (v.2 08/03/19)
+    implementation : Jonathan Nhouyvanisvong (v.6 29/03/19)
     
     """
-    #compare class & level required
-    #check ability
-    #execute bonus/malus concerning active skill
-    pass
+    # Useful variables
+    order_hero_capacity = order['action']
+    order_hero_type = players[order['player']][order['hero']]['type']
+    order_hero_lvl = players[order['player']][order['hero']]['level']
+    ability_used = False
+
+    # Ability 1 (lvl 2 min. required)
+    if order_hero_capacity in ('energise', 'invigorate', 'fulgura', 'reach'):
+        capacity_radius = database[order_hero_type][order_hero_lvl]['abilities'][0]['radius']
+        if order_hero_capacity != 'reach':
+            capacity_x = database[order_hero_type][order_hero_lvl]['abilities'][0]['x']
+        
+        # Energise
+        if order_hero_capacity == 'energise':
+            # Check allies in radius of influence
+            for hero in players[order['player']]:
+                if get_distance(players[order['player']][order['hero']]['coords'], players[order['player']][hero]['coords']) <= capacity_radius:
+                    players[order['player']][hero]['active_effects'][order_hero_capacity] = (1, capacity_x)
+                    ability_used = True
+
+        # Invigorate
+        elif order_hero_capacity == 'invigorate':
+            # Check allies in radius of influence
+            for hero in players[order['player']]:
+                if get_distance(players[order['player']][order['hero']]['coords'], players[order['player']][hero]['coords']) <= capacity_radius:
+                    players[order['player']][hero]['hp'] += capacity_x
+                    # Check max hp
+                    target_hero_type = players[order['player']][hero]['type']
+                    target_hero_lvl = players[order['player']][hero]['level']
+                    ability_used = True
+                    if players[order['player']][hero]['hp'] > database[target_hero_type][target_hero_lvl]['hp']:
+                        players[order['player']][hero]['hp'] = database[target_hero_type][target_hero_lvl]['hp']
+
+        # Fulgura
+        elif order_hero_capacity == 'fulgura':
+            # Confirm if coordinates contains player
+            if get_tile_info(order['target'], players, map) == 'player':
+                # Try to get the hero on that tile
+                for player in players:
+                    if player != order['player']:
+                        for hero in players[player]:
+                            # If the target ennemy is in range and on the target tile, apply ability
+                            if get_distance(players[order['player']][order['hero']]['coords'], players[player][hero]['coords']) <= capacity_radius \
+                                and players[player][hero]['coords'] == order['target']:
+                                target_hp = players[player][hero]['hp'] - capacity_x
+                                if target_hp < 0:
+                                    target_hp = 0
+                                players[player][hero]['hp'] = target_hp
+                                ability_used = True
+                                # Set the memory to 2 in order to trigger a creature action next turn
+                                if player == 'creatures':
+                                    players[player][hero]['ability_affectation_memory'] = 2
+
+        # Reach
+        elif order_hero_capacity == 'reach':
+            # If tile is clear & target in radius, teleport player to the target coordinates
+            if get_tile_info(order['target'], players, map) == 'clear' and get_distance(players[order['player']][order['hero']]['coords'], order['target']) <= capacity_radius:
+                players[order['player']][order['hero']]['coords'] = order['target']
+                ability_used = True
+
+        # Set cooldown if the ability is used
+        if ability_used:
+            players[order['player']][order['hero']]['cooldown'][0] = database[order_hero_type][order_hero_lvl]['abilities'][0]['cooldown']
+
+    # Ability 2 (lvl 3 min. required)
+    else:
+        capacity_radius = database[order_hero_type][order_hero_lvl]['abilities'][1]['radius']
+        if order_hero_capacity != 'immunise':
+            capacity_x = database[order_hero_type][order_hero_lvl]['abilities'][0]['x']
+        # Stun
+        if order_hero_capacity == 'stun':
+            # Apply ability to each enemy in range
+            for player in players:
+                if player != order['player']:
+                    for hero in players[player]:
+                        if get_distance(players[order['player']][order['hero']]['coords'], players[player][hero]['coords']) <= capacity_radius:
+                            players[player][hero]['active_effects'][order_hero_capacity] = (1, capacity_x)
+                            ability_used = True
+
+                            # Set the memory to 2 in order to trigger a creature action next turn
+                            if player == 'creatures':
+                                players[player][hero]['ability_affectation_memory'] = 2
+
+        # Immunise
+        elif order_hero_capacity == 'immunise':             
+            # If there is an entity on the target tile
+            if get_tile_info(order['target'], players, map) == 'player':
+                # For each hero of the current player
+                for hero in players[order['player']]:
+                    # If ally is in radius & coordinates matches, apply ability
+                    if get_distance(players[order['player']][order['hero']]['coords'], players[order['player']][hero]['coords']) <= capacity_radius \
+                            and players[order['player']][hero]['coords'] == order['target']:
+
+                        players[order['player']][hero]['active_effects'][order_hero_capacity] = 1
+                        ability_used = True
+
+        # Ovibus
+        elif order_hero_capacity == 'ovibus':             
+            # If there is an entity on the target tile
+            if get_tile_info(order['target'], players, map) == 'player':
+                # For each enemy entity
+                for player in players:
+                    if player != order['player']:
+                        for hero in players[player]:
+                            # If enemy is in radius & coordinates matches, apply ability
+                            if get_distance(players[order['player']][order['hero']]['coords'], players[player][hero]['coords']) <= capacity_radius \
+                                and players[player][hero]['coords'] == order['target']:
+
+                                players[player][hero]['active_effects'][order_hero_capacity] = capacity_x
+                                ability_used = True
+
+                                # Set the memory to 2 in order to trigger a creature action next turn
+                                if player == 'creatures':
+                                    players[player][hero]['ability_affectation_memory'] = 2
+
+        # Burst
+        elif order_hero_capacity == 'burst':
+            # For each enemy in range, apply ability
+            for player in players:
+                if player != order['player']:
+                    for hero in players[player]:
+                        if get_distance(players[order['player']][order['hero']]['coords'], players[player][hero]['coords']) <= capacity_radius:
+                            
+                            target_hp = players[player][hero]['hp'] - capacity_x
+                            if target_hp < 0:
+                                target_hp = 0
+                            players[player][hero]['hp'] = target_hp
+                            ability_used = True
+
+                            # Set the memory to 2 in order to trigger a creature action next turn
+                            if player == 'creatures':
+                                players[player][hero]['ability_affectation_memory'] = 2
+
+        # Set cooldown if the ability is used
+        if ability_used:
+            players[order['player']][order['hero']]['cooldown'][1] = database[order_hero_type][order_hero_lvl]['abilities'][1]['cooldown']
+
 
 
 def attack(order, players, map, database):
@@ -1076,7 +1187,7 @@ def get_distance(coords1, coords2):
 
     Parameters
     ----------
-    coords1: the first pair of coordinates. (tuple)
+    coords1: the first pair of coordinates. (tuple)math.ceil
     coords2: the second pair of coordinates. (tuple)
 
     Returns
@@ -1117,7 +1228,7 @@ def get_tile_info(coords, players, map):
     info can take the following values:
         'wall' if the tile doesn't exist.
         'player' if the tile contains a hero or a creature.
-        'clear' if the tile is clear.
+        'clear' if the tile is clear.# If there is no hero in the radius, get the closest # If there is no hero in the radius, get the closest heroes# If there is no hero in the radius, get the closest heroesheroes
     For the formats of players and map, see rapport_gr_02_part_02.
     A typical 'coord' tuple is in the format ( row (int), column (int) ).
 
@@ -1137,6 +1248,91 @@ def get_tile_info(coords, players, map):
                     return 'player'
         # If this code is reached, then the tile is clear.
         return 'clear'
+
+# -----
+
+def get_closest_heroes(coords, players, restrictive):
+    """ Returns the closest hero(es) around the given tile.
+
+    Parameters:
+    ----------
+    coords : the coordinates of a tile (tuple).
+    players : data of player heroes and creatures (dict)
+    restrictive : if True, the function will only return one hero (the closest one with several conditions to remove the ambiguity).
+                      else, the function will return the list of the closest heroes (bool).
+
+    Returns:
+    -------
+    closest_heroes : a list containing the closest heroes, which are in of format (player (str), hero (str)) (list)
+
+    Notes
+    -----
+    For the format of 'players', see 'rapport_gr_02_part_2'.
+    A typical 'coord' tuple is in the format ( row (int), column (int) ).
+
+    Version:
+    -------
+    specification : Guillaume Nizet (v.1 29/03/19)
+    implementation : Guillaume Nizet, Jonathan Nhouyvanisvong, Martin Danhier (v.2 05/05/19)
+    """
+    # Initialize the data
+    closest_heroes = []
+    temp_closest_heroes = []
+    step = 0
+
+    while closest_heroes == [] or len(closest_heroes) > 1:
+        min = -1
+        if step != 0 and step <= 4:
+            temp_closest_heroes = closest_heroes
+        # For each hero
+        for player in players:
+            if player != 'creatures':
+                for hero in players[player]:
+                    if (player, hero) in temp_closest_heroes or step == 0:
+                        # Step 0 : Check the distance to get the closest heroes
+                        if step == 0:
+                            checked_value = math.floor(get_distance(
+                                players[player][hero]['coords'], coords))
+                        # Step 1 : If the checked hero is one of the several closest heroes with the same distance
+                        elif step == 1:
+                            checked_value = players[player][hero]['hp']
+
+                        # Step 2 : If the checked hero is one of the several closest heroes with the same HP
+                        elif step == 2:
+                            checked_value = players[player][hero]['xp']
+
+                        # Step 3 : If the checked hero is one of the several closest heroes with the same HP and victory points
+                        elif step == 3:
+                            checked_value = hero.lower()
+
+                        # Step 4 : If the checked hero is one of the several closest heroes with the same HP, victory points and name
+                        else:
+                            checked_value = player.lower()
+
+                        # First checked hero : initialisation
+                        if min == -1:
+                            closest_heroes = [(player, hero)]
+                            min = checked_value
+
+                        # If the checked value is smaller than the current min
+                        elif checked_value < min:
+                            # Reset the closest heroes and save the current one
+                            closest_heroes = [(player, hero)]
+                            min = checked_value
+
+                        # If the checked value is equal to the current min
+                        elif checked_value == min:
+                            # save this hero as well
+                            closest_heroes.append((player, hero))
+
+        # Only return the list of the closest heroes (there might be more than one hero)
+        if not restrictive:
+            return closest_heroes
+        step += 1
+
+    # restrictive == True: The single closest hero has been found
+    return closest_heroes
+
 
 
 ### MAIN ###
