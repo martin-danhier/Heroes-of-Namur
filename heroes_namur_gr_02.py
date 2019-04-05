@@ -816,8 +816,14 @@ def attack(order, players, map, database):
     # get_tile_info() returns 'player' even if the tile is occupied by a creature
     if get_tile_info(order['target'], players, map) == 'player' and order['target'] != map['spawns']['Player 1'] and order['target'] != map['spawns']['Player 2'] and get_distance(players[order['player']][order['hero']]['coords'], order['target']) <= 2 ** 0.5:
         
-        # Base damage of the hero, based on its type and level
-        damage = database[players[order['player']][order['hero']]['type']][players[order['player']][order['hero']]['level']]['dmg']
+        # Get base damage
+        # Creature attacks, damage is a set value
+        if order['player'] == 'creatures':
+            damage = players[order['player']][order['hero']]['dmg']
+
+        # Hero attacks, damage based on its type and level
+        else:
+            damage = database[players[order['player']][order['hero']]['type']][players[order['player']][order['hero']]['level']]['dmg']
         
         # Process abilities that can modify the damage
 
