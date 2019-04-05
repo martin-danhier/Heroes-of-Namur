@@ -625,39 +625,16 @@ def clean(players, map, database):
                 if player != 'creatures':
 
                     for hero in players[player]:
-                        if math.ceil(get_distance(players[player][hero]['coords'], players['creatures'][creature]['coords'])) <= radius:
+                        if math.floor(get_distance(players[player][hero]['coords'], players['creatures'][creature]['coords'])) <= radius:
                             selected_heroes.append((player, hero))
                             hero_in_radius = True
 
             # If there is no hero in the radius, get the closest heroes
             if not hero_in_radius:
-                min_distance = -1
-                # For each hero
-                for player in players:
-                    if player != 'creatures':
-                        for hero in players[player]:
-
-                            checked_distance = math.ceil(get_distance(players[player][hero]['coords'], players['creatures'][creature]['coords']))
-                            
-                            # First checked hero : initialisation
-                            if min_distance == -1:
-                                selected_heroes = []
-                                selected_heroes.append((player, hero))
-                                min_distance = checked_distance
-
-                            # If distance is smaller than the current min distance
-                            elif checked_distance < min_distance:
-                                # Reset the closest heroes and save the current one
-                                selected_heroes = []
-                                selected_heroes.append((player, hero))
-                                min_distance = checked_distance
-                            
-                            # If distance is equal to the current min distance : save this hero as well
-                            elif checked_distance == min_distance:
-                                selected_heroes.append((player, hero))
+                get_closest_heroes(players['creatures'][creature]['coords'], players, False)
 
             # Calculate bonus
-            victory_points = math.ceil(victory_points / len(selected_heroes))
+            victory_points = math.floor(victory_points / len(selected_heroes))
             
             for hero in selected_heroes:
                 players[hero[0]][hero[1]]['xp'] += victory_points
@@ -1132,7 +1109,7 @@ def get_distance(coords1, coords2):
 
     Parameters
     ----------
-    coords1: the first pair of coordinates. (tuple)
+    coords1: the first pair of coordinates. (tuple)math.ceil
     coords2: the second pair of coordinates. (tuple)
 
     Returns
@@ -1173,7 +1150,7 @@ def get_tile_info(coords, players, map):
     info can take the following values:
         'wall' if the tile doesn't exist.
         'player' if the tile contains a hero or a creature.
-        'clear' if the tile is clear.
+        'clear' if the tile is clear.# If there is no hero in the radius, get the closest # If there is no hero in the radius, get the closest heroes# If there is no hero in the radius, get the closest heroesheroes
     For the formats of players and map, see rapport_gr_02_part_02.
     A typical 'coord' tuple is in the format ( row (int), column (int) ).
 
@@ -1193,6 +1170,91 @@ def get_tile_info(coords, players, map):
                     return 'player'
         # If this code is reached, then the tile is clear.
         return 'clear'
+
+# -----
+
+def get_closest_heroes(coords, players, restrictive):
+    """ Returns the closest hero(es) around the given tile.
+
+    Parameters:
+    ----------
+    coords : the coordinates of a tile (tuple).
+    players : data of player heroes and creatures (dict)
+    restrictive : if True, the function will only return one hero (the closest one with several conditions to remove the ambiguity).
+                      else, the function will return the list of the closest heroes (bool).
+
+    Returns:
+    -------
+    closest_heroes : a list containing the closest heroes, which are in of format (player (str), hero (str)) (list)
+
+    Notes
+    -----
+    For the format of 'players', see 'rapport_gr_02_part_2'.
+    A typical 'coord' tuple is in the format ( row (int), column (int) ).
+
+    Version:
+    -------
+    specification : Guillaume Nizet (v.1 29/03/19)
+    implementation : Guillaume Nizet, Jonathan Nhouyvanisvong, Martin Danhier (v.2 05/05/19)
+    """
+    # Initialize the data
+    closest_heroes = []
+    temp_closest_heroes = []
+    step = 0
+
+    while closest_heroes == [] or len(closest_heroes) > 1:
+        min = -1
+        if step != 0 and step <= 4:
+            temp_closest_heroes = closest_heroes
+        # For each hero
+        for player in players:
+            if player != 'creatures':
+                for hero in players[player]:
+                    if (player, hero) in temp_closest_heroes or step == 0:
+                        # Step 0 : Check the distance to get the closest heroes
+                        if step == 0:
+                            checked_value = math.floor(get_distance(
+                                players[player][hero]['coords'], coords))
+                        # Step 1 : If the checked hero is one of the several closest heroes with the same distance
+                        elif step == 1:
+                            checked_value = players[player][hero]['hp']
+
+                        # Step 2 : If the checked hero is one of the several closest heroes with the same HP
+                        elif step == 2:
+                            checked_value = players[player][hero]['xp']
+
+                        # Step 3 : If the checked hero is one of the several closest heroes with the same HP and victory points
+                        elif step == 3:
+                            checked_value = hero.lower()
+
+                        # Step 4 : If the checked hero is one of the several closest heroes with the same HP, victory points and name
+                        else:
+                            checked_value = player.lower()
+
+                        # First checked hero : initialisation
+                        if min == -1:
+                            closest_heroes = [(player, hero)]
+                            min = checked_value
+
+                        # If the checked value is smaller than the current min
+                        elif checked_value < min:
+                            # Reset the closest heroes and save the current one
+                            closest_heroes = [(player, hero)]
+                            min = checked_value
+
+                        # If the checked value is equal to the current min
+                        elif checked_value == min:
+                            # save this hero as well
+                            closest_heroes.append((player, hero))
+
+        # Only return the list of the closest heroes (there might be more than one hero)
+        if not restrictive:
+            return closest_heroes
+        step += 1
+
+    # restrictive == True: The single closest hero has been found
+    return closest_heroes
+
 
 
 ### MAIN ###

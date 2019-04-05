@@ -6,6 +6,7 @@ spawn:
 creatures:
 bear 10 10 20 5 3 100
 wolf 15 10 10 3 2 50
+test 10 17 1 0 1 10
 spur:
 10 19
 10 20
