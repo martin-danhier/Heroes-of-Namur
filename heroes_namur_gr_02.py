@@ -1071,25 +1071,19 @@ def think(players, map, database, player):
         choice = randint(0, 3)
         hero_coords = players[player][hero]['coords']
         hero_type = players[player][hero]['type']
-        # type : barbarian, healer, mage, rogue
         hero_lvl = players[player][hero]['level']
-        #radius : 0 1 2 3 4 ; 0 0 1 2 3
         
         # If choice == 1 or 2
         coords_1 = hero_coords[0] + randint(-1, 1)
         coords_2 = hero_coords[1] + randint(-1, 1)
         coords = '%d-%d' % (coords_1, coords_2)
 
-        # If choice == 3 - keep to reflect about ability
-        # coords_1 = randint(1,4)
-        # coords_2 = randint(1,4)
-
         # Check choice
-        if choice == 1: #move
+        if choice == 1: # Move
             order.append(hero + ':@' + coords) # nom:@r-c
-        elif choice == 2: #attack
+        elif choice == 2: # Attack
             order.append(hero + ':*' + coords) # nom:*r-c
-        elif choice == 3: #use ability
+        elif choice == 3 and int(hero_lvl) > 1: # Use ability
             capacity = [database[hero_type][hero_lvl]['abilities'][0]['name']]
             if int(hero_lvl) > 2:
                 capacity.append(database[hero_type][hero_lvl]['abilities'][1]['name'])
