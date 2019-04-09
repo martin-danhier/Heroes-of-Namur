@@ -703,7 +703,7 @@ def update_counters(players, map):
                 new_dict = {}
                 for effect in effects:
                     # Decrement the cooldown (0 = end of the effect)
-                    effects[effect] = (effects[effect][0] - 1, effects[effect][1])
+                    effects[effect][0] -= 1
                     # If the cooldown of an effect reached 0, remove that effect
                     # <=> only keep the elements with a strictly positive cooldown
                     # This workaround avoids the RuntimeError "dict changed size during iteration"
@@ -715,9 +715,26 @@ def update_counters(players, map):
     map['nb_turns'] += 1
     # Increment turns without action counter
     map['nb_turns_without_action'] += 1
-    # Increment citadel counter
-    if map['player_in_citadel'][0] != '':
+
+    # Update citadel counter
+
+    # Get players on spur
+    players_on_spur = []
+    for player in players:
+        for hero in player[player]:
+            if players[player][hero]['coords'] in map['spur']:
+                players_on_spur.append(player)
+
+    # No or several players : reset
+    if len (players_on_spur) != 1:
+        map['player_in_citadel'] = ('', 0)
+    # Same player as last turn : increment
+    elif map['player_in_citadel'][0] == players_on_spur[0]:
         map['player_in_citadel'] = (map['players_in_citadel'][0], map['players_in_citadel'][1] + 1)
+    # Different player : reset and set their name
+    else:
+        map['player_in_citadel'] = (players_on_spur[0], 1)
+        
 
 ### ACTIONS ###
 # Execute orders
