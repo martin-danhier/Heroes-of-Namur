@@ -601,7 +601,7 @@ def clean(players, map, database):
     Version
     -------
     specification : Guillaume Nizet (v.4 02/03/19)
-    implementation : Jonathan Nhouyvanisvong (v.4 24/03/19)
+    implementation : Jonathan Nhouyvanisvong, Martin Danhier (v.5 09/04/19)
     
     """
     dead_creatures = []
@@ -631,7 +631,14 @@ def clean(players, map, database):
 
             # If there is no hero in the radius, get the closest heroes
             if not hero_in_radius:
-                get_closest_heroes(players['creatures'][creature]['coords'], players, False)
+                selected_heroes = get_closest_heroes(players['creatures'][creature]['coords'], players, False)
+
+            # Remove dead heroes
+            heroes = []
+            for hero in range(selected_heroes):
+                if players[hero[0]][hero[1]]['hp'] > 0:
+                    heroes.append(hero)
+            selected_heroes = heroes
 
             # Calculate bonus
             victory_points = math.ceil(victory_points / len(selected_heroes))
@@ -648,23 +655,23 @@ def clean(players, map, database):
     for player in players:
         if player != 'creatures':
             for hero in players[player]:
-
+                
                 hero_type = players[player][hero]['type']
 
                 # If this hero is dead, replace it in its spawn and restore its health
                 if players[player][hero]['hp'] == 0:
                     players[player][hero]['coords'] = map['spawns'][player]
                     players[player][hero]['hp'] = database[hero_type][players[player][hero]['level']]['hp']
-
-                # Check if a hero level up
-                for level in database[hero_type]:
-                    if int(players[player][hero]['level']) < int(level) and players[player][hero]['xp'] >= database[hero_type][level]['victory_pts'] :
-                        # Update stats
-                        players[player][hero]['level'] = level
-                        players[player][hero]['hp'] = database[hero_type][level]['hp']
-                        # Unlock special ability
-                        if level in ('2', '3'):
-                            players[player][hero]['cooldown'].append(0)
+                else:
+                    # Check if a hero level up
+                    for level in database[hero_type]:
+                        if int(players[player][hero]['level']) < int(level) and players[player][hero]['xp'] >= database[hero_type][level]['victory_pts'] :
+                            # Update stats
+                            players[player][hero]['level'] = level
+                            players[player][hero]['hp'] = database[hero_type][level]['hp']
+                            # Unlock special ability
+                            if level in ('2', '3'):
+                                players[player][hero]['cooldown'].append(0)
 
 def update_counters(players, map):
     """ Decrements cooldowns and increments turn counters.
