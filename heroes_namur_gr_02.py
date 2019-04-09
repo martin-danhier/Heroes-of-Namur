@@ -1157,6 +1157,7 @@ def get_tile_info(coords, players, map):
     info can take the following values:
         'wall' if the tile doesn't exist.
         'player' if the tile contains a hero or a creature.
+        'spur' if the tile is in the spur.
         'clear' if the tile is clear.# If there is no hero in the radius, get the closest # If there is no hero in the radius, get the closest heroes# If there is no hero in the radius, get the closest heroesheroes
     For the formats of players and map, see rapport_gr_02_part_02.
     A typical 'coord' tuple is in the format ( row (int), column (int) ).
@@ -1164,7 +1165,7 @@ def get_tile_info(coords, players, map):
     Version
     -------
     specification: Martin Danhier (v.2 16/03/2019)
-    implementation: Martin Danhier (v.1 16/03/2019)
+    implementation: Martin Danhier (v.2 09/04/2019)
     """
     # If the coordinates are out of the map or if the coordinates are part of the spur while it is still locked.
     if coords[0] <= 0 or coords[0] > map['size'][0] or coords[1] <= 0 or coords[1] > map['size'][1] or (coords in map['spur'] and map['nb_turns'] <= 20):
@@ -1175,8 +1176,11 @@ def get_tile_info(coords, players, map):
             for individual in players[player]:
                 if players[player][individual]['coords'] == coords:
                     return 'player'
-        # If this code is reached, then the tile is clear.
-        return 'clear'
+        # If this code is reached, then there is no player on this tile
+        if coords in map['spur']:
+            return 'spur'
+        else:
+            return 'clear'
 
 # -----
 
