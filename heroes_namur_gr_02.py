@@ -601,7 +601,7 @@ def clean(players, map, database):
     Version
     -------
     specification : Guillaume Nizet (v.4 02/03/19)
-    implementation : Jonathan Nhouyvanisvong (v.4 24/03/19)
+    implementation : Jonathan Nhouyvanisvong, Martin Danhier (v.5 09/04/19)
     
     """
     dead_creatures = []
@@ -631,7 +631,14 @@ def clean(players, map, database):
 
             # If there is no hero in the radius, get the closest heroes
             if not hero_in_radius:
-                get_closest_heroes(players['creatures'][creature]['coords'], players, False)
+                selected_heroes = get_closest_heroes(players['creatures'][creature]['coords'], players, False)
+
+            # Remove dead heroes
+            heroes = []
+            for hero in range(selected_heroes):
+                if players[hero[0]][hero[1]]['hp'] > 0:
+                    heroes.append(hero)
+            selected_heroes = heroes
 
             # Calculate bonus
             victory_points = math.ceil(victory_points / len(selected_heroes))
@@ -648,23 +655,23 @@ def clean(players, map, database):
     for player in players:
         if player != 'creatures':
             for hero in players[player]:
-
+                
                 hero_type = players[player][hero]['type']
 
                 # If this hero is dead, replace it in its spawn and restore its health
                 if players[player][hero]['hp'] == 0:
                     players[player][hero]['coords'] = map['spawns'][player]
                     players[player][hero]['hp'] = database[hero_type][players[player][hero]['level']]['hp']
-
-                # Check if a hero level up
-                for level in database[hero_type]:
-                    if int(players[player][hero]['level']) < int(level) and players[player][hero]['xp'] >= database[hero_type][level]['victory_pts'] :
-                        # Update stats
-                        players[player][hero]['level'] = level
-                        players[player][hero]['hp'] = database[hero_type][level]['hp']
-                        # Unlock special ability
-                        if level in ('2', '3'):
-                            players[player][hero]['cooldown'].append(0)
+                else:
+                    # Check if a hero level up
+                    for level in database[hero_type]:
+                        if int(players[player][hero]['level']) < int(level) and players[player][hero]['xp'] >= database[hero_type][level]['victory_pts'] :
+                            # Update stats
+                            players[player][hero]['level'] = level
+                            players[player][hero]['hp'] = database[hero_type][level]['hp']
+                            # Unlock special ability
+                            if level in ('2', '3'):
+                                players[player][hero]['cooldown'].append(0)
 
 def update_counters(players, map):
     """ Decrements cooldowns and increments turn counters.
@@ -1190,6 +1197,7 @@ def get_tile_info(coords, players, map):
     info can take the following values:
         'wall' if the tile doesn't exist.
         'player' if the tile contains a hero or a creature.
+        'spur' if the tile is in the spur.
         'clear' if the tile is clear.# If there is no hero in the radius, get the closest # If there is no hero in the radius, get the closest heroes# If there is no hero in the radius, get the closest heroesheroes
     For the formats of players and map, see rapport_gr_02_part_02.
     A typical 'coord' tuple is in the format ( row (int), column (int) ).
@@ -1197,7 +1205,7 @@ def get_tile_info(coords, players, map):
     Version
     -------
     specification: Martin Danhier (v.2 16/03/2019)
-    implementation: Martin Danhier (v.1 16/03/2019)
+    implementation: Martin Danhier (v.2 09/04/2019)
     """
     # If the coordinates are out of the map or if the coordinates are part of the spur while it is still locked.
     if coords[0] <= 0 or coords[0] > map['size'][0] or coords[1] <= 0 or coords[1] > map['size'][1] or (coords in map['spur'] and map['nb_turns'] <= 20):
@@ -1208,8 +1216,11 @@ def get_tile_info(coords, players, map):
             for individual in players[player]:
                 if players[player][individual]['coords'] == coords:
                     return 'player'
-        # If this code is reached, then the tile is clear.
-        return 'clear'
+        # If this code is reached, then there is no player on this tile
+        if coords in map['spur']:
+            return 'spur'
+        else:
+            return 'clear'
 
 # -----
 
