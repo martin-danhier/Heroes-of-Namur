@@ -1,7 +1,7 @@
 import math
 import colored
 import os
-from random import randint
+from random import randint, choice
 import platform # used to determine the os to know which clear command to use (clear or cls)
 
 ### UI ###
@@ -1067,38 +1067,51 @@ def think(players, map, database, player):
     command = ''
 
     for hero in players[player]:
-        # Useful variables
-        choice = randint(0, 3)
-        hero_coords = players[player][hero]['coords']
-        hero_type = players[player][hero]['type']
-        # type : barbarian, healer, mage, rogue
         hero_lvl = players[player][hero]['level']
-        #radius : 0 1 2 3 4 ; 0 0 1 2 3
-        
-        # If choice == 1 or 2
-        coords_1 = hero_coords[0] + randint(-1, 1)
-        coords_2 = hero_coords[1] + randint(-1, 1)
-        coords = '%d-%d' % (coords_1, coords_2)
+        if int(hero_lvl) > 1: # Can use ability
+            decision = randint(0, 3)
+        else: # Can't use ability
+            decision = randint(0, 2)
+            
+        if decision != 0:
+            hero_coords = players[player][hero]['coords']
+            coords_r = hero_coords[0]
+            coords_c = hero_coords[1]
 
-        # If choice == 3 - keep to reflect about ability
-        # coords_1 = randint(1,4)
-        # coords_2 = randint(1,4)
+            if decision < 3:
+                distance = [-1, 0, 1]
+                coord_r = choice(distance)
+                if coord_r == 0:
+                    del distance[1]
+                    coord_c = choice(distance)
+                else:
+                    coord_c = choice(distance)
 
-        # Check choice
-        if choice == 1: #move
-            order.append(hero + ':@' + coords) # nom:@r-c
-        elif choice == 2: #attack
-            order.append(hero + ':*' + coords) # nom:*r-c
-        elif choice == 3: #use ability
-            capacity = [database[hero_type][hero_lvl]['abilities'][0]['name']]
-            if int(hero_lvl) > 2:
-                capacity.append(database[hero_type][hero_lvl]['abilities'][1]['name'])
-            id = randint(0, len(capacity) - 1)
-            if capacity[id] in target_capacity:
-                order.append(hero + ':' + capacity[id] + ':' + coords) # nom:capacity:r-c
-            else:
-                order.append(hero + ':' + capacity[id]) # nom:capacity
-    
+                if decision == 1: # Move
+                    action = '@' + '%d-%d' % (coords_r, coords_c) # @r-c
+                else: # Attack
+                    action = '*' + '%d-%d' % (coords_r, coords_c) # *r-c
+
+            else: # Use ability
+                hero_type = players[player][hero]['type']
+                capacity = [database[hero_type][hero_lvl]['abilities'][0]['name']]
+                if int(hero_lvl) > 2:
+                    capacity.append(database[hero_type][hero_lvl]['abilities'][1]['name'])
+
+                id = randint(0, len(capacity) - 1)
+                action = capacity[id] # capacity
+                if action in target_capacity:
+                    radius = database[hero_type][hero_lvl]['abilities'][id]['radius']
+                    distance = [-radius + radius_id for radius_id in range(radius * 2 + 1)]
+                    coord_r = choice(distance)
+                    if coord_r == 0:
+                        del distance[radius]
+                        coord_c = choice(distance)
+                    else:
+                        coord_c = choice(distance)
+                    action += ':' + '%d-%d' % (coords_r, coords_c) # r-c
+            order.append(hero + ':' + action) # nom:<action>
+            
     #store commands
     for index, order_done in enumerate(order):
         command += order_done
