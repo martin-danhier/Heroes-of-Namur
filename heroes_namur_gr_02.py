@@ -634,7 +634,7 @@ def clean(players, map, database):
                 get_closest_heroes(players['creatures'][creature]['coords'], players, False)
 
             # Calculate bonus
-            victory_points = math.floor(victory_points / len(selected_heroes))
+            victory_points = math.ceil(victory_points / len(selected_heroes))
             
             for hero in selected_heroes:
                 players[hero[0]][hero[1]]['xp'] += victory_points
