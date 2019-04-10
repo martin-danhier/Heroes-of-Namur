@@ -1640,5 +1640,3 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
         elif map['nb_turns_without_action'] == 40:
             print('It\'s a tie !')
             game_is_over = True
-
-# main('test.hon', (False, True))
