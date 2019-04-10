@@ -235,8 +235,8 @@ def create_stats(players, map, database):
     implementation : Martin Danhier (v.2 15/03/19)
 
     """
-    stats = '=== TURN #%s ===' % colored.stylize(
-        map['nb_turns'], colored.fg('light_goldenrod_1'))
+    stats = ''
+    creature_stats = '\n\n%s:' % colored.stylize('Creatures', colored.fg('light_magenta'))
 
     # For each player or creature
     for player in players:
@@ -1558,6 +1558,6 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
             print('%s WON OMFG WAAAAAAAAA DUIhskfusfd sf!!!!!!!1!!' %
                   map['player_in_citadel'][0])
             game_is_over = True
-        elif map['nb_turns_without_action'] == 4000: #for testing purposes
+        elif map['nb_turns_without_action'] == 40:
             print('It\'s a tie !')
             game_is_over = True
