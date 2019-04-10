@@ -2,7 +2,8 @@ import math
 import colored
 import os
 from random import randint, choice
-import platform # used to determine the os to know which clear command to use (clear or cls)
+# used to determine the os to know which clear command to use (clear or cls)
+import platform
 
 ### UI ###
 # Display user interface
@@ -25,7 +26,7 @@ def display_ui(players, map, database):
     -------
     specification : Guillaume Nizet, Martin Danhier (v.2 16/03/19)
     implementation : Guillaume Nizet (v.2 16/03/19)
-    
+
     """
     board = "\n     "
     # Get a list of str with the stats
@@ -39,11 +40,13 @@ def display_ui(players, map, database):
     colored_coords = {"spur": []}
     # Get colored borders around spur
     for coords in map["spur"]:
-        colored_coords["spur"] += get_coords_to_color((coords[0] * 2, coords[1] * 4 - 2))
+        colored_coords["spur"] += get_coords_to_color(
+            (coords[0] * 2, coords[1] * 4 - 2))
     # Get colored borders around players spawn points
     for player in players:
         if player != 'creatures':
-            colored_coords['spawn_%s' % player] = get_coords_to_color((map["spawns"][player][0] * 2, map["spawns"][player][1] * 4 - 2))
+            colored_coords['spawn_%s' % player] = get_coords_to_color(
+                (map["spawns"][player][0] * 2, map["spawns"][player][1] * 4 - 2))
     # Get player coords
     player_coords = {}
     for player in players:
@@ -72,7 +75,7 @@ def display_ui(players, map, database):
                     elif players[player][character]['type'] == 'healer':
                         type = 'H'
                     elif players[player][character]['type'] == 'rogue':
-                        type = 'R' 
+                        type = 'R'
                 # Get the color of the player
                 player_coords[coords] = (map['player_colors'][player], type)
 
@@ -89,7 +92,7 @@ def display_ui(players, map, database):
         # Add tabulation to border lines
         if y_pos % 2 != 0:
             board += '   '
-            
+
         # For each column
         x_pos = 0
         while x_pos < (4 * width) + 1:
@@ -106,16 +109,18 @@ def display_ui(players, map, database):
                             found = True
                 if not found:
                     color = colored.attr('reset')
-                   
+
             # First board line
             if y_pos == 1:
-                board += create_line_char('╔', '╦', '╗', x_pos, y_pos, color, width)
+                board += create_line_char('╔', '╦',
+                                          '╗', x_pos, y_pos, color, width)
 
             # Last board line
             elif y_pos == ((height * 2) + 1):  # on the last row
-                board += create_line_char('╚', '╩', '╝', x_pos, y_pos, color, width)
+                board += create_line_char('╚', '╩',
+                                          '╝', x_pos, y_pos, color, width)
 
-            #Between the first and the last row
+            # Between the first and the last row
             else:
                 # On center line of row
                 if y_pos % 2 == 0:
@@ -132,9 +137,10 @@ def display_ui(players, map, database):
                         board += '%s║' % color
                     # Tile content
                     else:
-                        # Display player                        
+                        # Display player
                         if (y_pos//2, x_pos//4 + 1) in player_coords:
-                            tile_content = '%s%s %s %s' % (colored.attr('reset'), colored.bg(player_coords[(y_pos//2, x_pos//4 + 1)][0]), player_coords[(y_pos//2, x_pos//4 + 1)][1], colored.attr('reset'))
+                            tile_content = '%s%s %s %s' % (colored.attr('reset'), colored.bg(player_coords[(
+                                y_pos//2, x_pos//4 + 1)][0]), player_coords[(y_pos//2, x_pos//4 + 1)][1], colored.attr('reset'))
                         else:
                             tile_content = '   '
 
@@ -143,17 +149,18 @@ def display_ui(players, map, database):
 
                 elif y_pos != 1:
                     # Board line
-                    board += create_line_char('╠', '╬', '╣', x_pos, y_pos, color, width)
-    
+                    board += create_line_char('╠', '╬',
+                                              '╣', x_pos, y_pos, color, width)
+
             x_pos += 1
 
         # Add stats
         stat_line = ''
         if len(stats) > 0:
             stat_line = stats[0]
-            stats = stats[1 :]
-        board += '%s    %s\n' %  (colored.attr('reset'),stat_line)
-    
+            stats = stats[1:]
+        board += '%s    %s\n' % (colored.attr('reset'), stat_line)
+
     # If there is still some stats to be displayed
     if len(stats) > 0:
         for stat_line in stats:
@@ -161,14 +168,15 @@ def display_ui(players, map, database):
 
     # Clear screen
     if platform.system == 'Windows':
-        os.system('cls') # Windows
+        os.system('cls')  # Windows
     else:
-        os.system('clear') # Linux, Mac
+        os.system('clear')  # Linux, Mac
 
     # Print board
     print(board)
 
 # -----
+
 
 def get_coords_to_color(coords):
     """ Returns the coordinates that need to be colored around the given coordinates. 
@@ -189,7 +197,7 @@ def get_coords_to_color(coords):
     --------
     specification : Guillaume Nizet (v.2 02/03/19)
     implementation : Guillaume Nizet (v.2 04/03/19)
-    
+
     """
     coords_to_color = []
     # For each character around the coord
@@ -202,6 +210,7 @@ def get_coords_to_color(coords):
     return coords_to_color
 
 # -----
+
 
 def create_stats(players, map, database):
     """ Generates a string containing the stats of the players.
@@ -226,34 +235,40 @@ def create_stats(players, map, database):
     implementation : Martin Danhier (v.2 15/03/19)
 
     """
-    stats = '=== TURN #%s ===' % colored.stylize(map['nb_turns'],colored.fg('light_goldenrod_1'))
+    stats = '=== TURN #%s ===' % colored.stylize(
+        map['nb_turns'], colored.fg('light_goldenrod_1'))
 
     # For each player (not including creatures)
     for player in players:
         if player != 'creatures':
             # Add the name of the player
             if len(players[player]) > 0:
-                stats += "\n\n%s:" % colored.stylize(player, colored.fg('light_%s' % map['player_colors'][player]))
+                stats += "\n\n%s:" % colored.stylize(
+                    player, colored.fg('light_%s' % map['player_colors'][player]))
             else:
                 # The player is not playing (no hero)
                 striked_name = ''
                 for character in player:
-                    striked_name += '\u0336' + character 
-                stats += '\n\n%s' % colored.stylize(striked_name, colored.fg('light_%s' % map['player_colors'][player]))
-            
+                    striked_name += '\u0336' + character
+                stats += '\n\n%s' % colored.stylize(striked_name, colored.fg(
+                    'light_%s' % map['player_colors'][player]))
+
             # Add hero data
             for hero in players[player]:
                 active_effects = players[player][hero]['active_effects']
-                hero_class_data = database[players[player][hero]['type']][players[player][hero]['level']]
+                hero_class_data = database[players[player][hero]
+                                           ['type']][players[player][hero]['level']]
 
                 # Get damage
                 damage = hero_class_data['dmg']
                 if 'stun' in active_effects:
-                    damage -= active_effects['stun'][1] #new damage = initial damage - x
+                    # new damage = initial damage - x
+                    damage -= active_effects['stun'][1]
                 if 'energise' in active_effects:
-                    damage += active_effects['energise'][1] #new damage = initial damage + x
+                    # new damage = initial damage + x
+                    damage += active_effects['energise'][1]
                 if damage < 1:
-                    damage = 1 #no damage below 1
+                    damage = 1  # no damage below 1
 
                 # Color damage
                 if damage < hero_class_data['dmg']:
@@ -262,29 +277,34 @@ def create_stats(players, map, database):
                     damage_color = 'light_goldenrod_1'
                 else:
                     damage_color = 'light_green'
-                damage = colored.stylize('%d' % damage, colored.fg(damage_color))
+                damage = colored.stylize(
+                    '%d' % damage, colored.fg(damage_color))
 
                 # Display general stats.
                 stats += '\n - \'%s\', %s:\n   (HP: %s, XP: %s, LVL: %s, DMG: %s)\n   Position: (%s, %s)' % (
-                    colored.stylize(hero, colored.fg('light_%s' % map['player_colors'][player])), players[player][hero]['type'],
-                    colored.stylize(players[player][hero]['hp'], colored.fg('light_goldenrod_1')), colored.stylize(players[player][hero]['xp'], colored.fg('light_goldenrod_1')), colored.stylize(players[player][hero]['level'], colored.fg('light_goldenrod_1')),
-                     damage, colored.stylize(players[player][hero]['coords'][0], colored.fg('light_goldenrod_1')), colored.stylize(players[player][hero]['coords'][1], colored.fg('light_goldenrod_1')))
-                
+                    colored.stylize(hero, colored.fg(
+                        'light_%s' % map['player_colors'][player])), players[player][hero]['type'],
+                    colored.stylize(players[player][hero]['hp'], colored.fg('light_goldenrod_1')), colored.stylize(players[player][hero]['xp'], colored.fg(
+                        'light_goldenrod_1')), colored.stylize(players[player][hero]['level'], colored.fg('light_goldenrod_1')),
+                    damage, colored.stylize(players[player][hero]['coords'][0], colored.fg('light_goldenrod_1')), colored.stylize(players[player][hero]['coords'][1], colored.fg('light_goldenrod_1')))
+
                 # Display abilities stats.
                 nb_abilities = len(players[player][hero]['cooldown'])
 
                 # Display them if there are some abilities to display
                 if (nb_abilities > 0):
-                    stats += '\n   Special abilities: '    
+                    stats += '\n   Special abilities: '
                     for index_ability in range(nb_abilities):
                         # Get data from databases.
                         ability_name = hero_class_data['abilities'][index_ability]['name']
                         ability_cooldown = players[player][hero]['cooldown'][index_ability]
                         # Add the name of the ability and the number of turns left before being able to use it again.
                         if ability_cooldown == 0:
-                            stats += ' %s (%s)' % (ability_name, colored.stylize('ready', colored.fg('light_goldenrod_1')))
+                            stats += ' %s (%s)' % (ability_name, colored.stylize(
+                                'ready', colored.fg('light_goldenrod_1')))
                         else:
-                            stats += '%s (%s turns left)' % (ability_name, colored.stylize(ability_cooldown, colored.fg('light_goldenrod_1')))
+                            stats += '%s (%s turns left)' % (ability_name, colored.stylize(
+                                ability_cooldown, colored.fg('light_goldenrod_1')))
                         # Add a comma to separate abilities
                         if nb_abilities > 1 and index_ability < nb_abilities - 1:
                             stats += ','
@@ -296,7 +316,8 @@ def create_stats(players, map, database):
                 if len(active_effects) > 0:
                     stats += '\n   Active effects: '
                     for effect in active_effects:
-                        stats += '%s (%s turns left)' % (effect, colored.stylize(active_effects[effect][0], colored.fg('light_goldenrod_1')))
+                        stats += '%s (%s turns left)' % (effect, colored.stylize(
+                            active_effects[effect][0], colored.fg('light_goldenrod_1')))
                         # Add a comma to separate effects
                         if index < len(active_effects) - 1:
                             stats += ', '
@@ -306,6 +327,7 @@ def create_stats(players, map, database):
     return stats
 
 # -----
+
 
 def create_line_char(first, cross, last, x, y, color, width):
     """ Create and color a border character.
@@ -342,6 +364,7 @@ def create_line_char(first, cross, last, x, y, color, width):
 ### INPUT ###
 # Process input
 
+
 def create_character(players, map, command, player):
     """ Parse the input command and create the players.
 
@@ -361,7 +384,7 @@ def create_character(players, map, command, player):
     -------
     specification : Jonathan Nhouyvanisvong (v.3 02/03/2019)
     implementation : Guillaume Nizet (v.3 20/03/19)
-    
+
     """
     # First, check the validity of the command
 
@@ -389,15 +412,15 @@ def create_character(players, map, command, player):
                 # If the given hero name or type is empty
                 else:
                     command_is_valid = False
-            
+
             # If the command is not in the format 'name' : 'type'
             else:
                 command_is_valid = False
 
             # Do not add heroes that have the same name (keeping the first one)
             if command_is_valid and info[0] not in players[player]:
-                    players[player][info[0]] = { 'type' : info[1], 'level' : '1', 'hp' : 10, 'xp' : 0, 'coords' : map['spawns'][player], 'cooldown' : [], 'active_effects' : {}}
-
+                players[player][info[0]] = {'type': info[1], 'level': '1', 'hp': 10, 'xp': 0,
+                                            'coords': map['spawns'][player], 'cooldown': [], 'active_effects': {}}
 
 
 # -----
@@ -490,7 +513,8 @@ def parse_command(player, command, players, database):
                                 valid = True
                             else:
                                 # Check if the given ability is available for the hero (right class, right level and cooldown = 0)
-                                available_abilities = database[players[player][info[0]]['type']][players[player][info[0]]['level']]['abilities']
+                                available_abilities = database[players[player][info[0]]
+                                                               ['type']][players[player][info[0]]['level']]['abilities']
                                 for index in range(len(available_abilities)):
                                     if info[1] == available_abilities[index]['name'] and players[player][info[0]]['cooldown'][index] == 0:
                                         valid = True
@@ -504,7 +528,8 @@ def parse_command(player, command, players, database):
                                     # Parse the coordinates before storing
                                     splitted_target = target.split('-')
                                     if len(splitted_target) == 2 and splitted_target[0].isdigit() and splitted_target[1].isdigit():
-                                        actions.append({'player': player, 'hero': info[0], 'action': action_name, 'target': (int(splitted_target[0]), int(splitted_target[1]))})
+                                        actions.append({'player': player, 'hero': info[0], 'action': action_name, 'target': (
+                                            int(splitted_target[0]), int(splitted_target[1]))})
     return actions
 
 
@@ -534,7 +559,7 @@ def read_file(path):
     -------
     specification : Jonathan Nhouyvanisvong (v.4 15/03/19)
     implementation : Martin Danhier (v.5 19/03/19)
-    
+
     """
     # Get lines from the given file.
     param_file = open(path, 'r')
@@ -543,7 +568,8 @@ def read_file(path):
 
     # Initialize the data dictionaries.
     players = {'creatures': {}}
-    map = {'spawns': {}, 'spur': [], 'player_in_citadel': ('', 0), 'nb_turns' : 1, 'nb_turns_without_action' : 0}
+    map = {'spawns': {}, 'spur': [], 'player_in_citadel': (
+        '', 0), 'nb_turns': 1, 'nb_turns_without_action': 0}
 
     # Initialize some variables for the loop.
     current = ''
@@ -583,6 +609,7 @@ def read_file(path):
 ### CLEAN AND UPDATES ###
 # Clean, apply bonuses, update cooldowns...
 
+
 def clean(players, map, database):
     """ Cleans the board (managing death and levels).
 
@@ -602,7 +629,7 @@ def clean(players, map, database):
     -------
     specification : Guillaume Nizet (v.4 02/03/19)
     implementation : Jonathan Nhouyvanisvong, Martin Danhier (v.5 09/04/19)
-    
+
     """
     dead_creatures = []
 
@@ -611,11 +638,11 @@ def clean(players, map, database):
     # For each dead creature
     for creature in players['creatures']:
         if players['creatures'][creature]['hp'] == 0:
-            
+
             selected_heroes = []
 
             # Get the data of that creature
-            dead_creatures.append(creature) 
+            dead_creatures.append(creature)
             victory_points = players['creatures'][creature]['xp']
             radius = players['creatures'][creature]['radius']
 
@@ -631,21 +658,21 @@ def clean(players, map, database):
 
             # If there is no hero in the radius, get the closest heroes
             if not hero_in_radius:
-                selected_heroes = get_closest_heroes(players['creatures'][creature]['coords'], players, False)
+                selected_heroes = get_closest_heroes(
+                    players['creatures'][creature]['coords'], players, False)
 
             # Remove dead heroes
             heroes = []
-            for hero in range(selected_heroes):
+            for hero in selected_heroes:
                 if players[hero[0]][hero[1]]['hp'] > 0:
                     heroes.append(hero)
             selected_heroes = heroes
 
             # Calculate bonus
             victory_points = math.ceil(victory_points / len(selected_heroes))
-            
+
             for hero in selected_heroes:
                 players[hero[0]][hero[1]]['xp'] += victory_points
-        
 
     # Remove dead creatures
     for creature in dead_creatures:
@@ -655,23 +682,25 @@ def clean(players, map, database):
     for player in players:
         if player != 'creatures':
             for hero in players[player]:
-                
+
                 hero_type = players[player][hero]['type']
 
                 # If this hero is dead, replace it in its spawn and restore its health
                 if players[player][hero]['hp'] == 0:
                     players[player][hero]['coords'] = map['spawns'][player]
-                    players[player][hero]['hp'] = database[hero_type][players[player][hero]['level']]['hp']
+                    players[player][hero]['hp'] = database[hero_type][players[player]
+                                                                      [hero]['level']]['hp']
                 else:
                     # Check if a hero level up
                     for level in database[hero_type]:
-                        if int(players[player][hero]['level']) < int(level) and players[player][hero]['xp'] >= database[hero_type][level]['victory_pts'] :
+                        if int(players[player][hero]['level']) < int(level) and players[player][hero]['xp'] >= database[hero_type][level]['victory_pts']:
                             # Update stats
                             players[player][hero]['level'] = level
                             players[player][hero]['hp'] = database[hero_type][level]['hp']
                             # Unlock special ability
                             if level in ('2', '3'):
                                 players[player][hero]['cooldown'].append(0)
+
 
 def update_counters(players, map):
     """ Decrements cooldowns and increments turn counters.
@@ -695,14 +724,14 @@ def update_counters(players, map):
     for player in players:
         if player != 'creatures':
             for hero in players[player]:
-                
+
                 # Step 1: DECREMENT ABILITIES COOLDOWN
                 # For each cooldown of that hero
                 cooldowns = players[player][hero]['cooldown']
                 for cooldown_index in range(len(cooldowns)):
                     # Decrement the cooldown if it is strictly positive (0 = ready to use)
                     if cooldowns[cooldown_index] > 0:
-                       cooldowns[cooldown_index] -= 1
+                        cooldowns[cooldown_index] -= 1
 
                 # Step 2: DECREMENT ACTIVE EFFECTS COOLDOWN
                 # For each active effect of that hero
@@ -710,7 +739,7 @@ def update_counters(players, map):
                 new_dict = {}
                 for effect in effects:
                     # Decrement the cooldown (0 = end of the effect)
-                    effects[effect] = (effects[effect][0] - 1, effects[effect][1])
+                    effects[effect][0] -= 1
                     # If the cooldown of an effect reached 0, remove that effect
                     # <=> only keep the elements with a strictly positive cooldown
                     # This workaround avoids the RuntimeError "dict changed size during iteration"
@@ -722,9 +751,26 @@ def update_counters(players, map):
     map['nb_turns'] += 1
     # Increment turns without action counter
     map['nb_turns_without_action'] += 1
-    # Increment citadel counter
-    if map['player_in_citadel'][0] != '':
-        map['player_in_citadel'] = (map['players_in_citadel'][0], map['players_in_citadel'][1] + 1)
+
+    # Update citadel counter
+
+    # Get players on spur
+    players_on_spur = []
+    for player in players:
+        for hero in players[player]:
+            if players[player][hero]['coords'] in map['spur']:
+                players_on_spur.append(player)
+
+    # No or several players : reset
+    if len(players_on_spur) != 1:
+        map['player_in_citadel'] = ('', 0)
+    # Same player as last turn : increment
+    elif map['player_in_citadel'][0] == players_on_spur[0]:
+        map['player_in_citadel'] = (map['player_in_citadel'][0], map['player_in_citadel'][1] + 1)
+    # Different player : reset and set their name
+    else:
+        map['player_in_citadel'] = (players_on_spur[0], 1)
+
 
 ### ACTIONS ###
 # Execute orders
@@ -755,7 +801,7 @@ def use_special_ability(order, players, map, database):
     -------
     specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
     implementation : Jonathan Nhouyvanisvong (v.6 29/03/19)
-    
+
     """
     # Useful variables
     order_hero_capacity = order['action']
@@ -768,25 +814,30 @@ def use_special_ability(order, players, map, database):
         capacity_radius = database[order_hero_type][order_hero_lvl]['abilities'][0]['radius']
         if order_hero_capacity != 'reach':
             capacity_x = database[order_hero_type][order_hero_lvl]['abilities'][0]['x']
-        
+
         # Energise
         if order_hero_capacity == 'energise':
             # Check allies in radius of influence
             for hero in players[order['player']]:
-                distance_checked = math.floor(get_distance(players[order['player']][order['hero']]['coords'], players[order['player']][hero]['coords']))
+                distance_checked = math.floor(get_distance(
+                    players[order['player']][order['hero']]['coords'], players[order['player']][hero]['coords']))
                 if hero != order['hero'] and distance_checked <= capacity_radius:
                     if order_hero_capacity in players[order['player']][hero]['active_effects']:
-                        players[order['player']][hero]['active_effects'][order_hero_capacity][0] += 1
-                        players[order['player']][hero]['active_effects'][order_hero_capacity][1] += capacity_x
+                        players[order['player']
+                                ][hero]['active_effects'][order_hero_capacity][0] += 1
+                        players[order['player']
+                                ][hero]['active_effects'][order_hero_capacity][1] += capacity_x
                     else:
-                        players[order['player']][hero]['active_effects'][order_hero_capacity] = [1, capacity_x]
+                        players[order['player']][hero]['active_effects'][order_hero_capacity] = [
+                            1, capacity_x]
                     ability_used = True
 
         # Invigorate
         elif order_hero_capacity == 'invigorate':
             # Check allies in radius of influence
             for hero in players[order['player']]:
-                distance_checked = math.floor(get_distance(players[order['player']][order['hero']]['coords'], players[order['player']][hero]['coords']))
+                distance_checked = math.floor(get_distance(
+                    players[order['player']][order['hero']]['coords'], players[order['player']][hero]['coords']))
                 if hero != order['hero'] and distance_checked <= capacity_radius:
 
                     players[order['player']][hero]['hp'] += capacity_x
@@ -796,7 +847,8 @@ def use_special_ability(order, players, map, database):
                     ability_used = True
 
                     if players[order['player']][hero]['hp'] > database[target_hero_type][target_hero_lvl]['hp']:
-                        players[order['player']][hero]['hp'] = database[target_hero_type][target_hero_lvl]['hp']
+                        players[order['player']
+                                ][hero]['hp'] = database[target_hero_type][target_hero_lvl]['hp']
 
         # Fulgura
         elif order_hero_capacity == 'fulgura':
@@ -807,10 +859,12 @@ def use_special_ability(order, players, map, database):
                     if player != order['player']:
                         for hero in players[player]:
                             # If the target ennemy is in range and on the target tile, apply ability
-                            distance_checked = math.floor(get_distance(players[order['player']][order['hero']]['coords'], players[player][hero]['coords']))
+                            distance_checked = math.floor(get_distance(
+                                players[order['player']][order['hero']]['coords'], players[player][hero]['coords']))
                             if distance_checked <= capacity_radius and players[player][hero]['coords'] == order['target']:
 
-                                target_hp = players[player][hero]['hp'] - capacity_x
+                                target_hp = players[player][hero]['hp'] - \
+                                    capacity_x
                                 if target_hp < 0:
                                     target_hp = 0
                                 players[player][hero]['hp'] = target_hp
@@ -823,16 +877,19 @@ def use_special_ability(order, players, map, database):
         # Reach
         elif order_hero_capacity == 'reach':
             # If tile is clear & target in radius, teleport player to the target coordinates
-            distance_checked = math.floor(get_distance(players[order['player']][order['hero']]['coords'], order['target']))
+            distance_checked = math.floor(get_distance(
+                players[order['player']][order['hero']]['coords'], order['target']))
             tile_checked = get_tile_info(order['target'], players, map)
-            if tile_checked in ('clear', 'spur') and  distance_checked <= capacity_radius:
+            if tile_checked in ('clear', 'spur') and distance_checked <= capacity_radius:
 
-                players[order['player']][order['hero']]['coords'] = order['target']
+                players[order['player']][order['hero']
+                                         ]['coords'] = order['target']
                 ability_used = True
 
         # Set cooldown if the ability is used
         if ability_used:
-            players[order['player']][order['hero']]['cooldown'][0] = database[order_hero_type][order_hero_lvl]['abilities'][0]['cooldown']
+            players[order['player']][order['hero']
+                                     ]['cooldown'][0] = database[order_hero_type][order_hero_lvl]['abilities'][0]['cooldown']
 
     # Ability 2 (lvl 3 min. required)
     else:
@@ -846,13 +903,17 @@ def use_special_ability(order, players, map, database):
             for player in players:
                 if player != order['player']:
                     for hero in players[player]:
-                        distance_checked = math.floor(get_distance(players[order['player']][order['hero']]['coords'], players[player][hero]['coords']))
+                        distance_checked = math.floor(get_distance(
+                            players[order['player']][order['hero']]['coords'], players[player][hero]['coords']))
                         if distance_checked <= capacity_radius:
                             if order_hero_capacity in players[order['player']][hero]['active_effects']:
-                                players[order['player']][hero]['active_effects'][order_hero_capacity][0] += 1
-                                players[order['player']][hero]['active_effects'][order_hero_capacity][1] += capacity_x
+                                players[order['player']
+                                        ][hero]['active_effects'][order_hero_capacity][0] += 1
+                                players[order['player']
+                                        ][hero]['active_effects'][order_hero_capacity][1] += capacity_x
                             else:
-                                players[order['player']][hero]['active_effects'][order_hero_capacity] = [1, capacity_x]
+                                players[order['player']][hero]['active_effects'][order_hero_capacity] = [
+                                    1, capacity_x]
                             ability_used = True
 
                             # Set the memory to 2 in order to trigger a creature action next turn
@@ -860,20 +921,22 @@ def use_special_ability(order, players, map, database):
                                 players[player][hero]['ability_affectation_memory'] = 2
 
         # Immunise
-        elif order_hero_capacity == 'immunise':             
+        elif order_hero_capacity == 'immunise':
             # If there is an entity on the target tile
             if get_tile_info(order['target'], players, map) == 'player':
                 # For each hero of the current player
                 for hero in players[order['player']]:
                     # If ally is in radius & coordinates matches, apply ability
-                    distance_checked = math.floor(get_distance(players[order['player']][order['hero']]['coords'], players[order['player']][hero]['coords']))
+                    distance_checked = math.floor(get_distance(
+                        players[order['player']][order['hero']]['coords'], players[order['player']][hero]['coords']))
                     if players[order['player']][hero]['coords'] == order['target'] and distance_checked <= capacity_radius:
 
-                        players[order['player']][hero]['active_effects'][order_hero_capacity] = [1]
+                        players[order['player']][hero]['active_effects'][order_hero_capacity] = [
+                            1]
                         ability_used = True
 
         # Ovibus
-        elif order_hero_capacity == 'ovibus':             
+        elif order_hero_capacity == 'ovibus':
             # If there is an entity on the target tile
             if get_tile_info(order['target'], players, map) == 'player':
                 # For each enemy entity
@@ -881,10 +944,12 @@ def use_special_ability(order, players, map, database):
                     if player != order['player']:
                         for hero in players[player]:
                             # If enemy is in radius & coordinates matches, apply ability
-                            distance_checked = math.floor(get_distance(players[order['player']][order['hero']]['coords'], players[player][hero]['coords']))
+                            distance_checked = math.floor(get_distance(
+                                players[order['player']][order['hero']]['coords'], players[player][hero]['coords']))
                             if players[player][hero]['coords'] == order['target'] and distance_checked <= capacity_radius:
 
-                                players[player][hero]['active_effects'][order_hero_capacity] = [capacity_x]
+                                players[player][hero]['active_effects'][order_hero_capacity] = [
+                                    capacity_x]
                                 ability_used = True
 
                                 # Set the memory to 2 in order to trigger a creature action next turn
@@ -897,10 +962,12 @@ def use_special_ability(order, players, map, database):
             for player in players:
                 if player != order['player']:
                     for hero in players[player]:
-                        distance_checked = math.floor(get_distance(players[order['player']][order['hero']]['coords'], players[player][hero]['coords']))
+                        distance_checked = math.floor(get_distance(
+                            players[order['player']][order['hero']]['coords'], players[player][hero]['coords']))
                         if distance_checked <= capacity_radius:
-                            
-                            target_hp = players[player][hero]['hp'] - capacity_x
+
+                            target_hp = players[player][hero]['hp'] - \
+                                capacity_x
                             if target_hp < 0:
                                 target_hp = 0
                             players[player][hero]['hp'] = target_hp
@@ -912,8 +979,8 @@ def use_special_ability(order, players, map, database):
 
         # Set cooldown if the ability is used
         if ability_used:
-            players[order['player']][order['hero']]['cooldown'][1] = database[order_hero_type][order_hero_lvl]['abilities'][1]['cooldown']
-
+            players[order['player']][order['hero']
+                                     ]['cooldown'][1] = database[order_hero_type][order_hero_lvl]['abilities'][1]['cooldown']
 
 
 def attack(order, players, map, database):
@@ -942,24 +1009,26 @@ def attack(order, players, map, database):
     -------
     specification : Jonathan Nhouyvanisvong (v.4 19/03/19)
     implementation : Guillaume Nizet (v.2 19/03/19)
-    
+
     """
     # If the target tile is occupied by a player or a creature and if it's not the spawn point of any player and if it's not farther than square root of 2 (to be able to attack diagonally)
     # get_tile_info() returns 'player' even if the tile is occupied by a creature
     if get_tile_info(order['target'], players, map) == 'player' and order['target'] != map['spawns']['Player 1'] and order['target'] != map['spawns']['Player 2'] and get_distance(players[order['player']][order['hero']]['coords'], order['target']) <= 2 ** 0.5:
-        
+
         # Base damage of the hero, based on its type and level
-        damage = database[players[order['player']][order['hero']]['type']][players[order['player']][order['hero']]['level']]['dmg']
-        
+        damage = database[players[order['player']][order['hero']]['type']
+                          ][players[order['player']][order['hero']]['level']]['dmg']
+
         # Process abilities that can modify the damage
 
         # Get active effects
-        active_effects = players[order['player']][order['hero']]['active_effects']
-        
+        active_effects = players[order['player']
+                                 ][order['hero']]['active_effects']
+
         # Energise increases the damage
         if 'energise' in active_effects:
             damage += active_effects['energise'][1]
-        
+
         # Stun decreases the damage
         if 'stun' in active_effects:
             damage -= active_effects['stun'][1]
@@ -976,20 +1045,21 @@ def attack(order, players, map, database):
                     # If the target is affected by the ability 'immunise'
                     if player != 'creatures' and 'immunise' in players[player][hero]['active_effects']:
                         damage = 0
-                    
+
                     # Health of the target = its previous health - damage points of the active hero
                     target_hp = players[player][hero]['hp'] - damage
-                    
+
                     # If the target is going to be killed, its hp is set back to 0.
                     if target_hp <= 0:
                         players[player][hero]['hp'] = 0
                     else:
                         players[player][hero]['hp'] = target_hp
-                    
+
                     # Reset no-action counter
                     map['nb_turns_without_action'] = 0
 
 # -----
+
 
 def move_on(order, players, map):
     """ Tries to execute the given move order.
@@ -1016,9 +1086,9 @@ def move_on(order, players, map):
     -------
     specification : Jonathan Nhouyvanisvong (v.3 03/03/19)
     implementation : Guillaume Nizet (v.1 16/03/19)
-    
+
     """
-    #Check if the target tile is a not a spawn point
+    # Check if the target tile is a not a spawn point
 
     tile_not_on_a_spawn_point = True
 
@@ -1031,7 +1101,8 @@ def move_on(order, players, map):
     # - it is not farther than square root of 2 (to be able to move diagonally)
     # - it is not on a spawn point
 
-    if get_tile_info(order['target'], players, map) == 'clear' and get_distance(players[order['player']][order['hero']]['coords'], order['target']) <= (2 ** 0.5) and tile_not_on_a_spawn_point:
+    info = get_tile_info(order['target'], players, map)
+    if (info == 'clear' or (info == 'spur' and map['nb_turns'] >= 20)) and get_distance(players[order['player']][order['hero']]['coords'], order['target']) <= (2 ** 0.5) and tile_not_on_a_spawn_point:
         players[order['player']][order['hero']]['coords'] = order['target']
 
 
@@ -1054,9 +1125,9 @@ def process_creatures(players):
     --------
     specification : Guillaume Nizet (v.2 03/03/19)
     implementation : prenom nom (v.2 08/03/19)
-    
+
     """
-    #actually, create a stupid AI (Exem. : It can attack but it failed because nobody here)
+    # actually, create a stupid AI (Exem. : It can attack but it failed because nobody here)
     # Action : left, right, up, down, attack, nothing
     pass
 
@@ -1110,15 +1181,14 @@ def think(players, map, database, player):
                 coords_r += choice(distance)
                 if hero_coords[0] - coords_r == 0:
                     del distance[1]
-                    coords_c = choice(distance)
+                    coords_c += choice(distance)
                 else:
-                    coords_c = choice(distance)
+                    coords_c += choice(distance)
 
                 if decision == 1: # Move
                     action = '@' + '%d-%d' % (coords_r, coords_c) # @r-c
                 else: # Attack
                     action = '*' + '%d-%d' % (coords_r, coords_c) # *r-c
-
             else: # Use ability
                 hero_type = players[player][hero]['type']
                 capacity = [database[hero_type][hero_lvl]['abilities'][0]['name']]
@@ -1133,9 +1203,10 @@ def think(players, map, database, player):
                     coords_r += choice(distance)
                     if hero_coords[0] - coords_r == 0:
                         del distance[radius]
-                        coords_c = choice(distance)
+                        coords_c += choice(distance)
                     else:
-                        coords_c = choice(distance)
+                        coords_c += choice(distance)
+
                     action += ':' + '%d-%d' % (coords_r, coords_c) # r-c
             order.append(hero + ':' + action) # nom:<action>
             
@@ -1178,6 +1249,7 @@ def get_distance(coords1, coords2):
     return ((coords2[0] - coords1[0]) ** 2 + (coords2[1] - coords1[1]) ** 2) ** 0.5
 
 # -----
+
 
 def get_tile_info(coords, players, map):
     """ Get the details of the given tile.
@@ -1223,6 +1295,7 @@ def get_tile_info(coords, players, map):
             return 'clear'
 
 # -----
+
 
 def get_closest_heroes(coords, players, restrictive):
     """ Returns the closest hero(es) around the given tile.
@@ -1307,11 +1380,10 @@ def get_closest_heroes(coords, players, restrictive):
     return closest_heroes
 
 
-
 ### MAIN ###
 # Entry point of the game
 
-def main(file, AI_repartition = (False, True), player_colors = ('green', 'red')):
+def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
     """ Manages the global course of the in-game events.
 
     Parameters
@@ -1330,28 +1402,28 @@ def main(file, AI_repartition = (False, True), player_colors = ('green', 'red'))
     # Create the constant database dictionary containg the data of each class at each level
     database = {
         'barbarian': {
-            '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2, 'abilities':[]},
+            '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2, 'abilities': []},
             '2': {'victory_pts': 100, 'hp': 13, 'dmg': 3, 'abilities': [{'name': 'energise', 'radius': 1, 'x': 1, 'cd': 1}]},
             '3': {'victory_pts': 200, 'hp': 16, 'dmg': 4, 'abilities': [{'name': 'energise', 'radius': 2, 'x': 1, 'cd': 1}, {'name': 'stun', 'radius': 1, 'x': 1, 'cd': 1}]},
             '4': {'victory_pts': 400, 'hp': 19, 'dmg': 5, 'abilities': [{'name': 'energise', 'radius': 3, 'x': 2, 'cd': 1}, {'name': 'stun', 'radius': 2, 'x': 2, 'cd': 1}]},
             '5': {'victory_pts': 800, 'hp': 22, 'dmg': 6, 'abilities': [{'name': 'energise', 'radius': 4, 'x': 2, 'cd': 1}, {'name': 'stun', 'radius': 3, 'x': 3, 'cd': 1}]}
         },
         'healer': {
-            '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2, 'abilities':[]},
+            '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2, 'abilities': []},
             '2': {'victory_pts': 100, 'hp': 11, 'dmg': 2, 'abilities': [{'name': 'invigorate', 'radius': 1, 'x': 1, 'cd': 1}]},
             '3': {'victory_pts': 200, 'hp': 12, 'dmg': 3, 'abilities': [{'name': 'invigorate', 'radius': 2, 'x': 2, 'cd': 1}, {'name': 'immunise', 'radius': 1, 'cd': 3}]},
             '4': {'victory_pts': 400, 'hp': 13, 'dmg': 3, 'abilities': [{'name': 'invigorate', 'radius': 3, 'x': 3, 'cd': 1}, {'name': 'immunise', 'radius': 2, 'cd': 3}]},
             '5': {'victory_pts': 800, 'hp': 14, 'dmg': 4, 'abilities': [{'name': 'invigorate', 'radius': 4, 'x': 4, 'cd': 1}, {'name': 'immunise', 'radius': 3, 'cd': 3}]}
         },
         'mage': {
-            '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2, 'abilities':[]},
+            '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2, 'abilities': []},
             '2': {'victory_pts': 100, 'hp': 12, 'dmg': 3, 'abilities': [{'name': 'fulgura', 'radius': 1, 'x': 3, 'cd': 1}]},
             '3': {'victory_pts': 200, 'hp': 14, 'dmg': 4, 'abilities': [{'name': 'fulgura', 'radius': 2, 'x': 3, 'cd': 1}, {'name': 'ovibus', 'radius': 1, 'x': 1, 'cd': 3}]},
             '4': {'victory_pts': 400, 'hp': 16, 'dmg': 5, 'abilities': [{'name': 'fulgura', 'radius': 3, 'x': 4, 'cd': 1}, {'name': 'ovibus', 'radius': 2, 'x': 2, 'cd': 3}]},
             '5': {'victory_pts': 800, 'hp': 18, 'dmg': 6, 'abilities': [{'name': 'fulgura', 'radius': 4, 'x': 4, 'cd': 1}, {'name': 'ovibus', 'radius': 3, 'x': 2, 'cd': 3}]}
         },
         'rogue': {
-            '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2, 'abilities':[]},
+            '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2, 'abilities': []},
             '2': {'victory_pts': 100, 'hp': 12, 'dmg': 3, 'abilities': [{'name': 'reach', 'radius': 1, 'cd': 1}]},
             '3': {'victory_pts': 200, 'hp': 14, 'dmg': 4, 'abilities': [{'name': 'reach', 'radius': 2, 'cd': 1}, {'name': 'burst', 'radius': 1, 'x': 1, 'cd': 1}]},
             '4': {'victory_pts': 400, 'hp': 16, 'dmg': 5, 'abilities': [{'name': 'reach', 'radius': 3, 'cd': 1}, {'name': 'burst', 'radius': 2, 'x': 2, 'cd': 1}]},
@@ -1363,20 +1435,23 @@ def main(file, AI_repartition = (False, True), player_colors = ('green', 'red'))
     players, map = read_file('test.hon')
 
     # Save the player colors
-    map['player_colors'] = {'Player %d' % (index + 1) : player_colors[index] for index in range(len(player_colors))}
-    
+    map['player_colors'] = {'Player %d' % (
+        index + 1): player_colors[index] for index in range(len(player_colors))}
+
     # Convert AI repartition to a dictionary
-    AI_repartition = {'Player %d' % (index + 1) : AI_repartition[index] for index in range(len(AI_repartition))}
+    AI_repartition = {'Player %d' % (
+        index + 1): AI_repartition[index] for index in range(len(AI_repartition))}
 
     # Step 2 : create 4 heroes/player
     for player in players:
         if player != 'creatures':
             # Display UI several times to prevent cheating if there are more than one human player.
             display_ui(players, map, database)
-            if AI_repartition[player]: # AI
-                command = 'Blork:mage Groumpf:barbarian Azagdul:healer Bob:rogue' # Naive AI for now
-            else: # Human
-                command = input('%s, Create 4 heroes:\n>>> ' % colored.stylize(player, colored.fg('light_%s' % map['player_colors'][player])))
+            if AI_repartition[player]:  # AI
+                command = 'Blork:mage Groumpf:barbarian Azagdul:healer Bob:rogue'  # Naive AI for now
+            else:  # Human
+                command = input('%s, Create 4 heroes:\n>>> ' % colored.stylize(
+                    player, colored.fg('light_%s' % map['player_colors'][player])))
             create_character(players, map, command, player)
 
     # Main loop
@@ -1389,12 +1464,13 @@ def main(file, AI_repartition = (False, True), player_colors = ('green', 'red'))
             if player != 'creatures' and len(players[player]) > 0:
                 # Display UI several times to prevent cheating if there are more than one human player.
                 display_ui(players, map, database)
-                if AI_repartition[player]: # AI
+                if AI_repartition[player]:  # AI
                     command = think(players, map, database, player)
-                else: # Human
-                    command = input('%s, Enter orders:\n>>> ' % colored.stylize(player, colored.fg('light_%s' % map['player_colors'][player])))
-                
-                #Save orders
+                else:  # Human
+                    command = input('%s, Enter orders:\n>>> ' % colored.stylize(
+                        player, colored.fg('light_%s' % map['player_colors'][player])))
+
+                # Save orders
                 orders += parse_command(player, command, players, database)
 
         # Step 4 : Use special abilities
@@ -1408,9 +1484,9 @@ def main(file, AI_repartition = (False, True), player_colors = ('green', 'red'))
         # Step 5 : Move & Fight
         for order in orders:
             if order['action'] == 'attack':
-                attack (order, players, map, database)
+                attack(order, players, map, database)
             elif order['action'] == 'move':
-                move_on (order, players, map)
+                move_on(order, players, map)
 
         # Step 6 : Second clear
         clean(players, map, database)
@@ -1420,7 +1496,8 @@ def main(file, AI_repartition = (False, True), player_colors = ('green', 'red'))
 
         # Step 7 : Check if the game is over
         if map['player_in_citadel'][1] - 1 == map['nb_turns_to_win']:
-            print('%s WON OMFG WAAAAAAAAA DUIhskfusfd sf!!!!!!!1!!' % map['player_in_citadel'][0])
+            print('%s WON OMFG WAAAAAAAAA DUIhskfusfd sf!!!!!!!1!!' %
+                  map['player_in_citadel'][0])
             game_is_over = True
         elif map['nb_turns_without_action'] == 40:
             print('It\'s a tie !')
