@@ -1107,12 +1107,12 @@ def think(players, map, database, player):
 
             if decision < 3:
                 distance = [-1, 0, 1]
-                coord_r = choice(distance)
-                if coord_r == 0:
+                coords_r += choice(distance)
+                if hero_coords[0] - coords_r == 0:
                     del distance[1]
-                    coord_c = choice(distance)
+                    coords_c = choice(distance)
                 else:
-                    coord_c = choice(distance)
+                    coords_c = choice(distance)
 
                 if decision == 1: # Move
                     action = '@' + '%d-%d' % (coords_r, coords_c) # @r-c
@@ -1130,12 +1130,12 @@ def think(players, map, database, player):
                 if action in target_capacity:
                     radius = database[hero_type][hero_lvl]['abilities'][id]['radius']
                     distance = [-radius + radius_id for radius_id in range(radius * 2 + 1)]
-                    coord_r = choice(distance)
-                    if coord_r == 0:
+                    coords_r += choice(distance)
+                    if hero_coords[0] - coords_r == 0:
                         del distance[radius]
-                        coord_c = choice(distance)
+                        coords_c = choice(distance)
                     else:
-                        coord_c = choice(distance)
+                        coords_c = choice(distance)
                     action += ':' + '%d-%d' % (coords_r, coords_c) # r-c
             order.append(hero + ':' + action) # nom:<action>
             
