@@ -954,7 +954,7 @@ def use_special_ability(order, players, map, database):
         # Set cooldown if the ability is used
         if ability_used:
             players[order['player']][order['hero']
-                                     ]['cooldown'][0] = database[order_hero_type][order_hero_lvl]['abilities'][0]['cooldown']
+                                     ]['cooldown'][0] = database[order_hero_type][order_hero_lvl]['abilities'][0]['cd']
 
     # Ability 2 (lvl 3 min. required)
     else:
@@ -1045,7 +1045,7 @@ def use_special_ability(order, players, map, database):
         # Set cooldown if the ability is used
         if ability_used:
             players[order['player']][order['hero']
-                                     ]['cooldown'][1] = database[order_hero_type][order_hero_lvl]['abilities'][1]['cooldown']
+                                     ]['cooldown'][1] = database[order_hero_type][order_hero_lvl]['abilities'][1]['cd']
 
 
 def attack(order, players, map, database):
@@ -1641,4 +1641,4 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
             print('It\'s a tie !')
             game_is_over = True
 
-main('test.hon', (False, True))
+# main('test.hon', (False, True))
