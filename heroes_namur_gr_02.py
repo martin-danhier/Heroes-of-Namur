@@ -657,7 +657,7 @@ def read_file(path):
                 map['spur'].append((int(info[0]), int(info[1])))
             elif current == 'creatures:':
                 players['creatures'][info[0]] = {'coords': (int(info[1]), int(info[2])), 'hp': int(
-                    info[3]), 'dmg': int(info[4]), 'radius': int(info[5]), 'xp': int(info[6]), 'active_effects' : {}}
+                    info[3]), 'dmg': int(info[4]), 'radius': int(info[5]), 'xp': int(info[6]), 'active_effects': {}, 'ability_affectation_memory' : 0}
 
         # Increment the line counter.
         line_in_current += 1
@@ -779,9 +779,15 @@ def update_counters(players, map):
     specification: Martin Danhier (v.1 22/03/2018)
     implementation: Martin Danhier (v.1 22/03/2018)
     """
-    # For each hero that is not a creature
+    # For each hero or creature
     for player in players:
-        if player != 'creatures':
+        if player == 'creatures':
+            for creature in players['creatures']:
+                # Decrement the abilty affectation memory.
+                # It is used to trigger a creature action.
+                if players['creatures'][creature]['ability_affectation_memory'] > 0:
+                    players['creatures'][creature]['ability_affectation_memory'] -= 1
+        else:
             for hero in players[player]:
 
                 # Step 1: DECREMENT ABILITIES COOLDOWN
@@ -1073,11 +1079,16 @@ def attack(order, players, map, database):
     # If the target tile is occupied by a player or a creature and if it's not the spawn point of any player and if it's not farther than square root of 2 (to be able to attack diagonally)
     # get_tile_info() returns 'player' even if the tile is occupied by a creature
     if get_tile_info(order['target'], players, map) == 'player' and order['target'] != map['spawns']['Player 1'] and order['target'] != map['spawns']['Player 2'] and get_distance(players[order['player']][order['hero']]['coords'], order['target']) <= 2 ** 0.5:
+        
+        # Get base damage
+        # Creature attacks, damage is a set value
+        if order['player'] == 'creatures':
+            damage = players[order['player']][order['hero']]['dmg']
 
-        # Base damage of the hero, based on its type and level
-        damage = database[players[order['player']][order['hero']]['type']
-                          ][players[order['player']][order['hero']]['level']]['dmg']
-
+        # Hero attacks, damage based on its type and level
+        else:
+            damage = database[players[order['player']][order['hero']]['type']][players[order['player']][order['hero']]['level']]['dmg']
+        
         # Process abilities that can modify the damage
 
         # Get active effects
@@ -1168,8 +1179,8 @@ def move_on(order, players, map):
 ### CREATURES ###
 # Process creatures
 
-def process_creatures(players):
-    """ Automatically computes an action for a creature to perform.
+def process_creatures(players, map, database):
+    """ Automatically computes an action for every creature : goes towards nearby heroes and attacks the heroes next to itself.
 
     Parameters:
     -----------
@@ -1182,13 +1193,75 @@ def process_creatures(players):
 
     Version:
     --------
-    specification : Guillaume Nizet (v.2 03/03/19)
-    implementation : prenom nom (v.2 08/03/19)
-
+    specification : Guillaume Nizet (v.3 05/04/19)
+    implementation : Guillaume Nizet (v.2 05/04/19)
+    
     """
-    # actually, create a stupid AI (Exem. : It can attack but it failed because nobody here)
-    # Action : left, right, up, down, attack, nothing
-    pass
+
+    for creature in players['creatures']:
+
+        # Get creature info
+        creature_coords = players['creatures'][creature]['coords']
+        creature_radius = players['creatures'][creature]['radius']
+
+        # Get the closest hero
+        # get_closest_heroes() is restrictive : it returns a list of one hero, which is stored in closest_hero
+        closest_hero = get_closest_heroes(creature_coords, players, True)[0]
+
+        # Get the coords of the closest hero
+        for player in players:
+            for hero in players[player]:
+                if closest_hero == (player, hero):
+                    closest_hero_coords = players[player][hero]['coords']
+
+        # Get the distance between the hero and the creature
+        distance_hero_creature = get_distance(creature_coords, closest_hero_coords)
+
+        # If the hero is in the creature radius or if the creature has been affected by an ability on the previous turn
+        if distance_hero_creature <= creature_radius or players['creatures'][creature]['ability_affectation_memory'] > 0:
+            order = {'player' : 'creatures', 'hero' : creature}
+
+            # If the creature is next to the hero
+            if distance_hero_creature == 1:
+
+                # The creature attacks the hero
+                order['action'] = 'attack'
+                order['target'] = closest_hero_coords
+                attack(order, players, map, database)
+
+            else:
+
+                # The creature moves towards the hero
+                order['action'] = 'move'
+
+                # The creature can move on 9 tiles
+
+                first_loop = True
+
+                # Get the smallest distance
+                for x_coord in range(creature_coords[0] - 1, creature_coords[0] + 2):
+                    for y_coord in range(creature_coords[1] - 1, creature_coords[1] + 2):
+
+                        # Get the distance between the checked tile and the hero
+                        distance_hero_tile = get_distance((x_coord ,y_coord), closest_hero_coords)
+
+                        if first_loop:
+                            min_distance = distance_hero_tile
+                            first_loop = False
+
+                        else:
+                            if distance_hero_tile < min_distance:
+                                min_distance = distance_hero_tile
+
+
+                # Get the first coordinates that are at the smallest distance from the closest hero
+                for x_coord in range(creature_coords[0] - 1, creature_coords[0] + 2):
+                    for y_coord in range(creature_coords[1] - 1, creature_coords[1] + 2):
+                        if get_distance((x_coord, y_coord), closest_hero_coords) == min_distance:
+                            # The creature moves on to this tile
+                            order['target'] = (x_coord, y_coord)
+                            move_on(order, players, map)
+
 
 
 ### AI ###
@@ -1506,6 +1579,7 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
         if player != 'creatures':
             # Display UI several times to prevent cheating if there are more than one human player.
             display_ui(players, map, database)
+
             if AI_repartition[player]:  # AI
                 command = 'Blork:mage Groumpf:barbarian Azagdul:healer Bob:rogue'  # Naive AI for now
             else:  # Human
@@ -1519,6 +1593,11 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
 
         # Step 3 : give order (store in list)
         orders = []
+
+        # Get creatures orders
+        process_creatures(players, map, database)
+
+
         for player in players:
             if player != 'creatures' and len(players[player]) > 0:
                 # Display UI several times to prevent cheating if there are more than one human player.
@@ -1561,3 +1640,5 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
         elif map['nb_turns_without_action'] == 40:
             print('It\'s a tie !')
             game_is_over = True
+
+main('test.hon', (False, True))
