@@ -33,8 +33,8 @@ def display_ui(players, map, database):
     stats = create_stats(players, map, database).split('\n')
 
     # Get data
-    width = map["size"][0]
-    height = map["size"][1]
+    height = map["size"][0]
+    width = map["size"][1]
 
     # Generate dict with coords to color
     colored_coords = {"spur": []}
