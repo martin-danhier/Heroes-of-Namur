@@ -1206,6 +1206,7 @@ def think(players, map, database, player):
                         coords_c += choice(distance)
                     else:
                         coords_c += choice(distance)
+
                     action += ':' + '%d-%d' % (coords_r, coords_c) # r-c
             order.append(hero + ':' + action) # nom:<action>
             
