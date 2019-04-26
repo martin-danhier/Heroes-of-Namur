@@ -171,7 +171,8 @@ def display_ui(players, map, database):
         os.system('cls')  # Windows
     else:
         os.system('clear')  # Linux, Mac
-
+        pass
+        
     # Print board
     print(board)
 
@@ -692,6 +693,7 @@ def clean(players, map, database):
     """
     dead_creatures = []
 
+    
     # Check creatures dispawn
 
     # For each dead creature
@@ -747,8 +749,7 @@ def clean(players, map, database):
                 # If this hero is dead, replace it in its spawn and restore its health
                 if players[player][hero]['hp'] == 0:
                     players[player][hero]['coords'] = map['spawns'][player]
-                    players[player][hero]['hp'] = database[hero_type][players[player]
-                                                                      [hero]['level']]['hp']
+                    players[player][hero]['hp'] = database[hero_type][players[player][hero]['level']]['hp']
                 else:
                     # Check if a hero level up
                     for level in database[hero_type]:
@@ -1076,9 +1077,9 @@ def attack(order, players, map, database):
     implementation : Guillaume Nizet (v.2 19/03/19)
 
     """
-    # If the target tile is occupied by a player or a creature and if it's not the spawn point of any player and if it's not farther than square root of 2 (to be able to attack diagonally)
+    # If the target tile is occupied by a player or a creature and if it's not the spawn point of any player and if it's not farther than 1
     # get_tile_info() returns 'player' even if the tile is occupied by a creature
-    if get_tile_info(order['target'], players, map) == 'player' and order['target'] != map['spawns']['Player 1'] and order['target'] != map['spawns']['Player 2'] and get_distance(players[order['player']][order['hero']]['coords'], order['target']) <= 2 ** 0.5:
+    if get_tile_info(order['target'], players, map) == 'player' and order['target'] != map['spawns']['Player 1'] and order['target'] != map['spawns']['Player 2'] and math.floor(get_distance(players[order['player']][order['hero']]['coords'], order['target'])) <= 1:
         
         # Get base damage
         # Creature attacks, damage is a set value
@@ -1168,11 +1169,11 @@ def move_on(order, players, map):
 
     # If the target tile:
     # - is clear
-    # - it is not farther than square root of 2 (to be able to move diagonally)
+    # - it is not farther than 1
     # - it is not on a spawn point
 
     info = get_tile_info(order['target'], players, map)
-    if (info == 'clear' or (info == 'spur' and map['nb_turns'] >= 20)) and get_distance(players[order['player']][order['hero']]['coords'], order['target']) <= (2 ** 0.5) and tile_not_on_a_spawn_point:
+    if (info == 'clear' or (info == 'spur' and map['nb_turns'] >= 20)) and math.floor(get_distance(players[order['player']][order['hero']]['coords'], order['target'])) <= 1 and tile_not_on_a_spawn_point:
         players[order['player']][order['hero']]['coords'] = order['target']
 
 
@@ -1198,7 +1199,10 @@ def process_creatures(players, map, database):
     
     """
 
+    orders = []
+
     for creature in players['creatures']:
+        order = {}
 
         # Get creature info
         creature_coords = players['creatures'][creature]['coords']
@@ -1215,7 +1219,7 @@ def process_creatures(players, map, database):
                     closest_hero_coords = players[player][hero]['coords']
 
         # Get the distance between the hero and the creature
-        distance_hero_creature = get_distance(creature_coords, closest_hero_coords)
+        distance_hero_creature = math.floor(get_distance(creature_coords, closest_hero_coords))
 
         # If the hero is in the creature radius or if the creature has been affected by an ability on the previous turn
         if distance_hero_creature <= creature_radius or players['creatures'][creature]['ability_affectation_memory'] > 0:
@@ -1227,7 +1231,6 @@ def process_creatures(players, map, database):
                 # The creature attacks the hero
                 order['action'] = 'attack'
                 order['target'] = closest_hero_coords
-                attack(order, players, map, database)
 
             else:
 
@@ -1260,7 +1263,10 @@ def process_creatures(players, map, database):
                         if get_distance((x_coord, y_coord), closest_hero_coords) == min_distance:
                             # The creature moves on to this tile
                             order['target'] = (x_coord, y_coord)
-                            move_on(order, players, map)
+        if len(order) > 0:
+            orders.append(order)
+
+    return orders
 
 
 
@@ -1592,10 +1598,9 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
     while not game_is_over:
 
         # Step 3 : give order (store in list)
-        orders = []
 
         # Get creatures orders
-        process_creatures(players, map, database)
+        orders = process_creatures(players, map, database)
 
 
         for player in players:
@@ -1616,9 +1621,11 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
             if order['action'] not in ('attack', 'move'):
                 use_special_ability(order, players, map, database)
 
+        
         # Step 4 : First clear
         clean(players, map, database)
 
+        
         # Step 5 : Move & Fight
         for order in orders:
             if order['action'] == 'attack':
@@ -1626,9 +1633,10 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
             elif order['action'] == 'move':
                 move_on(order, players, map)
 
+
         # Step 6 : Second clear
         clean(players, map, database)
-
+        
         # Update cooldowns and counters
         update_counters(players, map)
 
