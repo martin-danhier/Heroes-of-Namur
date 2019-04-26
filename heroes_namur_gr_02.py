@@ -171,8 +171,6 @@ def display_ui(players, map, database):
         os.system('cls')  # Windows
     else:
         os.system('clear')  # Linux, Mac
-        pass
-        
     # Print board
     print(board)
 
@@ -237,7 +235,8 @@ def create_stats(players, map, database):
 
     """
     stats = ''
-    creature_stats = '\n\n%s:' % colored.stylize('Creatures', colored.fg('light_magenta'))
+    creature_stats = '\n\n%s:' % colored.stylize(
+        'Creatures', colored.fg('light_magenta'))
 
     # For each player or creature
     for player in players:
@@ -245,29 +244,33 @@ def create_stats(players, map, database):
             # Add creature data
             for creature in players['creatures']:
                 active_effects = players['creatures'][creature]['active_effects']
-                
+
                 # Get damage
                 damage = players['creatures'][creature]['dmg']
                 if 'stun' in active_effects:
-                    damage -= active_effects['stun'][1] #new damage = initial damage - x
+                    # new damage = initial damage - x
+                    damage -= active_effects['stun'][1]
                 if damage < 1:
-                    damage = 1 #no damage below 1
+                    damage = 1  # no damage below 1
 
                 # Color damage
                 if damage < players['creatures'][creature]['dmg']:
                     damage_color = 'light_red'
                 else:
                     damage_color = 'light_goldenrod_1'
-                damage = colored.stylize('%d' % damage, colored.fg(damage_color))
-                
-                creature_stats += '\n - %s:\n   (HP: %s, XP: %s, RADIUS: %s, DMG: %s)\n   Position: (%s, %s)' % (colored.stylize(creature, colored.fg('light_magenta')),colored.stylize(players['creatures'][creature]['hp'], colored.fg('light_goldenrod_1')), colored.stylize(players['creatures'][creature]['xp'], colored.fg('light_goldenrod_1')), colored.stylize(players['creatures'][creature]['radius'], colored.fg('light_goldenrod_1')), damage, colored.stylize(players['creatures'][creature]['coords'][0], colored.fg('light_goldenrod_1')), colored.stylize(players['creatures'][creature]['coords'][1], colored.fg('light_goldenrod_1')))
-                
+                damage = colored.stylize(
+                    '%d' % damage, colored.fg(damage_color))
+
+                creature_stats += '\n - %s:\n   (HP: %s, XP: %s, RADIUS: %s, DMG: %s)\n   Position: (%s, %s)' % (colored.stylize(creature, colored.fg('light_magenta')), colored.stylize(players['creatures'][creature]['hp'], colored.fg('light_goldenrod_1')), colored.stylize(players['creatures'][creature]['xp'], colored.fg(
+                    'light_goldenrod_1')), colored.stylize(players['creatures'][creature]['radius'], colored.fg('light_goldenrod_1')), damage, colored.stylize(players['creatures'][creature]['coords'][0], colored.fg('light_goldenrod_1')), colored.stylize(players['creatures'][creature]['coords'][1], colored.fg('light_goldenrod_1')))
+
                 # Display active effects
                 if len(active_effects) > 0:
                     index = 0
                     creature_stats += '\n   Active effects: '
                     for effect in active_effects:
-                        creature_stats += '%s (%s turns left)' % (effect, colored.stylize(active_effects[effect][0], colored.fg('light_goldenrod_1')))
+                        creature_stats += '%s (%s turns left)' % (effect, colored.stylize(
+                            active_effects[effect][0], colored.fg('light_goldenrod_1')))
                         # Add a comma to separate effects
                         if index < len(active_effects) - 1:
                             creature_stats += ', '
@@ -363,7 +366,8 @@ def create_stats(players, map, database):
 
     # Merge stats and creature stats
     line_counter = 0
-    full_stats = '=== TURN #%s ===' % colored.stylize(map['nb_turns'],colored.fg('light_goldenrod_1'))
+    full_stats = '=== TURN #%s ===' % colored.stylize(
+        map['nb_turns'], colored.fg('light_goldenrod_1'))
     splitted_stats = stats.split('\n')
     splitted_creature_stats = creature_stats.split('\n')
     while line_counter < len(splitted_stats) or line_counter < len(splitted_creature_stats):
@@ -372,16 +376,19 @@ def create_stats(players, map, database):
             line += splitted_stats[line_counter]
         if line_counter < len(splitted_creature_stats):
             # Fix the length error caused by the color codes in the str
-            colors = ['light_goldenrod_1', 'light_magenta'] + ['light_' + map['player_colors'][player] for player in map['player_colors']]
-            error = 4 * (len(line.split(colored.attr('reset'))) - 1) + len(line.split('\u0336')) - 1
+            colors = ['light_goldenrod_1', 'light_magenta'] + ['light_' +
+                                                               map['player_colors'][player] for player in map['player_colors']]
+            error = 4 * (len(line.split(colored.attr('reset'))) -
+                         1) + len(line.split('\u0336')) - 1
             for color in colors:
-                error += len(colored.fg(color)) * (len(line.split(colored.fg(color))) - 1)
-                
-            line += ' ' * (75 - len(line) + error) + splitted_creature_stats[line_counter]
+                error += len(colored.fg(color)) * \
+                    (len(line.split(colored.fg(color))) - 1)
+
+            line += ' ' * (75 - len(line) + error) + \
+                splitted_creature_stats[line_counter]
 
         full_stats += line
         line_counter += 1
-
 
     # Return the full stats string
     return full_stats
@@ -658,7 +665,7 @@ def read_file(path):
                 map['spur'].append((int(info[0]), int(info[1])))
             elif current == 'creatures:':
                 players['creatures'][info[0]] = {'coords': (int(info[1]), int(info[2])), 'hp': int(
-                    info[3]), 'dmg': int(info[4]), 'radius': int(info[5]), 'xp': int(info[6]), 'active_effects': {}, 'ability_affectation_memory' : 0}
+                    info[3]), 'dmg': int(info[4]), 'radius': int(info[5]), 'xp': int(info[6]), 'active_effects': {}, 'ability_affectation_memory': 0}
 
         # Increment the line counter.
         line_in_current += 1
@@ -693,7 +700,6 @@ def clean(players, map, database):
     """
     dead_creatures = []
 
-    
     # Check creatures dispawn
 
     # For each dead creature
@@ -749,7 +755,8 @@ def clean(players, map, database):
                 # If this hero is dead, replace it in its spawn and restore its health
                 if players[player][hero]['hp'] == 0:
                     players[player][hero]['coords'] = map['spawns'][player]
-                    players[player][hero]['hp'] = database[hero_type][players[player][hero]['level']]['hp']
+                    players[player][hero]['hp'] = database[hero_type][players[player]
+                                                                      [hero]['level']]['hp']
                 else:
                     # Check if a hero level up
                     for level in database[hero_type]:
@@ -782,22 +789,21 @@ def update_counters(players, map):
     """
     # For each hero or creature
     for player in players:
-        if player == 'creatures':
-            for creature in players['creatures']:
-                # Decrement the abilty affectation memory.
-                # It is used to trigger a creature action.
-                if players['creatures'][creature]['ability_affectation_memory'] > 0:
-                    players['creatures'][creature]['ability_affectation_memory'] -= 1
-        else:
             for hero in players[player]:
-
-                # Step 1: DECREMENT ABILITIES COOLDOWN
-                # For each cooldown of that hero
-                cooldowns = players[player][hero]['cooldown']
-                for cooldown_index in range(len(cooldowns)):
-                    # Decrement the cooldown if it is strictly positive (0 = ready to use)
-                    if cooldowns[cooldown_index] > 0:
-                        cooldowns[cooldown_index] -= 1
+                if player == 'creatures':
+                    for creature in players['creatures']:
+                        # Decrement the abilty affectation memory.
+                        # It is used to trigger a creature action.
+                        if players['creatures'][creature]['ability_affectation_memory'] > 0:
+                            players['creatures'][creature]['ability_affectation_memory'] -= 1
+                else:
+                    # Step 1: DECREMENT ABILITIES COOLDOWN
+                    # For each cooldown of that hero
+                    cooldowns = players[player][hero]['cooldown']
+                    for cooldown_index in range(len(cooldowns)):
+                        # Decrement the cooldown if it is strictly positive (0 = ready to use)
+                        if cooldowns[cooldown_index] > 0:
+                            cooldowns[cooldown_index] -= 1
 
                 # Step 2: DECREMENT ACTIVE EFFECTS COOLDOWN
                 # For each active effect of that hero
@@ -832,7 +838,8 @@ def update_counters(players, map):
         map['player_in_citadel'] = ('', 0)
     # Same player as last turn : increment
     elif map['player_in_citadel'][0] == players_on_spur[0]:
-        map['player_in_citadel'] = (map['player_in_citadel'][0], map['player_in_citadel'][1] + 1)
+        map['player_in_citadel'] = (
+            map['player_in_citadel'][0], map['player_in_citadel'][1] + 1)
     # Different player : reset and set their name
     else:
         map['player_in_citadel'] = (players_on_spur[0], 1)
@@ -954,14 +961,13 @@ def use_special_ability(order, players, map, database):
 
         # Set cooldown if the ability is used
         if ability_used:
-            players[order['player']][order['hero']
-                                     ]['cooldown'][0] = database[order_hero_type][order_hero_lvl]['abilities'][0]['cd']
+            players[order['player']][order['hero']]['cooldown'][0] = database[order_hero_type][order_hero_lvl]['abilities'][0]['cooldown']
 
     # Ability 2 (lvl 3 min. required)
     else:
         capacity_radius = database[order_hero_type][order_hero_lvl]['abilities'][1]['radius']
         if order_hero_capacity != 'immunise':
-            capacity_x = database[order_hero_type][order_hero_lvl]['abilities'][0]['x']
+            capacity_x = database[order_hero_type][order_hero_lvl]['abilities'][1]['x']
 
         # Stun
         if order_hero_capacity == 'stun':
@@ -972,13 +978,13 @@ def use_special_ability(order, players, map, database):
                         distance_checked = math.floor(get_distance(
                             players[order['player']][order['hero']]['coords'], players[player][hero]['coords']))
                         if distance_checked <= capacity_radius:
-                            if order_hero_capacity in players[order['player']][hero]['active_effects']:
-                                players[order['player']
+                            if order_hero_capacity in players[player][hero]['active_effects']:
+                                players[player
                                         ][hero]['active_effects'][order_hero_capacity][0] += 1
-                                players[order['player']
+                                players[player
                                         ][hero]['active_effects'][order_hero_capacity][1] += capacity_x
                             else:
-                                players[order['player']][hero]['active_effects'][order_hero_capacity] = [
+                                players[player][hero]['active_effects'][order_hero_capacity] = [
                                     1, capacity_x]
                             ability_used = True
 
@@ -1046,7 +1052,7 @@ def use_special_ability(order, players, map, database):
         # Set cooldown if the ability is used
         if ability_used:
             players[order['player']][order['hero']
-                                     ]['cooldown'][1] = database[order_hero_type][order_hero_lvl]['abilities'][1]['cd']
+                                     ]['cooldown'][1] = database[order_hero_type][order_hero_lvl]['abilities'][1]['cooldown']
 
 
 def attack(order, players, map, database):
@@ -1080,7 +1086,7 @@ def attack(order, players, map, database):
     # If the target tile is occupied by a player or a creature and if it's not the spawn point of any player and if it's not farther than 1
     # get_tile_info() returns 'player' even if the tile is occupied by a creature
     if get_tile_info(order['target'], players, map) == 'player' and order['target'] != map['spawns']['Player 1'] and order['target'] != map['spawns']['Player 2'] and math.floor(get_distance(players[order['player']][order['hero']]['coords'], order['target'])) <= 1:
-        
+
         # Get base damage
         # Creature attacks, damage is a set value
         if order['player'] == 'creatures':
@@ -1088,8 +1094,9 @@ def attack(order, players, map, database):
 
         # Hero attacks, damage based on its type and level
         else:
-            damage = database[players[order['player']][order['hero']]['type']][players[order['player']][order['hero']]['level']]['dmg']
-        
+            damage = database[players[order['player']][order['hero']]['type']
+                              ][players[order['player']][order['hero']]['level']]['dmg']
+
         # Process abilities that can modify the damage
 
         # Get active effects
@@ -1196,7 +1203,7 @@ def process_creatures(players, map, database):
     --------
     specification : Guillaume Nizet (v.3 05/04/19)
     implementation : Guillaume Nizet (v.2 05/04/19)
-    
+
     """
 
     orders = []
@@ -1219,11 +1226,12 @@ def process_creatures(players, map, database):
                     closest_hero_coords = players[player][hero]['coords']
 
         # Get the distance between the hero and the creature
-        distance_hero_creature = math.floor(get_distance(creature_coords, closest_hero_coords))
+        distance_hero_creature = math.floor(
+            get_distance(creature_coords, closest_hero_coords))
 
         # If the hero is in the creature radius or if the creature has been affected by an ability on the previous turn
         if distance_hero_creature <= creature_radius or players['creatures'][creature]['ability_affectation_memory'] > 0:
-            order = {'player' : 'creatures', 'hero' : creature}
+            order = {'player': 'creatures', 'hero': creature}
 
             # If the creature is next to the hero
             if distance_hero_creature == 1:
@@ -1246,7 +1254,8 @@ def process_creatures(players, map, database):
                     for y_coord in range(creature_coords[1] - 1, creature_coords[1] + 2):
 
                         # Get the distance between the checked tile and the hero
-                        distance_hero_tile = get_distance((x_coord ,y_coord), closest_hero_coords)
+                        distance_hero_tile = get_distance(
+                            (x_coord, y_coord), closest_hero_coords)
 
                         if first_loop:
                             min_distance = distance_hero_tile
@@ -1255,7 +1264,6 @@ def process_creatures(players, map, database):
                         else:
                             if distance_hero_tile < min_distance:
                                 min_distance = distance_hero_tile
-
 
                 # Get the first coordinates that are at the smallest distance from the closest hero
                 for x_coord in range(creature_coords[0] - 1, creature_coords[0] + 2):
@@ -1267,7 +1275,6 @@ def process_creatures(players, map, database):
             orders.append(order)
 
     return orders
-
 
 
 ### AI ###
@@ -1304,11 +1311,11 @@ def think(players, map, database, player):
 
     for hero in players[player]:
         hero_lvl = players[player][hero]['level']
-        if int(hero_lvl) > 1: # Can use ability
+        if int(hero_lvl) > 1:  # Can use ability
             decision = randint(0, 3)
-        else: # Can't use ability
+        else:  # Can't use ability
             decision = randint(0, 2)
-            
+
         if decision != 0:
             hero_coords = players[player][hero]['coords']
             coords_r = hero_coords[0]
@@ -1323,21 +1330,24 @@ def think(players, map, database, player):
                 else:
                     coords_c += choice(distance)
 
-                if decision == 1: # Move
-                    action = '@' + '%d-%d' % (coords_r, coords_c) # @r-c
-                else: # Attack
-                    action = '*' + '%d-%d' % (coords_r, coords_c) # *r-c
-            else: # Use ability
+                if decision == 1:  # Move
+                    action = '@' + '%d-%d' % (coords_r, coords_c)  # @r-c
+                else:  # Attack
+                    action = '*' + '%d-%d' % (coords_r, coords_c)  # *r-c
+            else:  # Use ability
                 hero_type = players[player][hero]['type']
-                capacity = [database[hero_type][hero_lvl]['abilities'][0]['name']]
+                capacity = [database[hero_type]
+                            [hero_lvl]['abilities'][0]['name']]
                 if int(hero_lvl) > 2:
-                    capacity.append(database[hero_type][hero_lvl]['abilities'][1]['name'])
+                    capacity.append(database[hero_type]
+                                    [hero_lvl]['abilities'][1]['name'])
 
                 id = randint(0, len(capacity) - 1)
-                action = capacity[id] # capacity
+                action = capacity[id]  # capacity
                 if action in target_capacity:
                     radius = database[hero_type][hero_lvl]['abilities'][id]['radius']
-                    distance = [-radius + radius_id for radius_id in range(radius * 2 + 1)]
+                    distance = [-radius +
+                                radius_id for radius_id in range(radius * 2 + 1)]
                     coords_r += choice(distance)
                     if hero_coords[0] - coords_r == 0:
                         del distance[radius]
@@ -1345,10 +1355,10 @@ def think(players, map, database, player):
                     else:
                         coords_c += choice(distance)
 
-                    action += ':' + '%d-%d' % (coords_r, coords_c) # r-c
-            order.append(hero + ':' + action) # nom:<action>
-            
-    #store commands
+                    action += ':' + '%d-%d' % (coords_r, coords_c)  # r-c
+            order.append(hero + ':' + action)  # nom:<action>
+
+    # store commands
     for index, order_done in enumerate(order):
         command += order_done
         if index != len(order) - 1:
@@ -1541,31 +1551,31 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
     database = {
         'barbarian': {
             '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2, 'abilities': []},
-            '2': {'victory_pts': 100, 'hp': 13, 'dmg': 3, 'abilities': [{'name': 'energise', 'radius': 1, 'x': 1, 'cd': 1}]},
-            '3': {'victory_pts': 200, 'hp': 16, 'dmg': 4, 'abilities': [{'name': 'energise', 'radius': 2, 'x': 1, 'cd': 1}, {'name': 'stun', 'radius': 1, 'x': 1, 'cd': 1}]},
-            '4': {'victory_pts': 400, 'hp': 19, 'dmg': 5, 'abilities': [{'name': 'energise', 'radius': 3, 'x': 2, 'cd': 1}, {'name': 'stun', 'radius': 2, 'x': 2, 'cd': 1}]},
-            '5': {'victory_pts': 800, 'hp': 22, 'dmg': 6, 'abilities': [{'name': 'energise', 'radius': 4, 'x': 2, 'cd': 1}, {'name': 'stun', 'radius': 3, 'x': 3, 'cd': 1}]}
+            '2': {'victory_pts': 100, 'hp': 13, 'dmg': 3, 'abilities': [{'name': 'energise', 'radius': 1, 'x': 1, 'cooldown': 1}]},
+            '3': {'victory_pts': 200, 'hp': 16, 'dmg': 4, 'abilities': [{'name': 'energise', 'radius': 2, 'x': 1, 'cooldown': 1}, {'name': 'stun', 'radius': 1, 'x': 1, 'cooldown': 1}]},
+            '4': {'victory_pts': 400, 'hp': 19, 'dmg': 5, 'abilities': [{'name': 'energise', 'radius': 3, 'x': 2, 'cooldown': 1}, {'name': 'stun', 'radius': 2, 'x': 2, 'cooldown': 1}]},
+            '5': {'victory_pts': 800, 'hp': 22, 'dmg': 6, 'abilities': [{'name': 'energise', 'radius': 4, 'x': 2, 'cooldown': 1}, {'name': 'stun', 'radius': 3, 'x': 3, 'cooldown': 1}]}
         },
         'healer': {
             '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2, 'abilities': []},
-            '2': {'victory_pts': 100, 'hp': 11, 'dmg': 2, 'abilities': [{'name': 'invigorate', 'radius': 1, 'x': 1, 'cd': 1}]},
-            '3': {'victory_pts': 200, 'hp': 12, 'dmg': 3, 'abilities': [{'name': 'invigorate', 'radius': 2, 'x': 2, 'cd': 1}, {'name': 'immunise', 'radius': 1, 'cd': 3}]},
-            '4': {'victory_pts': 400, 'hp': 13, 'dmg': 3, 'abilities': [{'name': 'invigorate', 'radius': 3, 'x': 3, 'cd': 1}, {'name': 'immunise', 'radius': 2, 'cd': 3}]},
-            '5': {'victory_pts': 800, 'hp': 14, 'dmg': 4, 'abilities': [{'name': 'invigorate', 'radius': 4, 'x': 4, 'cd': 1}, {'name': 'immunise', 'radius': 3, 'cd': 3}]}
+            '2': {'victory_pts': 100, 'hp': 11, 'dmg': 2, 'abilities': [{'name': 'invigorate', 'radius': 1, 'x': 1, 'cooldown': 1}]},
+            '3': {'victory_pts': 200, 'hp': 12, 'dmg': 3, 'abilities': [{'name': 'invigorate', 'radius': 2, 'x': 2, 'cooldown': 1}, {'name': 'immunise', 'radius': 1, 'cooldown': 3}]},
+            '4': {'victory_pts': 400, 'hp': 13, 'dmg': 3, 'abilities': [{'name': 'invigorate', 'radius': 3, 'x': 3, 'cooldown': 1}, {'name': 'immunise', 'radius': 2, 'cooldown': 3}]},
+            '5': {'victory_pts': 800, 'hp': 14, 'dmg': 4, 'abilities': [{'name': 'invigorate', 'radius': 4, 'x': 4, 'cooldown': 1}, {'name': 'immunise', 'radius': 3, 'cooldown': 3}]}
         },
         'mage': {
             '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2, 'abilities': []},
-            '2': {'victory_pts': 100, 'hp': 12, 'dmg': 3, 'abilities': [{'name': 'fulgura', 'radius': 1, 'x': 3, 'cd': 1}]},
-            '3': {'victory_pts': 200, 'hp': 14, 'dmg': 4, 'abilities': [{'name': 'fulgura', 'radius': 2, 'x': 3, 'cd': 1}, {'name': 'ovibus', 'radius': 1, 'x': 1, 'cd': 3}]},
-            '4': {'victory_pts': 400, 'hp': 16, 'dmg': 5, 'abilities': [{'name': 'fulgura', 'radius': 3, 'x': 4, 'cd': 1}, {'name': 'ovibus', 'radius': 2, 'x': 2, 'cd': 3}]},
-            '5': {'victory_pts': 800, 'hp': 18, 'dmg': 6, 'abilities': [{'name': 'fulgura', 'radius': 4, 'x': 4, 'cd': 1}, {'name': 'ovibus', 'radius': 3, 'x': 2, 'cd': 3}]}
+            '2': {'victory_pts': 100, 'hp': 12, 'dmg': 3, 'abilities': [{'name': 'fulgura', 'radius': 1, 'x': 3, 'cooldown': 1}]},
+            '3': {'victory_pts': 200, 'hp': 14, 'dmg': 4, 'abilities': [{'name': 'fulgura', 'radius': 2, 'x': 3, 'cooldown': 1}, {'name': 'ovibus', 'radius': 1, 'x': 1, 'cooldown': 3}]},
+            '4': {'victory_pts': 400, 'hp': 16, 'dmg': 5, 'abilities': [{'name': 'fulgura', 'radius': 3, 'x': 4, 'cooldown': 1}, {'name': 'ovibus', 'radius': 2, 'x': 2, 'cooldown': 3}]},
+            '5': {'victory_pts': 800, 'hp': 18, 'dmg': 6, 'abilities': [{'name': 'fulgura', 'radius': 4, 'x': 4, 'cooldown': 1}, {'name': 'ovibus', 'radius': 3, 'x': 2, 'cooldown': 3}]}
         },
         'rogue': {
             '1': {'victory_pts': 0, 'hp': 10, 'dmg': 2, 'abilities': []},
-            '2': {'victory_pts': 100, 'hp': 12, 'dmg': 3, 'abilities': [{'name': 'reach', 'radius': 1, 'cd': 1}]},
-            '3': {'victory_pts': 200, 'hp': 14, 'dmg': 4, 'abilities': [{'name': 'reach', 'radius': 2, 'cd': 1}, {'name': 'burst', 'radius': 1, 'x': 1, 'cd': 1}]},
-            '4': {'victory_pts': 400, 'hp': 16, 'dmg': 5, 'abilities': [{'name': 'reach', 'radius': 3, 'cd': 1}, {'name': 'burst', 'radius': 2, 'x': 2, 'cd': 1}]},
-            '5': {'victory_pts': 800, 'hp': 18, 'dmg': 6, 'abilities': [{'name': 'reach', 'radius': 4, 'cd': 1}, {'name': 'burst', 'radius': 3, 'x': 3, 'cd': 1}]}
+            '2': {'victory_pts': 100, 'hp': 12, 'dmg': 3, 'abilities': [{'name': 'reach', 'radius': 1, 'cooldown': 1}]},
+            '3': {'victory_pts': 200, 'hp': 14, 'dmg': 4, 'abilities': [{'name': 'reach', 'radius': 2, 'cooldown': 1}, {'name': 'burst', 'radius': 1, 'x': 1, 'cooldown': 1}]},
+            '4': {'victory_pts': 400, 'hp': 16, 'dmg': 5, 'abilities': [{'name': 'reach', 'radius': 3, 'cooldown': 1}, {'name': 'burst', 'radius': 2, 'x': 2, 'cooldown': 1}]},
+            '5': {'victory_pts': 800, 'hp': 18, 'dmg': 6, 'abilities': [{'name': 'reach', 'radius': 4, 'cooldown': 1}, {'name': 'burst', 'radius': 3, 'x': 3, 'cooldown': 1}]}
         }
     }
 
@@ -1602,7 +1612,6 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
         # Get creatures orders
         orders = process_creatures(players, map, database)
 
-
         for player in players:
             if player != 'creatures' and len(players[player]) > 0:
                 # Display UI several times to prevent cheating if there are more than one human player.
@@ -1621,11 +1630,11 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
             if order['action'] not in ('attack', 'move'):
                 use_special_ability(order, players, map, database)
 
-        
         # Step 4 : First clear
         clean(players, map, database)
 
-        
+        display_ui(players, map, database)
+
         # Step 5 : Move & Fight
         for order in orders:
             if order['action'] == 'attack':
@@ -1633,10 +1642,9 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
             elif order['action'] == 'move':
                 move_on(order, players, map)
 
-
         # Step 6 : Second clear
         clean(players, map, database)
-        
+
         # Update cooldowns and counters
         update_counters(players, map)
 
