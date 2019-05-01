@@ -1,6 +1,7 @@
 import math
 import colored
 import os
+import AI_gr_02
 from random import randint, choice
 # used to determine the os to know which clear command to use (clear or cls)
 import platform
@@ -513,7 +514,7 @@ def parse_command(player, command, players, database):
         {
             'hero' : hero_name (str),
             'player' : player_name (str),
-            'action' : action (str) (can be the name of an ability (as 'fulgura') or 'attack' or 'fight'),
+            'action' : action (str) (can be the name of an ability (as 'fulgura') or 'attack' or 'move'),
             'target' : ( x (int), y (int) ) #optional
         }
     For the formats of 'players' and 'database', see rapport_gr_02_part_2.
@@ -1071,7 +1072,7 @@ def attack(order, players, map, database):
         {
             'hero' : hero_name (str),
             'player' : player_name (str),
-            'action' : 'fight',
+            'action' : 'attack',
             'target' : ( x (int), y (int) ) #optional
         }
     For the formats of 'players', 'database' and 'map', see rapport_gr_02_part_02.
@@ -1079,7 +1080,7 @@ def attack(order, players, map, database):
 
     Version
     -------
-    specification : Jonathan Nhouyvanisvong (v.4 19/03/19)
+    specification : Jonathan Nhouyvanisvong (v.5 01/05/19)
     implementation : Guillaume Nizet (v.2 19/03/19)
 
     """
@@ -1275,97 +1276,6 @@ def process_creatures(players, map, database):
             orders.append(order)
 
     return orders
-
-
-### AI ###
-# Artificial player
-
-def think(players, map, database, player):
-    """ Entry point of the IA: process data and create an "order string".
-
-    Parameters
-    ----------
-    players : data of player heroes and creatures (dict)
-    map: data of the map (spawns, spur, size, etc...) (dict)
-    database : data of hero classes (dict)
-    player : the name of the AI player (str)
-
-    Returns
-    -------
-    command : string countaining the orders to execute (str)
-
-    Notes
-    -----
-    For the formats of 'players', 'map' and 'database', see rapport_gr_02_part_02.
-    The format of 'command' is described in the instructions, p14.
-
-    Version
-    -------
-    specification : Martin Danhier (v.2 02/03/19)
-    implementation : Jonathan Nhouyvanisvong (v.3 29/03/19)
-
-    """
-    target_capacity = ('immunise', 'fulgura', 'ovibus', 'reach')
-    order = []
-    command = ''
-
-    for hero in players[player]:
-        hero_lvl = players[player][hero]['level']
-        if int(hero_lvl) > 1:  # Can use ability
-            decision = randint(0, 3)
-        else:  # Can't use ability
-            decision = randint(0, 2)
-
-        if decision != 0:
-            hero_coords = players[player][hero]['coords']
-            coords_r = hero_coords[0]
-            coords_c = hero_coords[1]
-
-            if decision < 3:
-                distance = [-1, 0, 1]
-                coords_r += choice(distance)
-                if hero_coords[0] - coords_r == 0:
-                    del distance[1]
-                    coords_c += choice(distance)
-                else:
-                    coords_c += choice(distance)
-
-                if decision == 1:  # Move
-                    action = '@' + '%d-%d' % (coords_r, coords_c)  # @r-c
-                else:  # Attack
-                    action = '*' + '%d-%d' % (coords_r, coords_c)  # *r-c
-            else:  # Use ability
-                hero_type = players[player][hero]['type']
-                capacity = [database[hero_type]
-                            [hero_lvl]['abilities'][0]['name']]
-                if int(hero_lvl) > 2:
-                    capacity.append(database[hero_type]
-                                    [hero_lvl]['abilities'][1]['name'])
-
-                id = randint(0, len(capacity) - 1)
-                action = capacity[id]  # capacity
-                if action in target_capacity:
-                    radius = database[hero_type][hero_lvl]['abilities'][id]['radius']
-                    distance = [-radius +
-                                radius_id for radius_id in range(radius * 2 + 1)]
-                    coords_r += choice(distance)
-                    if hero_coords[0] - coords_r == 0:
-                        del distance[radius]
-                        coords_c += choice(distance)
-                    else:
-                        coords_c += choice(distance)
-
-                    action += ':' + '%d-%d' % (coords_r, coords_c)  # r-c
-            order.append(hero + ':' + action)  # nom:<action>
-
-    # store commands
-    for index, order_done in enumerate(order):
-        command += order_done
-        if index != len(order) - 1:
-            command += ' '
-
-    return command
-
 
 ### TOOLS ###
 # Useful methods
@@ -1617,7 +1527,7 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
                 # Display UI several times to prevent cheating if there are more than one human player.
                 display_ui(players, map, database)
                 if AI_repartition[player]:  # AI
-                    command = think(players, map, database, player)
+                    command = AI_gr_02.get_AI_orders(players, map, database, player)
                 else:  # Human
                     command = input('%s, Enter orders:\n>>> ' % colored.stylize(
                         player, colored.fg('light_%s' % map['player_colors'][player])))
