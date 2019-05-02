@@ -1221,10 +1221,7 @@ def process_creatures(players, map, database):
         closest_hero = get_closest_heroes(creature_coords, players, True)[0]
 
         # Get the coords of the closest hero
-        for player in players:
-            for hero in players[player]:
-                if closest_hero == (player, hero):
-                    closest_hero_coords = players[player][hero]['coords']
+        closest_hero_coords = players[closest_hero[0]][closest_hero[1]]['coords']
 
         # Get the distance between the hero and the creature
         distance_hero_creature = math.floor(

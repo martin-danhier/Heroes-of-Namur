@@ -1,3 +1,5 @@
+import math
+
 def get_AI_orders(players, map, database, player):
     """ Entry point of the IA: process data and create an "order string".
 
@@ -28,20 +30,20 @@ def get_AI_orders(players, map, database, player):
         hero_type = players[player][hero]['type']
 
         if hero_type == 'barbarian':
-            actions.append(process_barbarian(players, map, database, player, hero))
+            actions.append(process_barbarian(players, map, database, actions, player, hero))
 
         elif hero_type == 'healer':
-            actions.append(process_healer(players, map, database, player, hero))
+            actions.append(process_healer(players, map, database, actions,  player, hero))
 
         elif hero_type == 'mage':
-            actions.append(process_mage(players, map, database, player, hero))
+            actions.append(process_mage(players, map, database, actions, player, hero))
 
         elif hero_type == 'rogue':
-            actions.append(process_rogue(players, map, database, player, hero))
+            actions.append(process_rogue(players, map, database, actions, player, hero))
     # Generate a command string for those actions
     return generate_command_string(actions)
 
-def process_barbarian(players, map, database, player, hero):
+def process_barbarian(players, map, database, orders, player, hero):
     """ Generates an action dictionary for the given barbarian.
 
     Parameters
@@ -49,6 +51,7 @@ def process_barbarian(players, map, database, player, hero):
     players : data of player heroes and creatures (dict)
     map: data of the map (spawns, spur, size, etc...) (dict)
     database : data of hero classes (dict)
+    orders: the orders already given to the allies (list of dict)
     player : the name of the AI player (str)
     hero : the name of the current hero. It must be a barbarian. (str)
 
@@ -77,9 +80,9 @@ def process_barbarian(players, map, database, player, hero):
 
     # If there are no creatures left OR level == 4 => return rush_citadel
     # else : voir le tableau
-    return farm_creatures(players, map, database, player, hero)
+    return farm_creatures(players, map, database, orders, player, hero)
 
-def process_healer(players, map, database, player, hero):
+def process_healer(players, map, database, orders, player, hero):
     """ Generates an action dictionary for the given healer.
 
     Parameters
@@ -87,6 +90,7 @@ def process_healer(players, map, database, player, hero):
     players : data of player heroes and creatures (dict)
     map: data of the map (spawns, spur, size, etc...) (dict)
     database : data of hero classes (dict)
+    orders: the orders already given to the allies (list of dict)
     player : the name of the AI player (str)
     hero : the name of the current hero. It must be a healer. (str)
 
@@ -116,9 +120,9 @@ def process_healer(players, map, database, player, hero):
     # else : voir le tableau
 
     # test: move each healer in a diagonal
-    return farm_creatures(players, map, database, player, hero)
+    return farm_creatures(players, map, database, orders, player, hero)
 
-def process_mage(players, map, database, player, hero):
+def process_mage(players, map, database, orders, player, hero):
     """ Generates an action dictionary for the given mage.
 
     Parameters
@@ -126,6 +130,7 @@ def process_mage(players, map, database, player, hero):
     players : data of player heroes and creatures (dict)
     map: data of the map (spawns, spur, size, etc...) (dict)
     database : data of hero classes (dict)
+    orders: the orders already given to the allies (list of dict)
     player : the name of the AI player (str)
     hero : the name of the current hero. It must be a mage. (str)
 
@@ -153,9 +158,9 @@ def process_mage(players, map, database, player, hero):
 
     # If there are no creatures left OR level == 4 => return rush_citadel
     # else : voir le tableau
-    return farm_creatures(players, map, database, player, hero)
+    return farm_creatures(players, map, database, orders, player, hero)
 
-def process_rogue(players, map, database, player, hero):
+def process_rogue(players, map, database, orders, player, hero):
     """ Generates an action dictionary for the given rogue.
 
     Parameters
@@ -163,6 +168,7 @@ def process_rogue(players, map, database, player, hero):
     players : data of player heroes and creatures (dict)
     map: data of the map (spawns, spur, size, etc...) (dict)
     database : data of hero classes (dict)
+    orders: the orders already given to the allies (list of dict)
     player : the name of the AI player (str)
     hero : the name of the current hero. It must be a rogue. (str)
 
@@ -190,10 +196,10 @@ def process_rogue(players, map, database, player, hero):
 
     # If there are no creatures left OR level == 4 => return rush_citadel
     # else : voir le tableau
-    return farm_creatures(players, map, database, player, hero)
+    return farm_creatures(players, map, database, orders, player, hero)
 
 
-def farm_creatures(players, map, database, player, hero):
+def farm_creatures(players, map, database, orders, player, hero):
     """ Hunt creatures to earn victory points.
     
     Parameters
@@ -201,6 +207,7 @@ def farm_creatures(players, map, database, player, hero):
     players : data of player heroes and creatures (dict)
     map: data of the map (spawns, spur, size, etc...) (dict)
     database : data of hero classes (dict)
+    orders: the orders already given to the allies (list of dict)
     player : the name of the AI player (str)
     hero : the name of the current hero. It must be a rogue. (str)
 
@@ -231,13 +238,27 @@ def farm_creatures(players, map, database, player, hero):
     # SI un joueur adverse approche trop de la citadelle : se déplacer vers lui et l’attaquer.
     # SINON : Rechercher des créatures pour gagner des points de victoire et des niveaux.
 
-    
+    if False:
+        return {}
+        # changer la condition
+        # si un joueur approche un peu trop de la citadelle il vaut se déplacer vers lui et s'il est à portée, l'attaquer
+    else:
+        target = get_closest_entity(players[player][hero]['coords'], players, True, 'creatures')[0]
+        # get target coords
+        target_coords = players[target[0]][target[1]]['coords']
+        
+        order = find_path(players, map, players[player][hero]['coords'], target_coords)
+        order['hero'] = hero
+        return order
+        # if the citadel is safe, target creatures
+        # -> aller vers la créature la plus proche
+        # -> si créature est à portée, l'attaquer
 
 
 
     return {}
 
-def rush_citadel(players, map, database, player, hero):
+def rush_citadel(players, map, database, orders, player, hero):
     """ Try to conquer and defend the citadel.
 
     Parameters
@@ -245,6 +266,7 @@ def rush_citadel(players, map, database, player, hero):
     players : data of player heroes and creatures (dict)
     map: data of the map (spawns, spur, size, etc...) (dict)
     database : data of hero classes (dict)
+    orders: the orders already given to the allies (list of dict)
     player : the name of the AI player (str)
     hero : the name of the current hero. It must be a rogue. (str)
 
@@ -283,8 +305,50 @@ def rush_citadel(players, map, database, player, hero):
     return {}
 
 # === TOOLS ===
+# Useful functions
+def find_path(players, map, source, target):
+    """
+    """
+    order = {}
+    distance = math.floor(get_distance(source, target))
+    # If the source is next to the target
+    if distance == 1:
+        # The source attacks the target
+        order['action'] = 'attack'
+        order['target'] = target
+    else:
+        # The source moves towards the target
+        order['action'] = 'move'
 
-def get_tile_info(coords, players, map):
+        # The source can move on 9 tiles
+        first_loop = True
+
+        # Get the smallest distance
+        for x_coord in range(source[0] - 1, source[0] + 2):
+            for y_coord in range(source[1] - 1, source[1] + 2):
+
+                # Get the distance between the checked tile and the hero
+                distance_hero_tile = get_distance(
+                    (x_coord, y_coord), target)
+
+                if first_loop:
+                    min_distance = distance_hero_tile
+                    first_loop = False
+
+                else:
+                    if distance_hero_tile < min_distance:
+                        min_distance = distance_hero_tile
+
+        # Get the first coordinates that are at the smallest distance from the closest hero
+        for x_coord in range(source[0] - 1, source[0] + 2):
+            for y_coord in range(source[1] - 1, source[1] + 2):
+                if get_distance((x_coord, y_coord), target) == min_distance:
+                    # The creature moves on to this tile
+                    order['target'] = (x_coord, y_coord)
+    return order
+
+
+def get_tile_info(coords, players, map, orders):
     """ Get the details of the given tile.
 
     Parameters
@@ -292,6 +356,7 @@ def get_tile_info(coords, players, map):
     coords: the coordinates of a tile. (tuple)
     players : data of player heroes and creatures (dict)
     map: data of the map (spawns, spur, size, etc...) (dict)
+    orders: the orders already given to the allies (list of dict)
 
     Returns
     -------
@@ -309,17 +374,22 @@ def get_tile_info(coords, players, map):
 
     Version
     -------
-    specification: Martin Danhier (v.2 16/03/2019)
-    implementation: Martin Danhier (v.2 09/04/2019)
+    specification: Martin Danhier (v.3 02/05/2019)
+    implementation: Martin Danhier (v.3 02/05/2019)
     """
     # If the coordinates are out of the map or if the coordinates are part of the spur while it is still locked.
     if coords[0] <= 0 or coords[0] > map['size'][0] or coords[1] <= 0 or coords[1] > map['size'][1] or (coords in map['spur'] and map['nb_turns'] <= 20):
         return 'wall'
-    else:
+    else:      
         # For each hero / creature, check if its coords are equal to tested ones.
         for player in players:
             for individual in players[player]:
                 if players[player][individual]['coords'] == coords:
+                    return 'player'
+        # Return player if an ally is planning to move to the chosen tile
+        for order in orders:
+            if order != {}:
+                if order['action'] == 'move' and order['target'] == coords:
                     return 'player'
         # If this code is reached, then there is no player on this tile
         if coords in map['spur']:
@@ -367,3 +437,117 @@ def generate_command_string(actions):
                     command+= ':%d-%d' % (action['target'][0], action['target'][1])
             command += ' '
     return command
+
+def get_closest_entity(coords, players, restrictive, mode):
+    """ Returns the closest entiti(es) around the given tile.
+
+    Parameters:
+    ----------
+    coords : the coordinates of a tile (tuple).
+    players : data of player heroes and creatures (dict)
+    restrictive : if True, the function will only return one hero (the closest one with several conditions to remove the ambiguity).
+                      else, the function will return the list of the closest heroes (bool).
+    mode : the target mode of the function. (str)
+
+    Returns:
+    -------
+    closest_heroes : a list containing the closest heroes, which are in of format (player (str), hero (str)) (list)
+
+    Notes
+    -----
+    For the format of 'players', see 'rapport_gr_02_part_2'.
+    A typical 'coord' tuple is in the format ( row (int), column (int) ).
+    The possible modes are the following:
+        - 'creatures': only target creatures
+        - 'heroes': only target heroes
+        - 'any': target any entity
+
+    Version:
+    -------
+    specification : Guillaume Nizet, Martin Danhier (v.2 02/05/19)
+    implementation : Guillaume Nizet, Jonathan Nhouyvanisvong, Martin Danhier (v.3 02/05/19)
+    """
+    # Initialize the data
+    closest_heroes = []
+    temp_closest_heroes = []
+    step = 0
+
+    while closest_heroes == [] or len(closest_heroes) > 1:
+        min = -1
+        if step != 0 and step <= 4:
+            temp_closest_heroes = closest_heroes
+        # For each hero
+        for player in players:
+            # Apply mode filters
+            if (player != 'creatures' and mode == 'heroes') or (player == 'creatures' and mode == 'creatures') or (mode == 'any'):
+                for hero in players[player]:
+                    if (player, hero) in temp_closest_heroes or step == 0:
+                        # Step 0 : Check the distance to get the closest heroes
+                        if step == 0:
+                            checked_value = math.floor(get_distance(
+                                players[player][hero]['coords'], coords))
+                        # Step 1 : If the checked hero is one of the several closest heroes with the same distance
+                        elif step == 1:
+                            checked_value = players[player][hero]['hp']
+
+                        # Step 2 : If the checked hero is one of the several closest heroes with the same HP
+                        elif step == 2:
+                            checked_value = players[player][hero]['xp']
+
+                        # Step 3 : If the checked hero is one of the several closest heroes with the same HP and victory points
+                        elif step == 3:
+                            checked_value = hero.lower()
+
+                        # Step 4 : If the checked hero is one of the several closest heroes with the same HP, victory points and name
+                        else:
+                            checked_value = player.lower()
+
+                        # First checked hero : initialisation
+                        if min == -1:
+                            closest_heroes = [(player, hero)]
+                            min = checked_value
+
+                        # If the checked value is smaller than the current min
+                        elif checked_value < min:
+                            # Reset the closest heroes and save the current one
+                            closest_heroes = [(player, hero)]
+                            min = checked_value
+
+                        # If the checked value is equal to the current min
+                        elif checked_value == min:
+                            # save this hero as well
+                            closest_heroes.append((player, hero))
+
+        # Only return the list of the closest heroes (there might be more than one hero)
+        if not restrictive:
+            return closest_heroes
+        step += 1
+
+    # restrictive == True: The single closest hero has been found
+    return closest_heroes
+
+def get_distance(coords1, coords2):
+    """ Get the distance between two coordinates.
+
+    Parameters
+    ----------
+    coords1: the first pair of coordinates. (tuple)math.ceil
+    coords2: the second pair of coordinates. (tuple)
+
+    Returns
+    -------
+    distance: the distance between the two coordinates (int)
+
+    Notes
+    -----
+    A typical 'coord' tuple is in the format ( row (int), column (int) ).
+
+    Version
+    -------
+    specification: Martin Danhier (v.3 08/03/19)
+    implementation : Guillaume Nizet (v.1 16/03/19)
+
+    """
+
+    # Euclidian distance formula
+    return ((coords2[0] - coords1[0]) ** 2 + (coords2[1] - coords1[1]) ** 2) ** 0.5
