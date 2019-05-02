@@ -962,7 +962,7 @@ def use_special_ability(order, players, map, database):
 
         # Set cooldown if the ability is used
         if ability_used:
-            players[order['player']][order['hero']]['cooldown'][0] = database[order_hero_type][order_hero_lvl]['abilities'][0]['cooldown']
+            players[order['player']][order['hero']]['cooldown'][0] = database[order_hero_type][order_hero_lvl]['abilities'][0]['cooldown'] + 1
 
     # Ability 2 (lvl 3 min. required)
     else:
@@ -1053,7 +1053,7 @@ def use_special_ability(order, players, map, database):
         # Set cooldown if the ability is used
         if ability_used:
             players[order['player']][order['hero']
-                                     ]['cooldown'][1] = database[order_hero_type][order_hero_lvl]['abilities'][1]['cooldown']
+                                     ]['cooldown'][1] = database[order_hero_type][order_hero_lvl]['abilities'][1]['cooldown'] + 1
 
 
 def attack(order, players, map, database):
@@ -1226,7 +1226,7 @@ def process_creatures(players, map, database):
         # Get the distance between the hero and the creature
         distance_hero_creature = math.floor(
             get_distance(creature_coords, closest_hero_coords))
-
+ 
         # If the hero is in the creature radius or if the creature has been affected by an ability on the previous turn
         if distance_hero_creature <= creature_radius or players['creatures'][creature]['ability_affectation_memory'] > 0:
             order = {'player': 'creatures', 'hero': creature}
