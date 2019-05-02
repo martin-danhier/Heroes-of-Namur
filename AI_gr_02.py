@@ -77,7 +77,7 @@ def process_barbarian(players, map, database, player, hero):
 
     # If there are no creatures left OR level == 4 => return rush_citadel
     # else : voir le tableau
-    return {}
+    return farm_creatures(players, map, database, player, hero)
 
 def process_healer(players, map, database, player, hero):
     """ Generates an action dictionary for the given healer.
@@ -116,7 +116,7 @@ def process_healer(players, map, database, player, hero):
     # else : voir le tableau
 
     # test: move each healer in a diagonal
-    return {'hero' : hero, 'action' : 'move', 'target': (players[player][hero]['coords'][0] - 1, players[player][hero]['coords'][1] - 1)}
+    return farm_creatures(players, map, database, player, hero)
 
 def process_mage(players, map, database, player, hero):
     """ Generates an action dictionary for the given mage.
@@ -153,7 +153,7 @@ def process_mage(players, map, database, player, hero):
 
     # If there are no creatures left OR level == 4 => return rush_citadel
     # else : voir le tableau
-    return {}
+    return farm_creatures(players, map, database, player, hero)
 
 def process_rogue(players, map, database, player, hero):
     """ Generates an action dictionary for the given rogue.
@@ -190,7 +190,8 @@ def process_rogue(players, map, database, player, hero):
 
     # If there are no creatures left OR level == 4 => return rush_citadel
     # else : voir le tableau
-    return {}
+    return farm_creatures(players, map, database, player, hero)
+
 
 def farm_creatures(players, map, database, player, hero):
     """ Hunt creatures to earn victory points.
@@ -229,6 +230,11 @@ def farm_creatures(players, map, database, player, hero):
     
     # SI un joueur adverse approche trop de la citadelle : se déplacer vers lui et l’attaquer.
     # SINON : Rechercher des créatures pour gagner des points de victoire et des niveaux.
+
+    
+
+
+
     return {}
 
 def rush_citadel(players, map, database, player, hero):
