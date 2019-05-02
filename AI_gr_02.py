@@ -229,34 +229,26 @@ def farm_creatures(players, map, database, orders, player, hero):
     -------
     specification: Martin Danhier (v.1 01/05/2019)
     """
-    # NOTE (supprimer après implémentation):
-    # Lvl 1 dans le tableau.
-    # ! si un héro d'un lvl > 1 n'arrive pas à faire ses capacités spéciales, il reviendra à cette fonction
-    # cette fonction doit toujours générer une action valide pour éviter qu'un héro soit bloqué à jamais
-    # Commun à toutes les classes de héros, d'où une fonction séparée
-    
-    # SI un joueur adverse approche trop de la citadelle : se déplacer vers lui et l’attaquer.
-    # SINON : Rechercher des créatures pour gagner des points de victoire et des niveaux.
-
-    if False:
-        return {}
-        # changer la condition
-        # si un joueur approche un peu trop de la citadelle il vaut se déplacer vers lui et s'il est à portée, l'attaquer
-    else:
+    too_close = False
+    # Check if a enemy is to close to the citadel
+    for tile in map['spur']:
+        # For each enemy hero
+        for checked_player in players:
+            if checked_player not in ('creatures', player):
+                for checked_hero in players[checked_player]:
+                    # If the enemy is too close to the citadel
+                    if get_distance(players[checked_player][checked_hero]['coords'], tile) < 4:
+                        target = (checked_player, checked_hero)
+                        too_close = True
+    # Else, target creatures
+    if not too_close:
         target = get_closest_entity(players[player][hero]['coords'], players, True, 'creatures')[0]
-        # get target coords
-        target_coords = players[target[0]][target[1]]['coords']
         
-        order = find_path(players, map, players[player][hero]['coords'], target_coords)
-        order['hero'] = hero
-        return order
-        # if the citadel is safe, target creatures
-        # -> aller vers la créature la plus proche
-        # -> si créature est à portée, l'attaquer
-
-
-
-    return {}
+    # Get target coords and order
+    target_coords = players[target[0]][target[1]]['coords']
+    order = find_path(players, map, orders, players[player][hero]['coords'], target_coords)
+    order['hero'] = hero
+    return order
 
 def rush_citadel(players, map, database, orders, player, hero):
     """ Try to conquer and defend the citadel.
@@ -306,8 +298,9 @@ def rush_citadel(players, map, database, orders, player, hero):
 
 # === TOOLS ===
 # Useful functions
-def find_path(players, map, source, target):
+def find_path(players, map, orders, source, target):
     """
+    orders: the orders already given to the allies (list of dict)
     """
     order = {}
     distance = math.floor(get_distance(source, target))
@@ -323,28 +316,41 @@ def find_path(players, map, source, target):
         # The source can move on 9 tiles
         first_loop = True
 
-        # Get the smallest distance
+        # Get the distances sorted by insertion sort
+        distances = []
         for x_coord in range(source[0] - 1, source[0] + 2):
             for y_coord in range(source[1] - 1, source[1] + 2):
+                if (x_coord, y_coord) != source:
+                    # Get the distance between the checked tile and the target
+                    tile_distance = get_distance((x_coord, y_coord), target)
 
-                # Get the distance between the checked tile and the hero
-                distance_hero_tile = get_distance(
-                    (x_coord, y_coord), target)
-
-                if first_loop:
-                    min_distance = distance_hero_tile
-                    first_loop = False
-
-                else:
-                    if distance_hero_tile < min_distance:
-                        min_distance = distance_hero_tile
-
-        # Get the first coordinates that are at the smallest distance from the closest hero
-        for x_coord in range(source[0] - 1, source[0] + 2):
-            for y_coord in range(source[1] - 1, source[1] + 2):
-                if get_distance((x_coord, y_coord), target) == min_distance:
-                    # The creature moves on to this tile
-                    order['target'] = (x_coord, y_coord)
+                    if first_loop:
+                        distances.append(((x_coord, y_coord), tile_distance))
+                        first_loop = False
+                    else:
+                        index = 0
+                        sorted = False
+                        while not sorted and index < len(distances):
+                            if tile_distance <= distances[index][1]:
+                                distances =  distances[:index] + [((x_coord, y_coord), tile_distance)] + distances[index:]
+                                sorted = True
+                            elif index == len(distances) - 1:
+                                distances.append(((x_coord, y_coord), tile_distance))
+                                sorted = True
+                            else:
+                                index += 1
+        
+        # Go to the clear tile nearest to the target
+        found = False
+        index = 0
+        while not found and index < 8:
+            if get_tile_info(distances[index][0], players, map, orders) == 'clear':
+                order['target'] = distances[index][0]
+                found = True
+            elif index == 7:
+                return {}
+            else:
+                index += 1
     return order
 
 
