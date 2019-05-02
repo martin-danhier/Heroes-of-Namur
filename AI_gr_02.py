@@ -81,7 +81,7 @@ def process_barbarian(players, map, database, orders, player, hero):
     # If there are no creatures left OR level == 4 => return rush_citadel
     # else : voir le tableau
 
-    if players[player][hero]['level'] == 5 or len(players['creatures']) == 0:
+    if players[player][hero]['level'] == '5' or len(players['creatures']) == 0:
         return rush_citadel(players, map, database, orders, player, hero)
 
     # The data needed to choose an action will be stored in a dictionary of the type { 'allies' : { 'type' : type, 'coordinates' : coordinates }, 'enemies' : nb_enemies }
@@ -90,10 +90,10 @@ def process_barbarian(players, map, database, orders, player, hero):
 
     # heroes_in_range = { 'allies' : {}, 'enemies': 0 }
          
-    if players[player][hero]['level'] >= 3:
+    if players[player][hero]['level'] >= '3':
         pass
 
-    if players[player][hero]['level'] >= 2:
+    if players[player][hero]['level'] >= '2':
         allies_in_range = 0
         enemies_in_range = 0
         

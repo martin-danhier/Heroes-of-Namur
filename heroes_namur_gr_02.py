@@ -1534,6 +1534,7 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
 
                 # Save orders
                 orders += parse_command(player, command, players, database)
+        input('')
 
         # Step 4 : Use special abilities
         for order in orders:
@@ -1544,6 +1545,7 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
         clean(players, map, database)
 
         display_ui(players, map, database)
+
 
         # Step 5 : Move & Fight
         for order in orders:
@@ -1566,3 +1568,5 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
         elif map['nb_turns_without_action'] == 40:
             print('It\'s a tie !')
             game_is_over = True
+
+       
