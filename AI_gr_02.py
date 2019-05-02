@@ -323,31 +323,64 @@ def rush_citadel(players, map, database, orders, player, hero):
     specification: Martin Danhier (v.1 01/05/2019)
     """
 
+    if players[player][hero]['coords'] not in map['spur']:
+        # Get nearest spur tile
+        first_iteration = True
+        for tile in map['spur']:
+            dist = get_distance(tile, players[player][hero]['coords'])
+            if first_iteration:
+                nearest_tile = tile
+                min_distance = dist
+                first_iteration = False
+            elif dist < min_distance:
+                nearest_tile = tile
+                min_distance = dist
+        info = get_tile_info(nearest_tile, players, map, orders)
+        if info == 'player':
+            order = find_path(players, map, orders, players[player][hero]['coords'], nearest_tile)
+        else:
+            order = find_path(players, map, orders, players[player][hero]['coords'], nearest_tile, False)
+        order['hero'] = hero
+        return order
+    else:
+        target = get_closest_entity(players[player][hero]['coords'], players, True, 'ennemies')[0]
+        target_coords = players[target[0]][target[1]]['coords']
+        if math.floor(get_distance(target_coords, players[player][hero]['coords'])) == 1:
+            return {'hero' : hero, 'action': 'attack', 'target': target_coords} 
+
+
     # ! il faut faire gaffe qu'un héros ait toujours quelque chose à faire et ne soit pas bloqué à jamais
 
     # Tous les alliés vers la citadelle
+
     # PARMI les alliés sur la citadelle :
     #   SI pv_allié <= seuil_critique : Changer avec un autre héros 3 (pour éviter la
     #   réinitialisation de la possession de la citadelle)
+
     # SI ennemis à proximité de la citadelle :
     #   Le héros allié sur la citadelle y reste.
     #   Les autres héros attaquent les ennemis proche (priorité attaque de groupe)
+
     # SINON : Healer reste sur la citadelle
+
     # SI la citadelle est inoccupée ET nombre_tours_sans_perte_pv <=
     # seuil_inactivité_critique :
     #   Chercher un ennemi à attaquer (Pour éviter un match nul)
+
+    
+
     return {}
 
 # === TOOLS ===
 # Useful functions
-def find_path(players, map, orders, source, target):
+def find_path(players, map, orders, source, target, attack_target = True):
     """
     orders: the orders already given to the allies (list of dict)
     """
     order = {}
     distance = math.floor(get_distance(source, target))
     # If the source is next to the target
-    if distance == 1:
+    if distance == 1 and attack_target:
         # The source attacks the target
         order['action'] = 'attack'
         order['target'] = target
@@ -386,7 +419,9 @@ def find_path(players, map, orders, source, target):
         found = False
         index = 0
         while not found and index < 8:
-            if get_tile_info(distances[index][0], players, map, orders) == 'clear':
+            info = get_tile_info(distances[index][0], players, map, orders)
+
+            if info == 'clear' or (info == 'spur' and map['nb_turns'] > 20):
                 order['target'] = distances[index][0]
                 found = True
             elif index == 7:
