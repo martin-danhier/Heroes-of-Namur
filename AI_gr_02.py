@@ -80,6 +80,46 @@ def process_barbarian(players, map, database, orders, player, hero):
 
     # If there are no creatures left OR level == 4 => return rush_citadel
     # else : voir le tableau
+
+    if players[player][hero]['level'] == 5 or len(players['creatures']) == 0:
+        return rush_citadel(players, map, database, orders, player, hero)
+
+    # The data needed to choose an action will be stored in a dictionary of the type { 'allies' : { 'type' : type, 'coordinates' : coordinates }, 'enemies' : nb_enemies }
+    # We need to get type and coordinates of the allies because the barbarian has to follow the healers
+    # And we only need the number of enemies to trigger 'stun' or 'energise'
+
+    # heroes_in_range = { 'allies' : {}, 'enemies': 0 }
+         
+    if players[player][hero]['level'] >= 3:
+        pass
+
+    if players[player][hero]['level'] >= 2:
+        allies_in_range = 0
+        enemies_in_range = 0
+        
+
+        energise_range = database['barbarian'][str(players[player][hero]['level'])]['abilities'][0]['radius']
+
+        for checked_player in players:
+            for checked_hero in players[checked_player]:                
+                if math.floor(get_distance(players[player][hero]['coords'], players[checked_player][checked_hero]['coords'])) <= energise_range:
+
+                    #Check the allies
+                    if checked_player == player: 
+                        allies_in_range += 1
+
+                    # Check the enemies (enemy players + creatures)
+                    else:
+                        enemies_in_range += 1
+
+        # Prevent the barbarian from counting itself in the allies in range
+        allies_in_range -= 1
+
+        if allies_in_range > 0 and enemies_in_range > 0:
+
+            # Use energise 
+            return { 'hero' : hero, 'action' : 'energise' }
+
     return farm_creatures(players, map, database, orders, player, hero)
 
 def process_healer(players, map, database, orders, player, hero):
