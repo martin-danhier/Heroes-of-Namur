@@ -282,7 +282,7 @@ def farm_creatures(players, map, database, orders, player, hero):
                         too_close = True
     # Else, target creatures
     if not too_close and len(players['creatures']) > 0:
-        target = get_closest_entity(players[player][hero]['coords'], players, True, 'creatures')[0]
+        target = get_closest_entity(players[player][hero]['coords'], players, player, True, 'creatures')[0]
         
         # Get target coords and order
         target_coords = players[target[0]][target[1]]['coords']
@@ -343,7 +343,7 @@ def rush_citadel(players, map, database, orders, player, hero):
         order['hero'] = hero
         return order
     else:
-        target = get_closest_entity(players[player][hero]['coords'], players, True, 'ennemies')[0]
+        target = get_closest_entity(players[player][hero]['coords'], players,player, True, 'ennemies')[0]
         target_coords = players[target[0]][target[1]]['coords']
         if math.floor(get_distance(target_coords, players[player][hero]['coords'])) == 1:
             return {'hero' : hero, 'action': 'attack', 'target': target_coords} 
