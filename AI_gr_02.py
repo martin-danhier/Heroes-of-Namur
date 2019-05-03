@@ -83,20 +83,52 @@ def process_barbarian(players, map, database, orders, player, hero):
 
     if players[player][hero]['level'] == '5' or len(players['creatures']) == 0:
         return rush_citadel(players, map, database, orders, player, hero)
-
-    # The data needed to choose an action will be stored in a dictionary of the type { 'allies' : { 'type' : type, 'coordinates' : coordinates }, 'enemies' : nb_enemies }
-    # We need to get type and coordinates of the allies because the barbarian has to follow the healers
-    # And we only need the number of enemies to trigger 'stun' or 'energise'
-
-    # heroes_in_range = { 'allies' : {}, 'enemies': 0 }
          
     if players[player][hero]['level'] >= '3':
-        pass
+        allies_in_range_energise = 0
+        enemies_in_range_energise = 0
+        enemies_in_range_stun = 0
+
+        energise_range = database['barbarian'][str(players[player][hero]['level'])]['abilities'][0]['radius']
+        stun_range = database['barbarian'][str(players[player][hero]['level'])]['abilities'][1]['radius']
+
+        for checked_player in players:
+            for checked_hero in players[checked_player]:                
+                if math.floor(get_distance(players[player][hero]['coords'], players[checked_player][checked_hero]['coords'])) <= energise_range:
+
+                    # Check the allies
+                    if checked_player == player: 
+                        allies_in_range_energise += 1
+
+                    # Check the enemies (enemy players + creatures)
+                    else:
+                        enemies_in_range_energise += 1
+
+                if math.floor(get_distance(players[player][hero]['coords'], players[checked_player][checked_hero]['coords'])) <= stun_range:
+
+                    # Only check the enemies (enemy players + creatures)
+                    if checked_player != player:
+                        enemies_in_range_stun += 1
+
+        # Prevent the barbarian from counting itself in the allies in range
+        allies_in_range_energise -= 1
+
+        # If there are heroes in range of energise, then they automatically are in range of stun because the radius of stun is smaller
+        if allies_in_range_energise > 0 and enemies_in_range_energise > 0 and players[player][hero]['cooldown'][0] == 0 and players[player][hero]['cooldown'][1] == 0:
+            if allies_in_range_energise >= enemies_in_range_stun:
+
+                # Use energise
+                return { 'hero' : hero, 'action' : 'energise' }
+
+            else:
+
+                # Use stun
+                return { 'hero' : hero, 'action' : 'stun' }
+
 
     if players[player][hero]['level'] >= '2':
         allies_in_range = 0
         enemies_in_range = 0
-        
 
         energise_range = database['barbarian'][str(players[player][hero]['level'])]['abilities'][0]['radius']
 
@@ -104,7 +136,7 @@ def process_barbarian(players, map, database, orders, player, hero):
             for checked_hero in players[checked_player]:                
                 if math.floor(get_distance(players[player][hero]['coords'], players[checked_player][checked_hero]['coords'])) <= energise_range:
 
-                    #Check the allies
+                    # Check the allies
                     if checked_player == player: 
                         allies_in_range += 1
 
@@ -115,7 +147,7 @@ def process_barbarian(players, map, database, orders, player, hero):
         # Prevent the barbarian from counting itself in the allies in range
         allies_in_range -= 1
 
-        if allies_in_range > 0 and enemies_in_range > 0:
+        if allies_in_range > 0 and enemies_in_range > 0 and players[player][hero]['cooldown'][0] == 0:
 
             # Use energise 
             return { 'hero' : hero, 'action' : 'energise' }
@@ -160,6 +192,39 @@ def process_healer(players, map, database, orders, player, hero):
     # else : voir le tableau
 
     # test: move each healer in a diagonal
+
+    if players[player][hero]['level'] == '5' or len(players['creatures']) == 0:
+        return rush_citadel(players, map, database, orders, player, hero)
+
+    # Define a 'danger amount' for every hero except for the healer that represents how much they are in danger
+    # Danger amount = hp/hp_max + nb_enemies_in_radius/x
+    # Where radius = 3 + 1/3(distance_from_healer)
+    #           x = a certain number, to be defined
+    # The healer will go towards a hero to heal/immunise him if his danger amount exceeds a certain threshold (to be defined)
+
+    # The data will be stored in a list of the type [((coord_x, coord_y), danger_amount)]
+
+    for checked_player in players:
+        for checked_hero in players[checked_player]:
+
+            # Check the allies 
+            if checked_player == player:
+
+                # Don't check the healer
+                if checked_hero != hero:
+
+                    hp = players[checked_player][checked_hero]['hp']
+                    max_hp = database[players[checked_player][checked_hero]['type']][players][checked_player][checked_hero]['level']['hp']
+                    radius = math.floor(3 + 1/3 * get_distance(players[player][hero]['coords'], players[checked_player][checked_hero]['coords'])) 
+
+                    danger_amount = hp/max_hp + nb_enemies_in_radius/x
+
+    if players[player][hero]['level'] >= '3':
+        pass
+
+    if players[player][hero]['level'] >= '2':
+        pass
+
     return farm_creatures(players, map, database, orders, player, hero)
 
 def process_mage(players, map, database, orders, player, hero):
