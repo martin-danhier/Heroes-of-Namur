@@ -521,13 +521,14 @@ def generate_command_string(actions):
             command += ' '
     return command
 
-def get_closest_entity(coords, players, restrictive, mode):
+def get_closest_entity(coords, players, player, restrictive, mode):
     """ Returns the closest entiti(es) around the given tile.
 
     Parameters:
     ----------
     coords : the coordinates of a tile (tuple).
     players : data of player heroes and creatures (dict)
+    player : the AI player (str)
     restrictive : if True, the function will only return one hero (the closest one with several conditions to remove the ambiguity).
                       else, the function will return the list of the closest heroes (bool).
     mode : the target mode of the function. (str)
@@ -542,8 +543,9 @@ def get_closest_entity(coords, players, restrictive, mode):
     A typical 'coord' tuple is in the format ( row (int), column (int) ).
     The possible modes are the following:
         - 'creatures': only target creatures
-        - 'heroes': only target heroes
-        - 'any': target any entity
+        - 'enemy_heroes': only target enemy heroes
+        - 'all_enemies' : only target enmy heroes and creatures
+        - 'allies' : only target ally heroes
 
     Version:
     -------
@@ -560,22 +562,22 @@ def get_closest_entity(coords, players, restrictive, mode):
         if step != 0 and step <= 4:
             temp_closest_heroes = closest_heroes
         # For each hero
-        for player in players:
+        for checked_player in players:
             # Apply mode filters
-            if (player != 'creatures' and mode == 'heroes') or (player == 'creatures' and mode == 'creatures') or (mode == 'any'):
-                for hero in players[player]:
-                    if (player, hero) in temp_closest_heroes or step == 0:
+            if (checked_player == 'creatures' and mode == 'creatures') or (checked_player not in ('creatures', player) and mode == 'enemy_heroes') or (checked_player != player and mode == 'all_enemies') or (checked_player == player and mode == 'allies'):
+                for hero in players[checked_player]:
+                    if (checked_player, hero) in temp_closest_heroes or step == 0:
                         # Step 0 : Check the distance to get the closest heroes
                         if step == 0:
                             checked_value = math.floor(get_distance(
-                                players[player][hero]['coords'], coords))
+                                players[checked_player][hero]['coords'], coords))
                         # Step 1 : If the checked hero is one of the several closest heroes with the same distance
                         elif step == 1:
-                            checked_value = players[player][hero]['hp']
+                            checked_value = players[checked_player][hero]['hp']
 
                         # Step 2 : If the checked hero is one of the several closest heroes with the same HP
                         elif step == 2:
-                            checked_value = players[player][hero]['xp']
+                            checked_value = players[checked_player][hero]['xp']
 
                         # Step 3 : If the checked hero is one of the several closest heroes with the same HP and victory points
                         elif step == 3:
@@ -583,23 +585,23 @@ def get_closest_entity(coords, players, restrictive, mode):
 
                         # Step 4 : If the checked hero is one of the several closest heroes with the same HP, victory points and name
                         else:
-                            checked_value = player.lower()
+                            checked_value = checked_player.lower()
 
                         # First checked hero : initialisation
                         if min == -1:
-                            closest_heroes = [(player, hero)]
+                            closest_heroes = [(checked_player, hero)]
                             min = checked_value
 
                         # If the checked value is smaller than the current min
                         elif checked_value < min:
                             # Reset the closest heroes and save the current one
-                            closest_heroes = [(player, hero)]
+                            closest_heroes = [(checked_player, hero)]
                             min = checked_value
 
                         # If the checked value is equal to the current min
                         elif checked_value == min:
                             # save this hero as well
-                            closest_heroes.append((player, hero))
+                            closest_heroes.append((checked_player, hero))
 
         # Only return the list of the closest heroes (there might be more than one hero)
         if not restrictive:
