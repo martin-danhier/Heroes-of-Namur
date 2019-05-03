@@ -236,22 +236,54 @@ def process_rogue(players, map, database, orders, player, hero):
     if hero_lvl >= '3':
         # target healer
         hero_coords = players[player][hero]['coords']
-        list_target = get_closest_entity(hero_coords, players, False, 'hero_enemies') # Temp parameters
+        closest_enemies = get_closest_entity(hero_coords, players, False, 'enemies')
 
-        # Join & fight closest healer_enemy if exists
-        ###
-        if player == 'Player 1':
-            player_checked = 'Player 2'
-        else:
-            player_checked = 'Player 1'
-        ###
+        distance_min_enemies = math.floor(get_distance(players[closest_enemies[0][0]][closest_enemies[0][1]]['coords'], hero_coords))
+
+        if distance_min_enemies == 1:
+            if len(closest_enemies) == 1:
+                # attack it
+                pass
+            else:
+
+                # more than one enemy
+                low_hp_creatures = []
+                low_hp_enemies = []
+                low_hp_healers = []
+
+                for enemy in closest_enemies:
+                    if players[enemy[0]][enemy[1]]['hp'] <= 4:
+                        if enemy[0] == 'creatures':
+                            low_hp_creatures.append(enemy)
+                        elif players[enemy[0]][enemy[1]]['type'] == 'healer':
+                            low_hp_healers.append(enemy)
+                        else:
+                            low_hp_enemies.append(enemy)
+                
+                if len(low_hp_creatures) > 0:
+                    target = low_hp_creatures[0]
+                if len(low_hp_healers) > 0:
+                    target = low_hp_healers[0]
+                if len(low_hp_healers) > 0:
+                
+                
+
+
+
+
+
+        index = 0
         healer_exists = False
-        for hero_checked in list_target:
-            if players[player_checked][hero_checked]['type'] == 'healer':
-                healer_founded = hero_checked
+        while index < len(list_target) and not healer_exists:
+            checked_hero = players[list_target[index][0]][list_target[index][1]]
+            if checked_hero['type'] == 'healer':
+                target = checked_hero
                 healer_exists = True
+            index += 1
+
+            
         if not healer_exists:
-            mark = get_closest_entity(hero_coords, players, True, 'hero_enemies')
+            target = get_closest_entity(hero_coords, players, True, 'enemy_heroes')
 
         # !! Recheck
         several_enemies = False
@@ -266,6 +298,9 @@ def process_rogue(players, map, database, orders, player, hero):
                         enemies_counter += 1
                         if enemies_counter > 1:
                             several_enemies = True
+
+
+        
 
         if not several_enemies:
             # coords_target = players[]
