@@ -151,12 +151,46 @@ def process_mage(players, map, database, orders, player, hero):
     Version
     -------
     specification: Martin Danhier (v.1 01/05/2019)
+    implementation: Jonathan Nhouyvanisvong (v.1 02/05/2019)
     """
     # NOTE
     # nb: check level beginning with the higher levels
     # because if there is nothing to do at a level, try to do the actions of the previous one and so on
+    hero_lvl = players[player][hero]['level']
+    if hero_lvl == '4' or len(players['creatures']) == 0:
+        # If there are no creatures left OR level == 4 => return rush_citadel
+        return rush_citadel
 
-    # If there are no creatures left OR level == 4 => return rush_citadel
+    if hero_lvl >= '3':
+        # Support ally -> Check closest ally
+        hero_coords = players[player][hero]['coords']
+        list_target = get_closest_entity(hero_coords, players, False, 'allies') # Temp parameters
+        # join closest ally
+
+        # Target creature
+        ovibus_range = database['mage'][str(players[player][hero]['level'])]['abilities'][0]['radius']
+        ovibus_cooldown = players[player][hero]['cooldown'][1]
+
+        # Check if creature -> use ovibus
+        for player_checked in players:
+            if player_checked == 'creatures':
+                for creature in players[player_checked]:
+                    distance = math.floor(get_distance(players[player][hero]['coords'], players[player_checked][creature]['coords']))
+                    if distance <= ovibus_range and ovibus_cooldown == 0:
+                        return {'hero': hero, 'action': 'ovibus', 'target': (x, y)}
+
+    if hero_lvl == '2':
+        fulgura_range = database['mage'][str(players[player][hero]['level'])]['abilities'][0]['radius']
+        fulgura_cooldown = players[player][hero]['cooldown'][0]
+
+        # Check if enemy -> use fulgura
+        for player_checked in players:
+            if player_checked != player:
+                for hero_checked in players[player_checked]:
+                    distance = math.floor(get_distance(players[player][hero]['coords'], players[player_checked][hero_checked]['coords']))
+                    if distance <= fulgura_range and fulgura_cooldown  == 0:
+                        return {'hero': hero, 'action': 'fulgura'}
+                
     # else : voir le tableau
     return farm_creatures(players, map, database, orders, player, hero)
 
@@ -189,10 +223,69 @@ def process_rogue(players, map, database, orders, player, hero):
     Version
     -------
     specification: Martin Danhier (v.1 01/05/2019)
+    implementation: Jonathan Nhouyvanisvong (v.1 02/05/2019)
     """
     # NOTE
     # nb: check level beginning with the higher levels
     # because if there is nothing to do at a level, try to do the actions of the previous one and so on
+    hero_lvl = players[player][hero]['level']
+    if hero_lvl == '5' or len(players['creatures']) == 0:
+        # If there are no creatures left OR level == 4 => return rush_citadel
+        return rush_citadel
+
+    if hero_lvl >= '3':
+        # target healer
+        hero_coords = players[player][hero]['coords']
+        list_target = get_closest_entity(hero_coords, players, False, 'hero_enemies') # Temp parameters
+
+        # Join & fight closest healer_enemy if exists
+        ###
+        if player == 'Player 1':
+            player_checked = 'Player 2'
+        else:
+            player_checked = 'Player 1'
+        ###
+        healer_exists = False
+        for hero_checked in list_target:
+            if players[player_checked][hero_checked]['type'] == 'healer':
+                healer_founded = hero_checked
+                healer_exists = True
+        if not healer_exists:
+            mark = get_closest_entity(hero_coords, players, True, 'hero_enemies')
+
+        # !! Recheck
+        several_enemies = False
+        enemies_counter = 0
+        dict_enemies = {}
+        for player_checked in players:
+            if player_checked != player:
+
+                for hero_checked in players[player_checked]:
+                    if get_distance(hero_coords, players[player_checked][hero_checked]['coords']) == 1:
+                        dict_enemies[player_checked].append(hero_checked)
+                        enemies_counter += 1
+                        if enemies_counter > 1:
+                            several_enemies = True
+
+        if not several_enemies:
+            # coords_target = players[]
+            return {'hero': hero, 'action': 'attack', 'target': (x, y)}
+        elif several_enemies:
+            # Check list of target
+            if hero_hp <= 4:
+                if hero_checked in players['creatures']:
+                    return {'hero': hero, 'action': 'attack', 'target': (x, y)}
+                elif hero_checked not in players['creatures']:
+                    return {'hero': hero, 'action': 'attack', 'target': (x, y)}
+            else:
+                # Use burst
+                return {'hero': hero, 'action': 'burst', 'target': (x, y)}
+                
+        elif players[player][hero]['cooldown'][0] == 0 and get_distance(hero_coords, players[player_checked][healer_founded]) > 1:
+            # Use reach where ?
+            return {'hero': hero, 'action': 'reach', 'target': (x, y)}
+
+    return farm_creatures(players, map, database, orders, player, hero)
 
     # If there are no creatures left OR level == 4 => return rush_citadel
     # else : voir le tableau
