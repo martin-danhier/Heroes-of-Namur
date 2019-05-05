@@ -175,8 +175,11 @@ def process_mage(players, map, database, orders, player, hero):
         for player_checked in players:
             if player_checked == 'creatures':
                 for creature in players[player_checked]:
-                    distance = math.floor(get_distance(players[player][hero]['coords'], players[player_checked][creature]['coords']))
+                    coords_creature = players[player_checked][creature]['coords']
+                    distance = math.floor(get_distance(players[player][hero]['coords'], coords_creature))
                     if distance <= ovibus_range and ovibus_cooldown == 0:
+                        x = coords_creature[0]
+                        y = coords_creature[1]
                         return {'hero': hero, 'action': 'ovibus', 'target': (x, y)}
 
     if hero_lvl == '2':
@@ -242,8 +245,11 @@ def process_rogue(players, map, database, orders, player, hero):
 
         if distance_min_enemies == 1:
             if len(closest_enemies) == 1:
-                # attack it
-                pass
+                # (player, hero)
+                coords_enemy = players[closest_enemies[0]][closest_enemies[1]]['coords']
+                x = coords_enemy[0]
+                y = coords_enemy[1]
+                return {'hero': hero, 'action': 'attack', 'target': (x, y)}
             else:
 
                 # more than one enemy
@@ -264,8 +270,8 @@ def process_rogue(players, map, database, orders, player, hero):
                     target = low_hp_creatures[0]
                 if len(low_hp_healers) > 0:
                     target = low_hp_healers[0]
-                if len(low_hp_healers) > 0:
-                
+                if len(low_hp_enemies) > 0:
+                    target = low_hp_enemies[0]
                 
 
 
