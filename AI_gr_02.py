@@ -249,7 +249,7 @@ def process_healer(players, map, database, orders, player, hero):
                 if ally[3] == max(danger_amounts):
 
                     # If he is in the radius of 'invigorate' 
-                    if math.floor(get_distance(ally[0], players[player][hero]['coords'])) <= database['healer'][players][player][hero]['level']['abilities'][0]['radius']:
+                    if math.floor(get_distance(ally[0], players[player][hero]['coords'])) <= database['healer'][players[player][hero]['level']]['abilities'][0]['radius']:
                         
                         # If he needs to be healed
                         if ally[1] < ally[2] and players[player][hero]['cooldown'][0] == 0:
