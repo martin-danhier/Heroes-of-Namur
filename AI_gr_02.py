@@ -263,6 +263,8 @@ def process_mage(players, map, database, orders, player, hero):
 
     # If there are no creatures left OR level == 4 => return rush_citadel
     # else : voir le tableau
+    if len(players['creatures']) == 0:
+        return rush_citadel(players, map, database, orders, player, hero)
     return farm_creatures(players, map, database, orders, player, hero)
 
 def process_rogue(players, map, database, orders, player, hero):
@@ -301,6 +303,9 @@ def process_rogue(players, map, database, orders, player, hero):
 
     # If there are no creatures left OR level == 4 => return rush_citadel
     # else : voir le tableau
+
+    if len(players['creatures']) == 0:
+        return rush_citadel(players, map, database, orders, player, hero)
     return farm_creatures(players, map, database, orders, player, hero)
 
 
@@ -389,26 +394,58 @@ def rush_citadel(players, map, database, orders, player, hero):
     """
 
     if players[player][hero]['coords'] not in map['spur']:
-        # Get nearest spur tile
+        # Get the spur tiles sorted by distance
         first_iteration = True
+        spur_sorted = []
         for tile in map['spur']:
             dist = get_distance(tile, players[player][hero]['coords'])
             if first_iteration:
-                nearest_tile = tile
-                min_distance = dist
-                first_iteration = False
-            elif dist < min_distance:
-                nearest_tile = tile
-                min_distance = dist
-        info = get_tile_info(nearest_tile, players, map, orders)
-        if info == 'player':
-            order = find_path(players, map, orders, players[player][hero]['coords'], nearest_tile)
-        else:
-            order = find_path(players, map, orders, players[player][hero]['coords'], nearest_tile, False)
+                    spur_sorted.append((tile, dist))
+                    first_iteration = False
+            else:
+                sorted = False
+                index = 0
+                while index < len(spur_sorted) and not sorted:
+                    
+                    if dist < spur_sorted[index][1]:
+                        spur_sorted = spur_sorted[:index] + [(tile, dist)] + spur_sorted[index:]
+                        sorted = True
+                    elif index == len(spur_sorted) - 1:
+                        spur_sorted.append((tile, dist))
+                        sorted = True
+                    index += 1
+
+        index = 0
+        order_generated = False
+        
+        while index < len(spur_sorted) and not order_generated:
+            nearest_tile = spur_sorted[index][0]
+            # Get the info of that tile
+            info = get_tile_info(nearest_tile, players, map, orders)
+            if info == 'player':
+                # Check if the hero on the tile is an ally player or not
+                ally_on_nearest_tile = False
+                for checked_hero in players[player]:
+                    if players[player][checked_hero]['coords'] == nearest_tile:
+                        ally_on_nearest_tile = True
+                
+                if not ally_on_nearest_tile:
+                    # if it is an ennemy
+
+                    # check if there is a clear tile on the spur to cancel the enemy victory counter
+                    
+
+                    order = find_path(players, map, orders, players[player][hero]['coords'], nearest_tile, True)
+                    order_generated = True
+            else:
+                order = find_path(players, map, orders, players[player][hero]['coords'], nearest_tile, False)
+                order_generated = True
+            index += 1
+            
         order['hero'] = hero
         return order
     else:
-        target = get_closest_entity(players[player][hero]['coords'], players,player, True, 'ennemies')[0]
+        target = get_closest_entity(players[player][hero]['coords'], players,player, True, 'enemy_heroes')[0]
         target_coords = players[target[0]][target[1]]['coords']
         if math.floor(get_distance(target_coords, players[player][hero]['coords'])) == 1:
             return {'hero' : hero, 'action': 'attack', 'target': target_coords} 
