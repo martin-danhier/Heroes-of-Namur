@@ -351,15 +351,13 @@ def farm_creatures(players, map, database, orders, player, hero):
                         target = (checked_player, checked_hero)
                         too_close = True
     # Else, target creatures
-    if not too_close and len(players['creatures']) > 0:
+    if not too_close:
         target = get_closest_entity(players[player][hero]['coords'], players, player, True, 'creatures')[0]
         
-        # Get target coords and order
-        target_coords = players[target[0]][target[1]]['coords']
-        order = find_path(players, map, orders, players[player][hero]['coords'], target_coords)
-        order['hero'] = hero
-    else:
-        order = {}
+    # Get target coords and order
+    target_coords = players[target[0]][target[1]]['coords']
+    order = find_path(players, map, orders, players[player][hero]['coords'], target_coords)
+    order['hero'] = hero
     return order
 
 def rush_citadel(players, map, database, orders, player, hero):
