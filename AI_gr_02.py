@@ -197,12 +197,14 @@ def process_healer(players, map, database, orders, player, hero):
         return rush_citadel(players, map, database, orders, player, hero)
 
     # Define a 'danger amount' for every hero except for the healer that represents how much they are in danger
-    # Danger amount = hp/hp_max + nb_enemies_in_radius/x
+    # Danger amount = max_hp/hp + nb_enemies_in_radius/2
     # Where radius = 3 + 1/3(distance_from_healer)
-    #           x = a certain number, to be defined
-    # The healer will go towards a hero to heal/immunise him if his danger amount exceeds a certain threshold (to be defined)
+    # The healer will go towards a hero to heal/immunise him if his danger amount exceeds 2
 
-    # The data will be stored in a list of the type [((coord_x, coord_y), danger_amount)]
+    # The data will be stored in a list of the type [(coords, hp, danger_amount)]
+
+    data_allies = []
+    danger_amounts = []
 
     for checked_player in players:
         for checked_hero in players[checked_player]:
@@ -214,16 +216,52 @@ def process_healer(players, map, database, orders, player, hero):
                 if checked_hero != hero:
 
                     hp = players[checked_player][checked_hero]['hp']
-                    max_hp = database[players[checked_player][checked_hero]['type']][players][checked_player][checked_hero]['level']['hp']
-                    radius = math.floor(3 + 1/3 * get_distance(players[player][hero]['coords'], players[checked_player][checked_hero]['coords'])) 
+                    coords = players[checked_player][checked_hero]['coords']
+                    max_hp = database[players[checked_player][checked_hero]['type']][players[checked_player][checked_hero]['level']]['hp']
+                    radius = math.floor(3 + 1/3 * get_distance(players[player][hero]['coords'], coords))
+                    nb_enemies_in_radius = 0
+                    
+                    # Get the number of enemy heroes in the radius
 
-                    danger_amount = hp/max_hp + nb_enemies_in_radius/x
+                    for checked_player_2 in players:
+                        for checked_hero_2 in players[checked_player_2]:
+
+                            # Check the enemies
+
+                            if checked_player_2 != player:
+                                if math.floor(get_distance(coords, players[checked_player_2][checked_hero_2]['coords'])) <= radius:
+                                    nb_enemies_in_radius += 1
+
+                    data_allies.append((coords, hp, max_hp, max_hp/hp + nb_enemies_in_radius/2))
+                    danger_amounts.append(max_hp/hp + nb_enemies_in_radius/2)
 
     if players[player][hero]['level'] >= '3':
         pass
+        
+
 
     if players[player][hero]['level'] >= '2':
-        pass
+
+        # If an ally is in danger
+        if max(danger_amounts) >= 2:
+
+            for ally in data_allies:
+                if ally[3] == max(danger_amounts):
+
+                    # If he is in the radius of 'invigorate' 
+                    if math.floor(get_distance(ally[0], players[player][hero]['coords'])) <= database['healer'][players][player][hero]['level']['abilities'][0]['radius']:
+                        
+                        # If he needs to be healed
+                        if ally[1] < ally[2] and players[player][hero]['cooldown'][0] == 0:
+
+                            # Use invigorate
+                            return { 'hero' : hero, 'action' : 'invigorate' }
+
+                    else:
+
+                        # Go towards him
+                        return { 'hero' : hero, 'action' : 'move', 'target' : find_path(players, map, orders, players[player][hero]['coords'], ally[0])}
+                    
 
     return farm_creatures(players, map, database, orders, player, hero)
 

@@ -1534,7 +1534,6 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
 
                 # Save orders
                 orders += parse_command(player, command, players, database)
-        input('')
 
         # Step 4 : Use special abilities
         for order in orders:
