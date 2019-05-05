@@ -396,7 +396,12 @@ def farm_creatures(players, map, database, orders, player, hero):
         
     # Get target coords and order
     target_coords = players[target[0]][target[1]]['coords']
-    order = find_path(players, map, orders, players[player][hero]['coords'], target_coords)
+    
+    # Can reach be done ?
+    if players[player][hero]['type'] == 'rogue' and int(players[player][hero]['level']) >= 3 and players[player][hero]['cooldown'][0] == 0:
+        order = find_path(players, map, orders, players[player][hero]['coords'], target_coords, True, database['rogue'][players[player][hero]['level']]['abilities'][0]['radius'])
+    else:
+        order = find_path(players, map, orders, players[player][hero]['coords'], target_coords)
     order['hero'] = hero
     return order
 
@@ -479,10 +484,19 @@ def rush_citadel(players, map, database, orders, player, hero):
                             spur_is_full = False
                     if spur_is_full:
                         # If the spur is full, attack the enemy
-                        order = find_path(players, map, orders, players[player][hero]['coords'], nearest_tile, True)
+
+                        # Can reach be done ?
+                        if players[player][hero]['type'] == 'rogue' and int(players[player][hero]['level']) >= 3 and players[player][hero]['cooldown'][0] == 0:
+                            order = find_path(players, map, orders, players[player][hero]['coords'], nearest_tile, True, database['rogue'][players[player][hero]['level']]['abilities'][0]['radius'])
+                        else:
+                            order = find_path(players, map, orders, players[player][hero]['coords'], nearest_tile, True)
                         order_generated = True
             else:
-                order = find_path(players, map, orders, players[player][hero]['coords'], nearest_tile, False)
+                # Can reach be done ?
+                if players[player][hero]['type'] == 'rogue' and int(players[player][hero]['level']) >= 3 and players[player][hero]['cooldown'][0] == 0:
+                    order = find_path(players, map, orders, players[player][hero]['coords'], nearest_tile, False, database['rogue'][players[player][hero]['level']]['abilities'][0]['radius'])
+                else:
+                    order = find_path(players, map, orders, players[player][hero]['coords'], nearest_tile, False)
                 order_generated = True
             index += 1
             
@@ -495,7 +509,11 @@ def rush_citadel(players, map, database, orders, player, hero):
         target = get_closest_entity(players[player][hero]['coords'], players,player, True, 'enemy_heroes')[0]
         target_coords = players[target[0]][target[1]]['coords']
     
-        order = find_path(players, map, orders, players[player][hero]['coords'], target_coords, True)
+        # Can reach be done ?
+        if players[player][hero]['type'] == 'rogue' and int(players[player][hero]['level']) >= 3 and players[player][hero]['cooldown'][0] == 0:
+            order = find_path(players, map, orders, players[player][hero]['coords'], target_coords, True, database['rogue'][players[player][hero]['level']]['abilities'][0]['radius'])
+        else:
+            order = find_path(players, map, orders, players[player][hero]['coords'], target_coords, True)
         order['hero'] = hero
         if (order['action'] == 'move' and order['target'] in map['spur']) or order['action'] == 'attack':
             # if the hero should move on another spur tile, or if the hero should attack, let it do it
@@ -529,9 +547,15 @@ def rush_citadel(players, map, database, orders, player, hero):
 
 # === TOOLS ===
 # Useful functions
-def find_path(players, map, orders, source, target, attack_target = True):
+def find_path(players, map, orders, source, target, attack_target = True, walkable_distance = 1):
     """
     orders: the orders already given to the allies (list of dict)
+    attack_target: if True, attack the target tile when it is in range. if False, move to that target tile. (bool, default True)
+    walkable_distance: the maximal distance that the hero can move in a single turn (int, default 1)
+
+    Notes
+    -----
+    If walkable_distance > 1, the hero must be a rogue and its reach cooldown must be equal to 0.
     """
     order = {}
     distance = math.floor(get_distance(source, target))
@@ -541,16 +565,16 @@ def find_path(players, map, orders, source, target, attack_target = True):
         order['action'] = 'attack'
         order['target'] = target
     else:
+        
         # The source moves towards the target
-        order['action'] = 'move'
 
-        # The source can move on 9 tiles
+        # The source can move on more on less tiles depending on the walkable distance
         first_loop = True
 
         # Get the distances sorted by insertion sort
         distances = []
-        for x_coord in range(source[0] - 1, source[0] + 2):
-            for y_coord in range(source[1] - 1, source[1] + 2):
+        for x_coord in range(source[0] - walkable_distance, source[0] + walkable_distance + 1):
+            for y_coord in range(source[1] - walkable_distance, source[1] + walkable_distance + 1):
                 if (x_coord, y_coord) != source:
                     # Get the distance between the checked tile and the target
                     tile_distance = get_distance((x_coord, y_coord), target)
@@ -574,16 +598,22 @@ def find_path(players, map, orders, source, target, attack_target = True):
         # Go to the clear tile nearest to the target
         found = False
         index = 0
-        while not found and index < 8:
+        while not found and index < len(distances):
             info = get_tile_info(distances[index][0], players, map, orders)
 
             if info == 'clear' or (info == 'spur' and map['nb_turns'] > 20):
                 order['target'] = distances[index][0]
                 found = True
-            elif index == 7:
+            elif index == len(distances):
                 return {}
             else:
                 index += 1
+
+        distance_from_source = math.floor(get_distance(order['target'], source))
+        if distance_from_source <= 1:
+            order['action'] = 'move'
+        else:
+            order['action'] = 'reach'
     return order
 
 
