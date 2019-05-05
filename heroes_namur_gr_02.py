@@ -833,9 +833,10 @@ def update_counters(players, map):
     # Get players on spur
     players_on_spur = []
     for player in players:
-        for hero in players[player]:
-            if players[player][hero]['coords'] in map['spur']:
-                players_on_spur.append(player)
+        if player != 'creatures':
+            for hero in players[player]:
+                if players[player][hero]['coords'] in map['spur'] and player not in players_on_spur:
+                    players_on_spur.append(player)
 
     # No or several players : reset
     if len(players_on_spur) != 1:

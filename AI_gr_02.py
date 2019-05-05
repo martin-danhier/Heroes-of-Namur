@@ -81,8 +81,6 @@ def process_barbarian(players, map, database, orders, player, hero):
     # If there are no creatures left OR level == 4 => return rush_citadel
     # else : voir le tableau
 
-    if players[player][hero]['level'] == '5' or len(players['creatures']) == 0:
-        return rush_citadel(players, map, database, orders, player, hero)
          
     if players[player][hero]['level'] >= '3':
         allies_in_range_energise = 0
@@ -152,7 +150,10 @@ def process_barbarian(players, map, database, orders, player, hero):
             # Use energise 
             return { 'hero' : hero, 'action' : 'energise' }
 
-    return farm_creatures(players, map, database, orders, player, hero)
+    if players[player][hero]['level'] == '5' or len(players['creatures']) == 0:
+        return rush_citadel(players, map, database, orders, player, hero)
+    else:
+        return farm_creatures(players, map, database, orders, player, hero)
 
 def process_healer(players, map, database, orders, player, hero):
     """ Generates an action dictionary for the given healer.
@@ -191,10 +192,6 @@ def process_healer(players, map, database, orders, player, hero):
     # If there are no creatures left OR level == 4 => return rush_citadel
     # else : voir le tableau
 
-    # test: move each healer in a diagonal
-
-    if players[player][hero]['level'] == '5' or len(players['creatures']) == 0:
-        return rush_citadel(players, map, database, orders, player, hero)
 
     # Define a 'danger amount' for every hero except for the healer that represents how much they are in danger
     # Danger amount = max_hp/hp + nb_enemies_in_radius/2
@@ -260,10 +257,15 @@ def process_healer(players, map, database, orders, player, hero):
                     else:
 
                         # Go towards him
-                        return { 'hero' : hero, 'action' : 'move', 'target' : find_path(players, map, orders, players[player][hero]['coords'], ally[0])}
+                        order = find_path(players, map, orders, players[player][hero]['coords'], ally[0], False)
+                        order['hero'] = hero
+                        return order
                     
-
-    return farm_creatures(players, map, database, orders, player, hero)
+    
+    if players[player][hero]['level'] == '5' or len(players['creatures']) == 0:
+        return rush_citadel(players, map, database, orders, player, hero)
+    else:
+        return farm_creatures(players, map, database, orders, player, hero)
 
 def process_mage(players, map, database, orders, player, hero):
     """ Generates an action dictionary for the given mage.
@@ -430,6 +432,8 @@ def rush_citadel(players, map, database, orders, player, hero):
     """
 
     if players[player][hero]['coords'] not in map['spur']:
+        # The hero is not on the spur
+
         # Get the spur tiles sorted by distance
         first_iteration = True
         spur_sorted = []
@@ -469,10 +473,14 @@ def rush_citadel(players, map, database, orders, player, hero):
                     # if it is an ennemy
 
                     # check if there is a clear tile on the spur to cancel the enemy victory counter
-                    
-
-                    order = find_path(players, map, orders, players[player][hero]['coords'], nearest_tile, True)
-                    order_generated = True
+                    spur_is_full = True
+                    for spur_tile in map['spur']:
+                        if get_tile_info(spur_tile, players, map, orders) == 'spur':
+                            spur_is_full = False
+                    if spur_is_full:
+                        # If the spur is full, attack the enemy
+                        order = find_path(players, map, orders, players[player][hero]['coords'], nearest_tile, True)
+                        order_generated = True
             else:
                 order = find_path(players, map, orders, players[player][hero]['coords'], nearest_tile, False)
                 order_generated = True
@@ -481,11 +489,21 @@ def rush_citadel(players, map, database, orders, player, hero):
         order['hero'] = hero
         return order
     else:
+        # The hero is on the spur
+
+        # Target the closest enemy
         target = get_closest_entity(players[player][hero]['coords'], players,player, True, 'enemy_heroes')[0]
         target_coords = players[target[0]][target[1]]['coords']
-        if math.floor(get_distance(target_coords, players[player][hero]['coords'])) == 1:
-            return {'hero' : hero, 'action': 'attack', 'target': target_coords} 
-
+    
+        order = find_path(players, map, orders, players[player][hero]['coords'], target_coords, True)
+        order['hero'] = hero
+        if (order['action'] == 'move' and order['target'] in map['spur']) or order['action'] == 'attack':
+            # if the hero should move on another spur tile, or if the hero should attack, let it do it
+            return order
+        else:
+            # if the hero should move outside of the spur, do not let it do it (move on the same tile)
+            return {'hero':hero, 'action':'move', 'target': players[player][hero]['coords']}
+    
 
     # ! il faut faire gaffe qu'un héros ait toujours quelque chose à faire et ne soit pas bloqué à jamais
 
@@ -645,7 +663,9 @@ def generate_command_string(actions):
     """
     command = ''
     # For each action dictionary
+    counter = 0
     for action in actions:
+        counter += 1
         # Converts the action to a string and append it to command
         if action != {}:
             if action['action'] == 'move':
@@ -656,7 +676,8 @@ def generate_command_string(actions):
                 command += '%s:%s' % (action['hero'], action['action'])
                 if 'target' in action:
                     command+= ':%d-%d' % (action['target'][0], action['target'][1])
-            command += ' '
+            if counter < len(actions):
+                command += ' '
     return command
 
 def get_closest_entity(coords, players, player, restrictive, mode):
