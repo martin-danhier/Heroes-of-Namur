@@ -216,12 +216,6 @@ def process_healer(players, map, database, orders, player, hero):
                 if checked_hero != hero:
 
                     hp = players[checked_player][checked_hero]['hp']
-<<<<<<< HEAD
-                    max_hp = database[players[checked_player][checked_hero]['type']][players[checked_player][checked_hero]['level']]['hp']
-                    radius = math.floor(3 + 1/3 * get_distance(players[player][hero]['coords'], players[checked_player][checked_hero]['coords'])) 
-
-                    # danger_amount = hp/max_hp + nb_enemies_in_radius/x
-=======
                     coords = players[checked_player][checked_hero]['coords']
                     max_hp = database[players[checked_player][checked_hero]['type']][players[checked_player][checked_hero]['level']]['hp']
                     radius = math.floor(3 + 1/3 * get_distance(players[player][hero]['coords'], coords))
@@ -240,7 +234,6 @@ def process_healer(players, map, database, orders, player, hero):
 
                     data_allies.append((coords, hp, max_hp, max_hp/hp + nb_enemies_in_radius/2))
                     danger_amounts.append(max_hp/hp + nb_enemies_in_radius/2)
->>>>>>> process_barbarian
 
     if players[player][hero]['level'] >= '3':
         pass
