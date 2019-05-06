@@ -302,14 +302,11 @@ def process_mage(players, map, database, orders, player, hero):
     # nb: check level beginning with the higher levels
     # because if there is nothing to do at a level, try to do the actions of the previous one and so on
     hero_lvl = players[player][hero]['level']
-    if hero_lvl == '4' or len(players['creatures']) == 0:
-        # If there are no creatures left OR level == 4 => return rush_citadel
-        return rush_citadel
 
     if hero_lvl >= '3':
         # Support ally -> Check closest ally
         hero_coords = players[player][hero]['coords']
-        list_target = get_closest_entity(hero_coords, players, False, 'allies') # Temp parameters
+        list_target = get_closest_entity(hero_coords, players, player, False, 'allies')
         # join closest ally
 
         # Target creature
@@ -327,7 +324,7 @@ def process_mage(players, map, database, orders, player, hero):
                         y = coords_creature[1]
                         return {'hero': hero, 'action': 'ovibus', 'target': (x, y)}
 
-    if hero_lvl == '2':
+    if hero_lvl >= '2':
         fulgura_range = database['mage'][str(players[player][hero]['level'])]['abilities'][0]['radius']
         fulgura_cooldown = players[player][hero]['cooldown'][0]
 
@@ -339,10 +336,10 @@ def process_mage(players, map, database, orders, player, hero):
                     if distance <= fulgura_range and fulgura_cooldown  == 0:
                         return {'hero': hero, 'action': 'fulgura'}
                 
-    # else : voir le tableau
-    if len(players['creatures']) == 0:
-        return rush_citadel(players, map, database, orders, player, hero)
-    return farm_creatures(players, map, database, orders, player, hero)
+    if hero_lvl >= '5' or len(players['creatures']) == 0:
+        return rush_citadel
+    else:
+        return farm_creatures(players, map, database, orders, player, hero)
 
 def process_rogue(players, map, database, orders, player, hero):
     """ Generates an action dictionary for the given rogue.
@@ -379,9 +376,6 @@ def process_rogue(players, map, database, orders, player, hero):
     # nb: check level beginning with the higher levels
     # because if there is nothing to do at a level, try to do the actions of the previous one and so on
     hero_lvl = players[player][hero]['level']
-    if hero_lvl == '5' or len(players['creatures']) == 0:
-        # If there are no creatures left OR level == 4 => return rush_citadel
-        return rush_citadel
 
     if hero_lvl >= '3':
         # target healer
@@ -389,7 +383,7 @@ def process_rogue(players, map, database, orders, player, hero):
 
         ###
         hero_coords = players[player][hero]['coords']
-        closest_enemies = get_closest_entity(hero_coords, players, False, 'enemies')
+        closest_enemies = get_closest_entity(hero_coords, players, player, False, 'enemies')
 
         distance_min_enemies = math.floor(get_distance(players[closest_enemies[0][0]][closest_enemies[0][1]]['coords'], hero_coords))
 
@@ -478,9 +472,11 @@ def process_rogue(players, map, database, orders, player, hero):
     # If there are no creatures left OR level == 4 => return rush_citadel
     # else : voir le tableau
 
-    if len(players['creatures']) == 0:
-        return rush_citadel(players, map, database, orders, player, hero)
-    return farm_creatures(players, map, database, orders, player, hero)
+    
+    if hero_lvl >= '5' or len(players['creatures']) == 0:
+        return rush_citadel
+    else:
+        return farm_creatures(players, map, database, orders, player, hero)
 
 
 def farm_creatures(players, map, database, orders, player, hero):
