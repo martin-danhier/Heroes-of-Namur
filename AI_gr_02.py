@@ -238,6 +238,9 @@ def process_rogue(players, map, database, orders, player, hero):
 
     if hero_lvl >= '3':
         # target healer
+        ###
+
+        ###
         hero_coords = players[player][hero]['coords']
         closest_enemies = get_closest_entity(hero_coords, players, False, 'enemies')
 
@@ -266,67 +269,64 @@ def process_rogue(players, map, database, orders, player, hero):
                         else:
                             low_hp_enemies.append(enemy)
                 
-                if len(low_hp_creatures) > 0:
-                    target = low_hp_creatures[0]
-                if len(low_hp_healers) > 0:
-                    target = low_hp_healers[0]
-                if len(low_hp_enemies) > 0:
-                    target = low_hp_enemies[0]
-                
+                if len(low_hp_creatures) != 0 or len(low_hp_healers) != 0 or len(low_hp_enemies) != 0:
+                    if len(low_hp_creatures) > 0:
+                        target = low_hp_creatures[0]
+                        # (player, hero)
+                    elif len(low_hp_healers) > 0:
+                        target = low_hp_healers[0]
+                    elif len(low_hp_enemies) > 0:
+                        target = low_hp_enemies[0]
 
+                    x = players[target[0]][target[1]]['coords'][0]
+                    y = players[target[0]][target[1]]['coords'][1]
+                    return {'hero': hero, 'action': 'attack', 'target': (x, y)}
+                else:
+                    return {'hero': hero, 'action': 'burst'}
 
+        # index = 0
+        # healer_exists = False
+        # while index < len(list_target) and not healer_exists:
+        #     checked_hero = players[list_target[index][0]][list_target[index][1]]
+        #     if checked_hero['type'] == 'healer':
+        #         target = checked_hero
+        #         healer_exists = True
+        #     index += 1
 
-
-
-        index = 0
-        healer_exists = False
-        while index < len(list_target) and not healer_exists:
-            checked_hero = players[list_target[index][0]][list_target[index][1]]
-            if checked_hero['type'] == 'healer':
-                target = checked_hero
-                healer_exists = True
-            index += 1
-
-            
-        if not healer_exists:
-            target = get_closest_entity(hero_coords, players, True, 'enemy_heroes')
+        # if not healer_exists:
+        #     target = get_closest_entity(hero_coords, players, True, 'enemy_heroes')
 
         # !! Recheck
-        several_enemies = False
-        enemies_counter = 0
-        dict_enemies = {}
-        for player_checked in players:
-            if player_checked != player:
+        # several_enemies = False
+        # enemies_counter = 0
+        # dict_enemies = {}
+        # for player_checked in players:
+        #     if player_checked != player:
+        #         for hero_checked in players[player_checked]:
+        #             if get_distance(hero_coords, players[player_checked][hero_checked]['coords']) == 1:
+        #                 dict_enemies[player_checked].append(hero_checked)
+        #                 enemies_counter += 1
+        #                 if enemies_counter > 1:
+        #                     several_enemies = True 
 
-                for hero_checked in players[player_checked]:
-                    if get_distance(hero_coords, players[player_checked][hero_checked]['coords']) == 1:
-                        dict_enemies[player_checked].append(hero_checked)
-                        enemies_counter += 1
-                        if enemies_counter > 1:
-                            several_enemies = True
-
-
-        
-
-        if not several_enemies:
-            # coords_target = players[]
-            return {'hero': hero, 'action': 'attack', 'target': (x, y)}
-        elif several_enemies:
-            # Check list of target
-            if hero_hp <= 4:
-                if hero_checked in players['creatures']:
-                    return {'hero': hero, 'action': 'attack', 'target': (x, y)}
-                elif hero_checked not in players['creatures']:
-                    return {'hero': hero, 'action': 'attack', 'target': (x, y)}
-            else:
-                # Use burst
-                return {'hero': hero, 'action': 'burst', 'target': (x, y)}
+        # if not several_enemies:
+        #     # coords_target = players[]
+        #     return {'hero': hero, 'action': 'attack', 'target': (x, y)}
+        # elif several_enemies:
+        #     # Check list of target
+        #     if hero_hp <= 4:
+        #         if hero_checked in players['creatures']:
+        #             return {'hero': hero, 'action': 'attack', 'target': (x, y)}
+        #         elif hero_checked not in players['creatures']:
+        #             return {'hero': hero, 'action': 'attack', 'target': (x, y)}
+        #     else:
+        #         # Use burst
+        #         return {'hero': hero, 'action': 'burst'}
                 
-        elif players[player][hero]['cooldown'][0] == 0 and get_distance(hero_coords, players[player_checked][healer_founded]) > 1:
-            # Use reach where ?
-            return {'hero': hero, 'action': 'reach', 'target': (x, y)}
-
-    return farm_creatures(players, map, database, orders, player, hero)
+        # elif players[player][hero]['cooldown'][0] == 0 and get_distance(hero_coords, players[player_checked][healer_founded]) > 1:
+        #     # Use reach where ?
+        #     return {'hero': hero, 'action': 'reach', 'target': (x, y)}
+        
 
     # If there are no creatures left OR level == 4 => return rush_citadel
     # else : voir le tableau
