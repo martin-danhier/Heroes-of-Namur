@@ -682,7 +682,7 @@ def read_file(path):
 # Clean, apply bonuses, update cooldowns...
 
 
-def clean(players, map, database):
+def clean(players, map, database, orders):
     """ Cleans the board (managing death and levels).
 
     Parameters
@@ -690,6 +690,7 @@ def clean(players, map, database):
     players : data of player heroes and creatures. (dict)
     map: data of the map (spawns, spur, size, etc...) (dict)
     database : data of hero classes (dict)
+    orders: list of global orders (list of dict)
 
     Notes
     -----
@@ -699,8 +700,8 @@ def clean(players, map, database):
 
     Version
     -------
-    specification : Guillaume Nizet (v.4 02/03/19)
-    implementation : Jonathan Nhouyvanisvong, Martin Danhier (v.5 09/04/19)
+    specification : Guillaume Nizet (v.5 06/05/19)
+    implementation : Jonathan Nhouyvanisvong, Martin Danhier (v.6 06/05/19)
 
     """
     dead_creatures = []
@@ -740,15 +741,31 @@ def clean(players, map, database):
                     heroes.append(hero)
             selected_heroes = heroes
 
-            # Calculate bonus
-            victory_points = math.ceil(victory_points / len(selected_heroes))
+            if len(selected_heroes) > 0:
+                # Calculate bonus
+                victory_points = math.ceil(victory_points / len(selected_heroes))
 
             for hero in selected_heroes:
                 players[hero[0]][hero[1]]['xp'] += victory_points
 
+    # Dead heroes
+    dead_heroes = []
+    for player in players:
+        if player != 'creatures':
+            for hero in players[player]:
+                if players[player][hero]['hp'] <= 0:
+                    dead_heroes.append((player, hero))
+
+    # Cancel orders of dead heroes/creatures
+    valid_orders = []
+    for order in orders:
+        if (order['action'] in ('move', 'attack')) and ((order['player'] == 'creatures' and order['hero'] not in dead_creatures) or (order['player'] != 'creatures' and (order['player'], order['hero']) not in dead_heroes)):
+            valid_orders.append(order)
+
     # Remove dead creatures
     for creature in dead_creatures:
         players['creatures'].pop(creature)
+        
 
     # For each hero
     for player in players:
@@ -772,6 +789,7 @@ def clean(players, map, database):
                             # Unlock special ability
                             if level in ('2', '3'):
                                 players[player][hero]['cooldown'].append(0)
+    return valid_orders
 
 
 def update_counters(players, map):
@@ -1565,10 +1583,9 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
                 use_special_ability(order, players, map, database)
 
         # Step 4 : First clear
-        clean(players, map, database)
+        orders = clean(players, map, database, orders)
 
         display_ui(players, map, database)
-
 
         # Step 5 : Move & Fight
         for order in orders:
@@ -1578,7 +1595,7 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
                 move_on(order, players, map)
 
         # Step 6 : Second clear
-        clean(players, map, database)
+        clean(players, map, database, orders)
 
         # Update cooldowns and counters
         update_counters(players, map)

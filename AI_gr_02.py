@@ -306,7 +306,7 @@ def process_mage(players, map, database, orders, player, hero):
     if hero_lvl >= '3':
         # Support ally -> Check closest ally
         hero_coords = players[player][hero]['coords']
-        list_target = get_closest_entity(hero_coords, players, player, False, 'allies')
+        # list_target = get_closest_entity(hero_coords, players, player, False, 'allies')
         # join closest ally
 
         # Target creature
@@ -334,7 +334,7 @@ def process_mage(players, map, database, orders, player, hero):
                 for hero_checked in players[player_checked]:
                     distance = math.floor(get_distance(players[player][hero]['coords'], players[player_checked][hero_checked]['coords']))
                     if distance <= fulgura_range and fulgura_cooldown  == 0:
-                        return {'hero': hero, 'action': 'fulgura'}
+                        return {'hero': hero, 'action': 'fulgura', 'target': players[player_checked][hero_checked]['coords']}
                 
     if hero_lvl >= '5' or len(players['creatures']) == 0:
         return rush_citadel(players, map, database, orders, player, hero)
@@ -508,11 +508,11 @@ def farm_creatures(players, map, database, orders, player, hero):
     specification: Martin Danhier (v.1 01/05/2019)
     """
     too_close = False
-    # Check if a enemy is to close to the citadel
+    # Check if a hero is to close to the citadel
     for tile in map['spur']:
-        # For each enemy hero
+        # For each hero
         for checked_player in players:
-            if checked_player not in ('creatures', player):
+            if checked_player != 'creatures':
                 for checked_hero in players[checked_player]:
                     # If the enemy is too close to the citadel
                     if get_distance(players[checked_player][checked_hero]['coords'], tile) < 5:
@@ -707,23 +707,24 @@ def find_path(players, map, orders, source, target, attack_target = True, walkab
                 if (x_coord, y_coord) != source:
                     # Get the distance between the checked tile and the target
                     tile_distance = get_distance((x_coord, y_coord), target)
+                    source_distance = math.floor(get_distance((x_coord, y_coord), source))
+                    if source_distance <= walkable_distance:
+                        if first_loop:
+                            distances.append(((x_coord, y_coord), tile_distance))
+                            first_loop = False
+                        else:
+                            index = 0
+                            sorted = False
+                            while not sorted and index < len(distances):
+                                if tile_distance <= distances[index][1]:
+                                    distances =  distances[:index] + [((x_coord, y_coord), tile_distance)] + distances[index:]
+                                    sorted = True
+                                elif index == len(distances) - 1:
+                                    distances.append(((x_coord, y_coord), tile_distance))
+                                    sorted = True
+                                else:
+                                    index += 1
 
-                    if first_loop:
-                        distances.append(((x_coord, y_coord), tile_distance))
-                        first_loop = False
-                    else:
-                        index = 0
-                        sorted = False
-                        while not sorted and index < len(distances):
-                            if tile_distance <= distances[index][1]:
-                                distances =  distances[:index] + [((x_coord, y_coord), tile_distance)] + distances[index:]
-                                sorted = True
-                            elif index == len(distances) - 1:
-                                distances.append(((x_coord, y_coord), tile_distance))
-                                sorted = True
-                            else:
-                                index += 1
-        
         # Go to the clear tile nearest to the target
         found = False
         index = 0
