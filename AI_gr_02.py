@@ -473,7 +473,7 @@ def process_rogue(players, map, database, orders, player, hero):
 
     
     if hero_lvl >= '5' or len(players['creatures']) == 0:
-        return rush_citadel
+        return rush_citadel(players, map, database, orders, player, hero)
     else:
         return farm_creatures(players, map, database, orders, player, hero)
 
