@@ -378,10 +378,7 @@ def process_rogue(players, map, database, orders, player, hero):
     hero_lvl = players[player][hero]['level']
 
     if hero_lvl >= '3':
-        # target healer
-        ###
-
-        ###
+        
         hero_coords = players[player][hero]['coords']
         closest_enemies = get_closest_entity(hero_coords, players, player, False, 'all_enemies')
         distance_min_enemies = math.floor(get_distance(players[closest_enemies[0][0]][closest_enemies[0][1]]['coords'], hero_coords))
@@ -422,7 +419,9 @@ def process_rogue(players, map, database, orders, player, hero):
                     y = players[target[0]][target[1]]['coords'][1]
                     return {'hero': hero, 'action': 'attack', 'target': (x, y)}
                 else:
-                    return {'hero': hero, 'action': 'burst'}
+                    if players[player][hero]['cooldown'][1] == 0:
+                        return {'hero': hero, 'action': 'burst'}
+    
 
         # index = 0
         # healer_exists = False
