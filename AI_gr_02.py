@@ -235,11 +235,6 @@ def process_healer(players, map, database, orders, player, hero):
                     data_allies.append((coords, hp, max_hp, max_hp/hp + nb_enemies_in_radius/2))
                     danger_amounts.append(max_hp/hp + nb_enemies_in_radius/2)
 
-    if players[player][hero]['level'] >= '3':
-        pass
-        
-
-
     if players[player][hero]['level'] >= '2':
 
         # If an ally is in danger
@@ -252,15 +247,34 @@ def process_healer(players, map, database, orders, player, hero):
                     if math.floor(get_distance(ally[0], players[player][hero]['coords'])) <= database['healer'][players[player][hero]['level']]['abilities'][0]['radius']:
                         
                         # If he needs to be healed
-                        if ally[1] < ally[2] and players[player][hero]['cooldown'][0] == 0:
+                        if ally[1] < ally[2]:
+                            if players[player][hero]['cooldown'][0] == 0:
 
-                            # Use invigorate
-                            return { 'hero' : hero, 'action' : 'invigorate' }
+                                # Use invigorate
+                                return { 'hero' : hero, 'action' : 'invigorate' }
+
+                        # If he doesn't need to be healed but is in danger, it means that he needs to be immunised
+                        else:
+                            if players[player][hero]['level'] >= '3':
+                                if math.floor(get_distance(ally[0], players[player][hero]['coords'])) <= database['healer'][players[player][hero]['level']]['abilities'][1]['radius']:
+                                    if players[player][hero]['cooldown'][1] == 0:
+
+                                        # Use immunise
+                                        return { 'hero' : hero, 'action' : 'immunise'}
+
+                                else:   
+
+                                    # Go towards him 
+                                    order = find_path(players, map, orders, players[player][hero]['coords'], ally[0])
+                                    order['hero'] = hero
+                                    return order
 
                     else:
 
                         # Go towards him
-                        return { 'hero' : hero, 'action' : 'move', 'target' : find_path(players, map, orders, players[player][hero]['coords'], ally[0])}
+                        order = find_path(players, map, orders, players[player][hero]['coords'], ally[0])
+                        order['hero'] = hero
+                        return order
                     
 
     return farm_creatures(players, map, database, orders, player, hero)
