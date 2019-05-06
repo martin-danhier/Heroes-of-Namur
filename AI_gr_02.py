@@ -337,7 +337,7 @@ def process_mage(players, map, database, orders, player, hero):
                         return {'hero': hero, 'action': 'fulgura'}
                 
     if hero_lvl >= '5' or len(players['creatures']) == 0:
-        return rush_citadel
+        return rush_citadel(players, map, database, orders, player, hero)
     else:
         return farm_creatures(players, map, database, orders, player, hero)
 
@@ -383,14 +383,13 @@ def process_rogue(players, map, database, orders, player, hero):
 
         ###
         hero_coords = players[player][hero]['coords']
-        closest_enemies = get_closest_entity(hero_coords, players, player, False, 'enemies')
-
+        closest_enemies = get_closest_entity(hero_coords, players, player, False, 'all_enemies')
         distance_min_enemies = math.floor(get_distance(players[closest_enemies[0][0]][closest_enemies[0][1]]['coords'], hero_coords))
 
         if distance_min_enemies == 1:
             if len(closest_enemies) == 1:
                 # (player, hero)
-                coords_enemy = players[closest_enemies[0]][closest_enemies[1]]['coords']
+                coords_enemy = players[closest_enemies[0][0]][closest_enemies[0][1]]['coords']
                 x = coords_enemy[0]
                 y = coords_enemy[1]
                 return {'hero': hero, 'action': 'attack', 'target': (x, y)}
