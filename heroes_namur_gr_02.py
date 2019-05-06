@@ -1,3 +1,4 @@
+import remote_play
 import math
 import colored
 import os
@@ -1442,7 +1443,7 @@ def get_closest_heroes(coords, players, restrictive):
 ### MAIN ###
 # Entry point of the game
 
-def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
+def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', player_colors=('green', 'red')):
     """ Manages the global course of the in-game events.
 
     Parameters
@@ -1457,6 +1458,20 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
     implementation : Martiin Danhier (v.2 20/03/19)
 
     """
+
+    player_id = 0
+    # Get the player_id
+    for AI_profile_index in range(len(AI_repartition)):
+        if AI_repartition[AI_profile_index] == 'remote':
+            player_id = AI_profile_index + 1
+    if player_id != 0:
+        if player_id == 1:
+            remote_id = 2
+        elif player_id == 2:
+            remote_id = 1
+
+        # Connect to the other player
+        connection = remote_play.connect_to_player(remote_id, remote_IP)
 
     # Create the constant database dictionary containg the data of each class at each level
     database = {
@@ -1507,11 +1522,15 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
             # Display UI several times to prevent cheating if there are more than one human player.
             display_ui(players, map, database)
 
-            if AI_repartition[player]:  # AI
+            if AI_repartition[player] == 'computer':  # AI
                 command = 'Blork:mage Groumpf:barbarian Azagdul:healer Bob:rogue'  # Naive AI for now
-            else:  # Human
+                if player_id != 0:
+                    remote_play.notify_remote_orders(connection, command)
+            elif AI_repartition[player] == 'human':  # Human
                 command = input('%s, Create 4 heroes:\n>>> ' % colored.stylize(
                     player, colored.fg('light_%s' % map['player_colors'][player])))
+            elif AI_repartition[player] == 'remote': # Remote
+                command = remote_play.get_remote_orders(connection)
             create_character(players, map, command, player)
 
     # Main loop
@@ -1527,11 +1546,15 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
             if player != 'creatures' and len(players[player]) > 0:
                 # Display UI several times to prevent cheating if there are more than one human player.
                 display_ui(players, map, database)
-                if AI_repartition[player]:  # AI
+                if AI_repartition[player] == 'computer':  # AI
                     command = AI_gr_02.get_AI_orders(players, map, database, player)
-                else:  # Human
+                    if player_id != 0:
+                        remote_play.notify_remote_orders(connection, command)    
+                elif AI_repartition[player] == 'human':  # Human
                     command = input('%s, Enter orders:\n>>> ' % colored.stylize(
                         player, colored.fg('light_%s' % map['player_colors'][player])))
+                elif AI_repartition[player] == 'remote':
+                    command = remote_play.get_remote_orders(connection)
 
                 # Save orders
                 orders += parse_command(player, command, players, database)
@@ -1568,5 +1591,9 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
         elif map['nb_turns_without_action'] == 40:
             print('It\'s a tie !')
             game_is_over = True
+
+    # Game is over, disconnect from remote player
+    if player_id != 0:
+        remote_play.disconnect_from_player(connection)
 
        

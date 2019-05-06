@@ -387,23 +387,24 @@ def farm_creatures(players, map, database, orders, player, hero):
             if checked_player not in ('creatures', player):
                 for checked_hero in players[checked_player]:
                     # If the enemy is too close to the citadel
-                    if get_distance(players[checked_player][checked_hero]['coords'], tile) < 4:
-                        target = (checked_player, checked_hero)
+                    if get_distance(players[checked_player][checked_hero]['coords'], tile) < 5:
                         too_close = True
+    if too_close:
+        return rush_citadel(players, map, database, orders, player, hero)
     # Else, target creatures
-    if not too_close:
+    else:
         target = get_closest_entity(players[player][hero]['coords'], players, player, True, 'creatures')[0]
         
-    # Get target coords and order
-    target_coords = players[target[0]][target[1]]['coords']
-    
-    # Can reach be done ?
-    if players[player][hero]['type'] == 'rogue' and int(players[player][hero]['level']) >= 3 and players[player][hero]['cooldown'][0] == 0:
-        order = find_path(players, map, orders, players[player][hero]['coords'], target_coords, True, database['rogue'][players[player][hero]['level']]['abilities'][0]['radius'])
-    else:
-        order = find_path(players, map, orders, players[player][hero]['coords'], target_coords)
-    order['hero'] = hero
-    return order
+        # Get target coords and order
+        target_coords = players[target[0]][target[1]]['coords']
+        
+        # Can reach be done ?
+        if players[player][hero]['type'] == 'rogue' and int(players[player][hero]['level']) >= 3 and players[player][hero]['cooldown'][0] == 0:
+            order = find_path(players, map, orders, players[player][hero]['coords'], target_coords, True, database['rogue'][players[player][hero]['level']]['abilities'][0]['radius'])
+        else:
+            order = find_path(players, map, orders, players[player][hero]['coords'], target_coords)
+        order['hero'] = hero
+        return order
 
 def rush_citadel(players, map, database, orders, player, hero):
     """ Try to conquer and defend the citadel.

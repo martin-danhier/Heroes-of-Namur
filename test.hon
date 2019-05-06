@@ -11,7 +11,7 @@ spur:
 21 20 
 creatures:
 one 10 10 20 5 4 150
-guardian 20 20 42 6 7 350
+guardian 20 20 42 6 7 1000
 two 25 10 10 3 3 250
 three 10 15 20 5 4 150
 four 25 14 10 3 3 250
