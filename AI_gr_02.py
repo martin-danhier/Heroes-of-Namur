@@ -198,13 +198,14 @@ def process_healer(players, map, database, orders, player, hero):
     implementation: Guillaume Nizet (v.1 05/05/19)
     """
 
+
     data_allies = []
     danger_amounts = []
 
     for checked_player in players:
         for checked_hero in players[checked_player]:
 
-            # Check the allies
+            # Check the allies 
             if checked_player == player:
 
                 # Don't check the healer
@@ -212,12 +213,10 @@ def process_healer(players, map, database, orders, player, hero):
 
                     hp = players[checked_player][checked_hero]['hp']
                     coords = players[checked_player][checked_hero]['coords']
-                    max_hp = database[players[checked_player][checked_hero]['type']
-                                      ][players[checked_player][checked_hero]['level']]['hp']
-                    radius = math.floor(
-                        3 + 1/3 * get_distance(players[player][hero]['coords'], coords))
+                    max_hp = database[players[checked_player][checked_hero]['type']][players[checked_player][checked_hero]['level']]['hp']
+                    radius = math.floor(3 + 1/3 * get_distance(players[player][hero]['coords'], coords))
                     nb_enemies_in_radius = 0
-
+                    
                     # Get the number of enemy heroes in the radius
 
                     for checked_player_2 in players:
@@ -229,12 +228,8 @@ def process_healer(players, map, database, orders, player, hero):
                                 if math.floor(get_distance(coords, players[checked_player_2][checked_hero_2]['coords'])) <= radius:
                                     nb_enemies_in_radius += 1
 
-                    data_allies.append(
-                        (coords, hp, max_hp, max_hp/hp + nb_enemies_in_radius/2))
+                    data_allies.append((coords, hp, max_hp, max_hp/hp + nb_enemies_in_radius/2))
                     danger_amounts.append(max_hp/hp + nb_enemies_in_radius/2)
-
-    if players[player][hero]['level'] >= '3':
-        pass  # TODO
 
     if players[player][hero]['level'] >= '2':
 
@@ -244,20 +239,36 @@ def process_healer(players, map, database, orders, player, hero):
             for ally in data_allies:
                 if ally[3] == max(danger_amounts):
 
-                    # If he is in the radius of 'invigorate'
+                    # If he is in the radius of 'invigorate' 
                     if math.floor(get_distance(ally[0], players[player][hero]['coords'])) <= database['healer'][players[player][hero]['level']]['abilities'][0]['radius']:
-
+                        
                         # If he needs to be healed
-                        if ally[1] < ally[2] and players[player][hero]['cooldown'][0] == 0:
+                        if ally[1] < ally[2]:
+                            if players[player][hero]['cooldown'][0] == 0:
 
-                            # Use invigorate
-                            return {'hero': hero, 'action': 'invigorate'}
+                                # Use invigorate
+                                return { 'hero' : hero, 'action' : 'invigorate' }
+
+                        # If he doesn't need to be healed but is in danger, it means that he needs to be immunised
+                        else:
+                            if players[player][hero]['level'] >= '3':
+                                if math.floor(get_distance(ally[0], players[player][hero]['coords'])) <= database['healer'][players[player][hero]['level']]['abilities'][1]['radius']:
+                                    if players[player][hero]['cooldown'][1] == 0:
+
+                                        # Use immunise
+                                        return { 'hero' : hero, 'action' : 'immunise'}
+
+                                else:   
+
+                                    # Go towards him 
+                                    order = find_path(players, map, orders, players[player][hero]['coords'], ally[0])
+                                    order['hero'] = hero
+                                    return order
 
                     else:
 
                         # Go towards him
-                        order = find_path(
-                            players, map, orders, players[player][hero]['coords'], ally[0], False)
+                        order = find_path(players, map, orders, players[player][hero]['coords'], ally[0])
                         order['hero'] = hero
                         return order
 
