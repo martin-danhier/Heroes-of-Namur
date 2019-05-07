@@ -1,3 +1,4 @@
+import remote_play
 import math
 import colored
 import os
@@ -168,7 +169,7 @@ def display_ui(players, map, database):
             board += ' ' * (width * 4 + 10) + stat_line + '\n'
 
     # Clear screen
-    if platform.system == 'Windows':
+    if 'Windows' in platform.platform():
         os.system('cls')  # Windows
     else:
         os.system('clear')  # Linux, Mac
@@ -459,10 +460,13 @@ def create_character(players, map, command, player):
     alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
     list_types = ['mage', 'barbarian', 'healer', 'rogue']
 
-    command_is_valid = True
+    
 
     orders = command.split(' ')
     for order_index in range(len(orders)):
+
+        order_is_valid = True
+
         if order_index < 4:
             info = orders[order_index].split(':')
             if len(info) == 2:
@@ -471,22 +475,22 @@ def create_character(players, map, command, player):
 
                         # If the name contains numbers or symbols
                         if character not in alphabet:
-                            command_is_valid = False
+                            order_is_valid = False
 
                     # If the hero type in not valid
                     if info[1] not in list_types:
-                        command_is_valid = False
+                        order_is_valid = False
 
                 # If the given hero name or type is empty
                 else:
-                    command_is_valid = False
+                    order_is_valid = False
 
             # If the command is not in the format 'name' : 'type'
             else:
-                command_is_valid = False
+                order_is_valid = False
 
             # Do not add heroes that have the same name (keeping the first one)
-            if command_is_valid and info[0] not in players[player]:
+            if order_is_valid and info[0] not in players[player]:
                 players[player][info[0]] = {'type': info[1], 'level': '1', 'hp': 10, 'xp': 0,
                                             'coords': map['spawns'][player], 'cooldown': [], 'active_effects': {}}
 
@@ -678,7 +682,7 @@ def read_file(path):
 # Clean, apply bonuses, update cooldowns...
 
 
-def clean(players, map, database):
+def clean(players, map, database, orders):
     """ Cleans the board (managing death and levels).
 
     Parameters
@@ -686,6 +690,7 @@ def clean(players, map, database):
     players : data of player heroes and creatures. (dict)
     map: data of the map (spawns, spur, size, etc...) (dict)
     database : data of hero classes (dict)
+    orders: list of global orders (list of dict)
 
     Notes
     -----
@@ -695,8 +700,8 @@ def clean(players, map, database):
 
     Version
     -------
-    specification : Guillaume Nizet (v.4 02/03/19)
-    implementation : Jonathan Nhouyvanisvong, Martin Danhier (v.5 09/04/19)
+    specification : Guillaume Nizet (v.5 06/05/19)
+    implementation : Jonathan Nhouyvanisvong, Martin Danhier (v.6 06/05/19)
 
     """
     dead_creatures = []
@@ -736,15 +741,31 @@ def clean(players, map, database):
                     heroes.append(hero)
             selected_heroes = heroes
 
-            # Calculate bonus
-            victory_points = math.ceil(victory_points / len(selected_heroes))
+            if len(selected_heroes) > 0:
+                # Calculate bonus
+                victory_points = math.ceil(victory_points / len(selected_heroes))
 
             for hero in selected_heroes:
                 players[hero[0]][hero[1]]['xp'] += victory_points
 
+    # Dead heroes
+    dead_heroes = []
+    for player in players:
+        if player != 'creatures':
+            for hero in players[player]:
+                if players[player][hero]['hp'] <= 0:
+                    dead_heroes.append((player, hero))
+
+    # Cancel orders of dead heroes/creatures
+    valid_orders = []
+    for order in orders:
+        if (order['action'] in ('move', 'attack')) and ((order['player'] == 'creatures' and order['hero'] not in dead_creatures) or (order['player'] != 'creatures' and (order['player'], order['hero']) not in dead_heroes)):
+            valid_orders.append(order)
+
     # Remove dead creatures
     for creature in dead_creatures:
         players['creatures'].pop(creature)
+        
 
     # For each hero
     for player in players:
@@ -768,6 +789,7 @@ def clean(players, map, database):
                             # Unlock special ability
                             if level in ('2', '3'):
                                 players[player][hero]['cooldown'].append(0)
+    return valid_orders
 
 
 def update_counters(players, map):
@@ -830,9 +852,10 @@ def update_counters(players, map):
     # Get players on spur
     players_on_spur = []
     for player in players:
-        for hero in players[player]:
-            if players[player][hero]['coords'] in map['spur']:
-                players_on_spur.append(player)
+        if player != 'creatures':
+            for hero in players[player]:
+                if players[player][hero]['coords'] in map['spur'] and player not in players_on_spur:
+                    players_on_spur.append(player)
 
     # No or several players : reset
     if len(players_on_spur) != 1:
@@ -962,7 +985,7 @@ def use_special_ability(order, players, map, database):
 
         # Set cooldown if the ability is used
         if ability_used:
-            players[order['player']][order['hero']]['cooldown'][0] = database[order_hero_type][order_hero_lvl]['abilities'][0]['cooldown']
+            players[order['player']][order['hero']]['cooldown'][0] = database[order_hero_type][order_hero_lvl]['abilities'][0]['cooldown'] + 1
 
     # Ability 2 (lvl 3 min. required)
     else:
@@ -1053,7 +1076,7 @@ def use_special_ability(order, players, map, database):
         # Set cooldown if the ability is used
         if ability_used:
             players[order['player']][order['hero']
-                                     ]['cooldown'][1] = database[order_hero_type][order_hero_lvl]['abilities'][1]['cooldown']
+                                     ]['cooldown'][1] = database[order_hero_type][order_hero_lvl]['abilities'][1]['cooldown'] + 1
 
 
 def attack(order, players, map, database):
@@ -1221,15 +1244,12 @@ def process_creatures(players, map, database):
         closest_hero = get_closest_heroes(creature_coords, players, True)[0]
 
         # Get the coords of the closest hero
-        for player in players:
-            for hero in players[player]:
-                if closest_hero == (player, hero):
-                    closest_hero_coords = players[player][hero]['coords']
+        closest_hero_coords = players[closest_hero[0]][closest_hero[1]]['coords']
 
         # Get the distance between the hero and the creature
         distance_hero_creature = math.floor(
             get_distance(creature_coords, closest_hero_coords))
-
+ 
         # If the hero is in the creature radius or if the creature has been affected by an ability on the previous turn
         if distance_hero_creature <= creature_radius or players['creatures'][creature]['ability_affectation_memory'] > 0:
             order = {'player': 'creatures', 'hero': creature}
@@ -1441,7 +1461,7 @@ def get_closest_heroes(coords, players, restrictive):
 ### MAIN ###
 # Entry point of the game
 
-def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
+def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', player_colors=('green', 'red')):
     """ Manages the global course of the in-game events.
 
     Parameters
@@ -1456,6 +1476,20 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
     implementation : Martiin Danhier (v.2 20/03/19)
 
     """
+
+    player_id = 0
+    # Get the player_id
+    for AI_profile_index in range(len(AI_repartition)):
+        if AI_repartition[AI_profile_index] == 'remote':
+            player_id = AI_profile_index + 1
+    if player_id != 0:
+        if player_id == 1:
+            remote_id = 2
+        elif player_id == 2:
+            remote_id = 1
+
+        # Connect to the other player
+        connection = remote_play.connect_to_player(remote_id, remote_IP)
 
     # Create the constant database dictionary containg the data of each class at each level
     database = {
@@ -1506,11 +1540,15 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
             # Display UI several times to prevent cheating if there are more than one human player.
             display_ui(players, map, database)
 
-            if AI_repartition[player]:  # AI
+            if AI_repartition[player] == 'computer':  # AI
                 command = 'Blork:mage Groumpf:barbarian Azagdul:healer Bob:rogue'  # Naive AI for now
-            else:  # Human
+                if player_id != 0:
+                    remote_play.notify_remote_orders(connection, command)
+            elif AI_repartition[player] == 'human':  # Human
                 command = input('%s, Create 4 heroes:\n>>> ' % colored.stylize(
                     player, colored.fg('light_%s' % map['player_colors'][player])))
+            elif AI_repartition[player] == 'remote': # Remote
+                command = remote_play.get_remote_orders(connection)
             create_character(players, map, command, player)
 
     # Main loop
@@ -1526,11 +1564,15 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
             if player != 'creatures' and len(players[player]) > 0:
                 # Display UI several times to prevent cheating if there are more than one human player.
                 display_ui(players, map, database)
-                if AI_repartition[player]:  # AI
+                if AI_repartition[player] == 'computer':  # AI
                     command = AI_gr_02.get_AI_orders(players, map, database, player)
-                else:  # Human
+                    if player_id != 0:
+                        remote_play.notify_remote_orders(connection, command)    
+                elif AI_repartition[player] == 'human':  # Human
                     command = input('%s, Enter orders:\n>>> ' % colored.stylize(
                         player, colored.fg('light_%s' % map['player_colors'][player])))
+                elif AI_repartition[player] == 'remote':
+                    command = remote_play.get_remote_orders(connection)
 
                 # Save orders
                 orders += parse_command(player, command, players, database)
@@ -1541,7 +1583,7 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
                 use_special_ability(order, players, map, database)
 
         # Step 4 : First clear
-        clean(players, map, database)
+        orders = clean(players, map, database, orders)
 
         display_ui(players, map, database)
 
@@ -1553,7 +1595,7 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
                 move_on(order, players, map)
 
         # Step 6 : Second clear
-        clean(players, map, database)
+        clean(players, map, database, orders)
 
         # Update cooldowns and counters
         update_counters(players, map)
@@ -1566,3 +1608,9 @@ def main(file, AI_repartition=(False, True), player_colors=('green', 'red')):
         elif map['nb_turns_without_action'] == 40:
             print('It\'s a tie !')
             game_is_over = True
+
+    # Game is over, disconnect from remote player
+    if player_id != 0:
+        remote_play.disconnect_from_player(connection)
+
+       
