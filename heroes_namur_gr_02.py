@@ -172,7 +172,8 @@ def display_ui(players, map, database):
     if 'Windows' in platform.platform():
         os.system('cls')  # Windows
     else:
-        os.system('clear')  # Linux, Mac
+         #os.system('clear')  # Linux, Mac
+        pass
     # Print board
     print(board)
 
@@ -459,8 +460,6 @@ def create_character(players, map, command, player):
 
     alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
     list_types = ['mage', 'barbarian', 'healer', 'rogue']
-
-    
 
     orders = command.split(' ')
     for order_index in range(len(orders)):
@@ -787,7 +786,10 @@ def clean(players, map, database, orders):
                             players[player][hero]['level'] = level
                             players[player][hero]['hp'] = database[hero_type][level]['hp']
                             # Unlock special ability
-                            if level in ('2', '3'):
+                            
+                            if len(players[player][hero]['cooldown']) == 0 and level in ('2', '3', '4', '5'):
+                                players[player][hero]['cooldown'].append(0)
+                            if len(players[player][hero]['cooldown']) == 1 and level in ('3', '4', '5'):
                                 players[player][hero]['cooldown'].append(0)
     return valid_orders
 
@@ -1482,14 +1484,11 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
     for AI_profile_index in range(len(AI_repartition)):
         if AI_repartition[AI_profile_index] == 'remote':
             player_id = AI_profile_index + 1
-    if player_id != 0:
-        if player_id == 1:
-            remote_id = 2
-        elif player_id == 2:
-            remote_id = 1
-
-        # Connect to the other player
-        connection = remote_play.connect_to_player(remote_id, remote_IP)
+	
+        
+    # Connect to the other player
+    connection = remote_play.connect_to_player(player_id, remote_IP)
+    
 
     # Create the constant database dictionary containg the data of each class at each level
     database = {
@@ -1535,21 +1534,26 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
         index + 1): AI_repartition[index] for index in range(len(AI_repartition))}
 
     # Step 2 : create 4 heroes/player
-    for player in players:
-        if player != 'creatures':
-            # Display UI several times to prevent cheating if there are more than one human player.
-            display_ui(players, map, database)
+    for player_index in range(len(players) - 1):
+        player = 'Player %d' % (player_index + 1)
+        
+        # Display UI several times to prevent cheating if there are more than one human player.
+        display_ui(players, map, database)
 
-            if AI_repartition[player] == 'computer':  # AI
-                command = 'Blork:mage Groumpf:barbarian Azagdul:healer Bob:rogue'  # Naive AI for now
-                if player_id != 0:
-                    remote_play.notify_remote_orders(connection, command)
-            elif AI_repartition[player] == 'human':  # Human
-                command = input('%s, Create 4 heroes:\n>>> ' % colored.stylize(
-                    player, colored.fg('light_%s' % map['player_colors'][player])))
-            elif AI_repartition[player] == 'remote': # Remote
-                command = remote_play.get_remote_orders(connection)
-            create_character(players, map, command, player)
+        if AI_repartition[player] == 'computer':  # AI
+            command = 'blork:mage groumpf:barbarian azagdul:healer bob:rogue'  # Naive AI for now
+            if player_id != 0:
+                remote_play.notify_remote_orders(connection, command)
+        elif AI_repartition[player] == 'human':  # Human
+            command = input('%s, Create 4 heroes:\n>>> ' % colored.stylize(
+                player, colored.fg('light_%s' % map['player_colors'][player])))
+        elif AI_repartition[player] == 'remote': # Remote
+            command = remote_play.get_remote_orders(connection)
+                      
+        create_character(players, map, command, player)
+        print(command)
+        print(command.split(' '))  
+        input()
 
     # Main loop
     game_is_over = False
