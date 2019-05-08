@@ -6,6 +6,7 @@ import AI_gr_02
 from random import randint, choice
 # used to determine the os to know which clear command to use (clear or cls)
 import platform
+import collections
 
 ### UI ###
 # Display user interface
@@ -638,7 +639,7 @@ def read_file(path):
     param_file.close()
 
     # Initialize the data dictionaries.
-    players = {'creatures': {}}
+    players = {'creatures': collections.OrderedDict({})}
     map = {'spawns': {}, 'spur': [], 'player_in_citadel': (
         '', 0), 'nb_turns': 1, 'nb_turns_without_action': 0}
 
@@ -1234,17 +1235,7 @@ def process_creatures(players, map, database):
 
     orders = []
 
-    # Get the creatures sorted
-    ordered_creatures = []
-    for index in range(len(players['creatures'])):
-        for creature in players['creatures']:
-            if players['creatures'][creature]['id'] == index + 1:
-                ordered_creatures.append(creature)
-
-    print(ordered_creatures)
-    input()
-
-    for creature in ordered_creatures:
+    for creature in players['creatures']:
         order = {}
 
         # Get creature info
@@ -1259,15 +1250,16 @@ def process_creatures(players, map, database):
         closest_hero_coords = players[closest_hero[0]][closest_hero[1]]['coords']
 
         # Get the distance between the hero and the creature
-        distance_hero_creature = math.floor(
-            get_distance(creature_coords, closest_hero_coords))
- 
-        # If the hero is in the creature radius or if the creature has been affected by an ability on the previous turn
-        if distance_hero_creature <= creature_radius or players['creatures'][creature]['ability_affectation_memory'] > 0:
-            order = {'player': 'creatures', 'hero': creature}
+        distance_hero_creature = get_distance(creature_coords, closest_hero_coords)
 
+        print('bab %s' % creature)
+        # If the hero is in the creature radius or if the creature has been affected by an ability on the previous turn
+        if distance_hero_creature < creature_radius + 1 or players['creatures'][creature]['ability_affectation_memory'] > 0:
+            print('boub %s' % creature )
+            order = {'player': 'creatures', 'hero': creature}
+            
             # If the creature is next to the hero
-            if distance_hero_creature == 1:
+            if distance_hero_creature < 2:
 
                 # The creature attacks the hero
                 order['action'] = 'attack'
@@ -1293,17 +1285,14 @@ def process_creatures(players, map, database):
                         if first_loop:
                             min_distance = distance_hero_tile
                             first_loop = False
+                             # The creature moves on to this tile
+                            order['target'] = (x_coord, y_coord)
 
                         else:
                             if distance_hero_tile < min_distance:
                                 min_distance = distance_hero_tile
-
-                # Get the first coordinates that are at the smallest distance from the closest hero
-                for x_coord in range(creature_coords[0] - 1, creature_coords[0] + 2):
-                    for y_coord in range(creature_coords[1] - 1, creature_coords[1] + 2):
-                        if get_distance((x_coord, y_coord), closest_hero_coords) == min_distance:
-                            # The creature moves on to this tile
-                            order['target'] = (x_coord, y_coord)
+                                # The creature moves on to this tile
+                                order['target'] = (x_coord, y_coord)
         if len(order) > 0:
             orders.append(order)
 
