@@ -1417,8 +1417,8 @@ def get_closest_heroes(coords, players, restrictive):
                     if (player, hero) in temp_closest_heroes or step == 0:
                         # Step 0 : Check the distance to get the closest heroes
                         if step == 0:
-                            checked_value = math.floor(get_distance(
-                                players[player][hero]['coords'], coords))
+                            checked_value = get_distance(
+                                players[player][hero]['coords'], coords)
                         # Step 1 : If the checked hero is one of the several closest heroes with the same distance
                         elif step == 1:
                             checked_value = players[player][hero]['hp']
@@ -1533,13 +1533,13 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
     AI_repartition = {'Player %d' % (
         index + 1): AI_repartition[index] for index in range(len(AI_repartition))}
 
+    # Display UI
+    display_ui(players, map, database)
+
     # Step 2 : create 4 heroes/player
     for player_index in range(len(players) - 1):
         player = 'Player %d' % (player_index + 1)
         
-        # Display UI several times to prevent cheating if there are more than one human player.
-        display_ui(players, map, database)
-
         if AI_repartition[player] == 'computer':  # AI
             command = 'blork:mage groumpf:barbarian azagdul:healer bob:rogue'  # Naive AI for now
             if player_id != 0:
@@ -1551,9 +1551,7 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
             command = remote_play.get_remote_orders(connection)
                       
         create_character(players, map, command, player)
-        print(command)
-        print(command.split(' '))  
-        input()
+        #input()
 
     # Main loop
     game_is_over = False
@@ -1564,10 +1562,12 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
         # Get creatures orders
         orders = process_creatures(players, map, database)
 
+	# Display UI
+        display_ui(players, map, database)
+
         for player in players:
             if player != 'creatures' and len(players[player]) > 0:
-                # Display UI several times to prevent cheating if there are more than one human player.
-                display_ui(players, map, database)
+               
                 if AI_repartition[player] == 'computer':  # AI
                     command = AI_gr_02.get_AI_orders(players, map, database, player)
                     if player_id != 0:
@@ -1588,8 +1588,6 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
 
         # Step 4 : First clear
         orders = clean(players, map, database, orders)
-
-        display_ui(players, map, database)
 
         # Step 5 : Move & Fight
         for order in orders:

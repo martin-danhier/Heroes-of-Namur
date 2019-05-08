@@ -26,7 +26,6 @@ def get_AI_orders(players, map, database, player):
     implementation : Martin Danhier (v.1 01/05/2019)
     """
     actions = []
-    print(players)
     # Get an action for each hero
     for hero in players[player]:
         hero_type = players[player][hero]['type']
