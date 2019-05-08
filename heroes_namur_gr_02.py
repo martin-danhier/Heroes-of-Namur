@@ -668,7 +668,7 @@ def read_file(path):
             elif current == 'spur:':
                 map['spur'].append((int(info[0]), int(info[1])))
             elif current == 'creatures:':
-                players['creatures'][info[0]] = {'coords': (int(info[1]), int(info[2])), 'hp': int(
+                players['creatures'][info[0]] = {'id' : line_in_current,'coords': (int(info[1]), int(info[2])), 'hp': int(
                     info[3]), 'dmg': int(info[4]), 'radius': int(info[5]), 'xp': int(info[6]), 'active_effects': {}, 'ability_affectation_memory': 0}
 
         # Increment the line counter.
@@ -1234,7 +1234,17 @@ def process_creatures(players, map, database):
 
     orders = []
 
-    for creature in players['creatures']:
+    # Get the creatures sorted
+    ordered_creatures = []
+    for index in range(len(players['creatures'])):
+        for creature in players['creatures']:
+            if players['creatures'][creature]['id'] == index + 1:
+                ordered_creatures.append(creature)
+
+    print(ordered_creatures)
+    input()
+
+    for creature in ordered_creatures:
         order = {}
 
         # Get creature info
