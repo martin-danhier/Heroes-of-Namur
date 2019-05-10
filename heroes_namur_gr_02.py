@@ -1198,7 +1198,10 @@ def move_on(order, players, map):
     tile_not_on_a_spawn_point = True
 
     for player in map['spawns']:
-        if order['target'] == map['spawns'][player]:
+        print(map['spawns'])
+        print(player)
+        print(order)
+        if order['target'] == map['spawns'][player] and player != order['player']:
             tile_not_on_a_spawn_point = False
 
     # If the target tile:
@@ -1252,10 +1255,8 @@ def process_creatures(players, map, database):
         # Get the distance between the hero and the creature
         distance_hero_creature = get_distance(creature_coords, closest_hero_coords)
 
-        print('bab %s' % creature)
         # If the hero is in the creature radius or if the creature has been affected by an ability on the previous turn
         if distance_hero_creature < creature_radius + 1 or players['creatures'][creature]['ability_affectation_memory'] > 0:
-            print('boub %s' % creature )
             order = {'player': 'creatures', 'hero': creature}
             
             # If the creature is next to the hero
@@ -1366,7 +1367,11 @@ def get_tile_info(coords, players, map):
         for player in players:
             for individual in players[player]:
                 if players[player][individual]['coords'] == coords:
+                    for spawn in map['spawns']:
+                        if spawn == player and map['spawns'][spawn] == coords:
+                            return 'clear'
                     return 'player'
+                    
         # If this code is reached, then there is no player on this tile
         if coords in map['spur']:
             return 'spur'
@@ -1484,9 +1489,9 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
         if AI_repartition[AI_profile_index] == 'remote':
             player_id = AI_profile_index + 1
 	
-        
-    # Connect to the other player
-    connection = remote_play.connect_to_player(player_id, remote_IP)
+    if player_id != 0:
+        # Connect to the other player
+        connection = remote_play.connect_to_player(player_id, remote_IP, True)
     
 
     # Create the constant database dictionary containg the data of each class at each level
@@ -1523,32 +1528,35 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
 
     # Step 1 : create map and implements data
     players, map = read_file('test.hon')
+ 
 
     # Save the player colors
-    map['player_colors'] = {'Player %d' % (
-        index + 1): player_colors[index] for index in range(len(player_colors))}
+    map['player_colors'] = {'Player %d' % (index + 1): player_colors[index] for index in range(len(player_colors))}
 
     # Convert AI repartition to a dictionary
     AI_repartition = {'Player %d' % (
         index + 1): AI_repartition[index] for index in range(len(AI_repartition))}
 
     # Display UI
-    display_ui(players, map, database)
+    display_ui (players, map, database)
 
     # Step 2 : create 4 heroes/player
     for player_index in range(len(players) - 1):
         player = 'Player %d' % (player_index + 1)
         
         if AI_repartition[player] == 'computer':  # AI
-            command = 'blork:mage groumpf:barbarian azagdul:healer bob:rogue'  # Naive AI for now
+            print("bab")
+            command = 'blork:mage groumpf:barbarian azagdul:healer bob:rogue'
             if player_id != 0:
                 remote_play.notify_remote_orders(connection, command)
         elif AI_repartition[player] == 'human':  # Human
             command = input('%s, Create 4 heroes:\n>>> ' % colored.stylize(
                 player, colored.fg('light_%s' % map['player_colors'][player])))
         elif AI_repartition[player] == 'remote': # Remote
+            print("boub")
             command = remote_play.get_remote_orders(connection)
-                      
+        print("%s: %s" % (player, command))
+
         create_character(players, map, command, player)
         #input()
 
@@ -1569,6 +1577,7 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
                
                 if AI_repartition[player] == 'computer':  # AI
                     command = AI_gr_02.get_AI_orders(players, map, database, player)
+                    
                     if player_id != 0:
                         remote_play.notify_remote_orders(connection, command)    
                 elif AI_repartition[player] == 'human':  # Human
@@ -1576,7 +1585,7 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
                         player, colored.fg('light_%s' % map['player_colors'][player])))
                 elif AI_repartition[player] == 'remote':
                     command = remote_play.get_remote_orders(connection)
-
+                print("%s: %s" % (player, command))
                 # Save orders
                 orders += parse_command(player, command, players, database)
 
