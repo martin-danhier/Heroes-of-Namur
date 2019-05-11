@@ -1624,4 +1624,7 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
     if player_id != 0:
         remote_play.disconnect_from_player(connection)
 
-       
+# --- Arguments support ---
+# Get the args
+
+# Start the program
