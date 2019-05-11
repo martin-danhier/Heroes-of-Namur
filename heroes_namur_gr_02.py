@@ -3,6 +3,7 @@ import math
 import colored
 import os
 import AI_gr_02
+import sys
 from random import randint, choice
 # used to determine the os to know which clear command to use (clear or cls)
 import platform

@@ -833,13 +833,11 @@ def generate_command_string(actions):
     Version
     -------
     specification: Martin Danhier (v.1 01/05/2019)
-    implementation: Martin Danhier (v.1 01/05/2019)
+    implementation: Martin Danhier (v.2 11/05/2019)
     """
     command = ''
     # For each action dictionary
-    counter = 0
     for action in actions:
-        counter += 1
         # Converts the action to a string and append it to command
         if action != {}:
             if action['action'] == 'move':
@@ -853,9 +851,11 @@ def generate_command_string(actions):
                 if 'target' in action:
                     command += ':%d-%d' % (action['target']
                                            [0], action['target'][1])
-            if counter < len(actions):
-                command += ' '
-    return command
+            command += ' '
+
+
+    # Remove trailing white spaces
+    return command.strip(' ')
 
 # ---
 
