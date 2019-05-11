@@ -3,9 +3,11 @@ import math
 import colored
 import os
 import AI_gr_02
+import sys
 from random import randint, choice
 # used to determine the os to know which clear command to use (clear or cls)
 import platform
+import collections
 
 ### UI ###
 # Display user interface
@@ -172,7 +174,8 @@ def display_ui(players, map, database):
     if 'Windows' in platform.platform():
         os.system('cls')  # Windows
     else:
-        os.system('clear')  # Linux, Mac
+         #os.system('clear')  # Linux, Mac
+        pass
     # Print board
     print(board)
 
@@ -460,8 +463,6 @@ def create_character(players, map, command, player):
     alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
     list_types = ['mage', 'barbarian', 'healer', 'rogue']
 
-    
-
     orders = command.split(' ')
     for order_index in range(len(orders)):
 
@@ -639,7 +640,7 @@ def read_file(path):
     param_file.close()
 
     # Initialize the data dictionaries.
-    players = {'creatures': {}}
+    players = {'creatures': collections.OrderedDict({})}
     map = {'spawns': {}, 'spur': [], 'player_in_citadel': (
         '', 0), 'nb_turns': 1, 'nb_turns_without_action': 0}
 
@@ -669,7 +670,7 @@ def read_file(path):
             elif current == 'spur:':
                 map['spur'].append((int(info[0]), int(info[1])))
             elif current == 'creatures:':
-                players['creatures'][info[0]] = {'coords': (int(info[1]), int(info[2])), 'hp': int(
+                players['creatures'][info[0]] = {'id' : line_in_current,'coords': (int(info[1]), int(info[2])), 'hp': int(
                     info[3]), 'dmg': int(info[4]), 'radius': int(info[5]), 'xp': int(info[6]), 'active_effects': {}, 'ability_affectation_memory': 0}
 
         # Increment the line counter.
@@ -787,7 +788,10 @@ def clean(players, map, database, orders):
                             players[player][hero]['level'] = level
                             players[player][hero]['hp'] = database[hero_type][level]['hp']
                             # Unlock special ability
-                            if level in ('2', '3'):
+                            
+                            if len(players[player][hero]['cooldown']) == 0 and level in ('2', '3', '4', '5'):
+                                players[player][hero]['cooldown'].append(0)
+                            if len(players[player][hero]['cooldown']) == 1 and level in ('3', '4', '5'):
                                 players[player][hero]['cooldown'].append(0)
     return valid_orders
 
@@ -1195,7 +1199,10 @@ def move_on(order, players, map):
     tile_not_on_a_spawn_point = True
 
     for player in map['spawns']:
-        if order['target'] == map['spawns'][player]:
+        print(map['spawns'])
+        print(player)
+        print(order)
+        if order['target'] == map['spawns'][player] and player != order['player']:
             tile_not_on_a_spawn_point = False
 
     # If the target tile:
@@ -1247,15 +1254,14 @@ def process_creatures(players, map, database):
         closest_hero_coords = players[closest_hero[0]][closest_hero[1]]['coords']
 
         # Get the distance between the hero and the creature
-        distance_hero_creature = math.floor(
-            get_distance(creature_coords, closest_hero_coords))
- 
-        # If the hero is in the creature radius or if the creature has been affected by an ability on the previous turn
-        if distance_hero_creature <= creature_radius or players['creatures'][creature]['ability_affectation_memory'] > 0:
-            order = {'player': 'creatures', 'hero': creature}
+        distance_hero_creature = get_distance(creature_coords, closest_hero_coords)
 
+        # If the hero is in the creature radius or if the creature has been affected by an ability on the previous turn
+        if distance_hero_creature < creature_radius + 1 or players['creatures'][creature]['ability_affectation_memory'] > 0:
+            order = {'player': 'creatures', 'hero': creature}
+            
             # If the creature is next to the hero
-            if distance_hero_creature == 1:
+            if distance_hero_creature < 2:
 
                 # The creature attacks the hero
                 order['action'] = 'attack'
@@ -1281,17 +1287,14 @@ def process_creatures(players, map, database):
                         if first_loop:
                             min_distance = distance_hero_tile
                             first_loop = False
+                             # The creature moves on to this tile
+                            order['target'] = (x_coord, y_coord)
 
                         else:
                             if distance_hero_tile < min_distance:
                                 min_distance = distance_hero_tile
-
-                # Get the first coordinates that are at the smallest distance from the closest hero
-                for x_coord in range(creature_coords[0] - 1, creature_coords[0] + 2):
-                    for y_coord in range(creature_coords[1] - 1, creature_coords[1] + 2):
-                        if get_distance((x_coord, y_coord), closest_hero_coords) == min_distance:
-                            # The creature moves on to this tile
-                            order['target'] = (x_coord, y_coord)
+                                # The creature moves on to this tile
+                                order['target'] = (x_coord, y_coord)
         if len(order) > 0:
             orders.append(order)
 
@@ -1365,7 +1368,11 @@ def get_tile_info(coords, players, map):
         for player in players:
             for individual in players[player]:
                 if players[player][individual]['coords'] == coords:
+                    for spawn in map['spawns']:
+                        if spawn == player and map['spawns'][spawn] == coords:
+                            return 'clear'
                     return 'player'
+                    
         # If this code is reached, then there is no player on this tile
         if coords in map['spur']:
             return 'spur'
@@ -1415,8 +1422,8 @@ def get_closest_heroes(coords, players, restrictive):
                     if (player, hero) in temp_closest_heroes or step == 0:
                         # Step 0 : Check the distance to get the closest heroes
                         if step == 0:
-                            checked_value = math.floor(get_distance(
-                                players[player][hero]['coords'], coords))
+                            checked_value = get_distance(
+                                players[player][hero]['coords'], coords)
                         # Step 1 : If the checked hero is one of the several closest heroes with the same distance
                         elif step == 1:
                             checked_value = players[player][hero]['hp']
@@ -1482,14 +1489,11 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
     for AI_profile_index in range(len(AI_repartition)):
         if AI_repartition[AI_profile_index] == 'remote':
             player_id = AI_profile_index + 1
+	
     if player_id != 0:
-        if player_id == 1:
-            remote_id = 2
-        elif player_id == 2:
-            remote_id = 1
-
         # Connect to the other player
-        connection = remote_play.connect_to_player(remote_id, remote_IP)
+        connection = remote_play.connect_to_player(player_id, remote_IP, True)
+    
 
     # Create the constant database dictionary containg the data of each class at each level
     database = {
@@ -1525,31 +1529,37 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
 
     # Step 1 : create map and implements data
     players, map = read_file('test.hon')
+ 
 
     # Save the player colors
-    map['player_colors'] = {'Player %d' % (
-        index + 1): player_colors[index] for index in range(len(player_colors))}
+    map['player_colors'] = {'Player %d' % (index + 1): player_colors[index] for index in range(len(player_colors))}
 
     # Convert AI repartition to a dictionary
     AI_repartition = {'Player %d' % (
         index + 1): AI_repartition[index] for index in range(len(AI_repartition))}
 
-    # Step 2 : create 4 heroes/player
-    for player in players:
-        if player != 'creatures':
-            # Display UI several times to prevent cheating if there are more than one human player.
-            display_ui(players, map, database)
+    # Display UI
+    display_ui (players, map, database)
 
-            if AI_repartition[player] == 'computer':  # AI
-                command = 'Blork:mage Groumpf:barbarian Azagdul:healer Bob:rogue'  # Naive AI for now
-                if player_id != 0:
-                    remote_play.notify_remote_orders(connection, command)
-            elif AI_repartition[player] == 'human':  # Human
-                command = input('%s, Create 4 heroes:\n>>> ' % colored.stylize(
-                    player, colored.fg('light_%s' % map['player_colors'][player])))
-            elif AI_repartition[player] == 'remote': # Remote
-                command = remote_play.get_remote_orders(connection)
-            create_character(players, map, command, player)
+    # Step 2 : create 4 heroes/player
+    for player_index in range(len(players) - 1):
+        player = 'Player %d' % (player_index + 1)
+        
+        if AI_repartition[player] == 'computer':  # AI
+            print("bab")
+            command = 'blork:mage groumpf:barbarian azagdul:healer bob:rogue'
+            if player_id != 0:
+                remote_play.notify_remote_orders(connection, command)
+        elif AI_repartition[player] == 'human':  # Human
+            command = input('%s, Create 4 heroes:\n>>> ' % colored.stylize(
+                player, colored.fg('light_%s' % map['player_colors'][player])))
+        elif AI_repartition[player] == 'remote': # Remote
+            print("boub")
+            command = remote_play.get_remote_orders(connection)
+        print("%s: %s" % (player, command))
+
+        create_character(players, map, command, player)
+        #input()
 
     # Main loop
     game_is_over = False
@@ -1560,12 +1570,15 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
         # Get creatures orders
         orders = process_creatures(players, map, database)
 
+	# Display UI
+        display_ui(players, map, database)
+
         for player in players:
             if player != 'creatures' and len(players[player]) > 0:
-                # Display UI several times to prevent cheating if there are more than one human player.
-                display_ui(players, map, database)
+               
                 if AI_repartition[player] == 'computer':  # AI
                     command = AI_gr_02.get_AI_orders(players, map, database, player)
+                    
                     if player_id != 0:
                         remote_play.notify_remote_orders(connection, command)    
                 elif AI_repartition[player] == 'human':  # Human
@@ -1573,7 +1586,7 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
                         player, colored.fg('light_%s' % map['player_colors'][player])))
                 elif AI_repartition[player] == 'remote':
                     command = remote_play.get_remote_orders(connection)
-
+                print("%s: %s" % (player, command))
                 # Save orders
                 orders += parse_command(player, command, players, database)
 
@@ -1584,8 +1597,6 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
 
         # Step 4 : First clear
         orders = clean(players, map, database, orders)
-
-        display_ui(players, map, database)
 
         # Step 5 : Move & Fight
         for order in orders:

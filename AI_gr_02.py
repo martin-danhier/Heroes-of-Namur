@@ -116,6 +116,7 @@ def process_barbarian(players, map, database, orders, player, hero):
         # Prevent the barbarian from counting itself in the allies in range
         allies_in_range_energise -= 1
 
+
         # If there are heroes in range of energise, then they automatically are in range of stun because the radius of stun is smaller
         if allies_in_range_energise > 0 and enemies_in_range_energise > 0 and players[player][hero]['cooldown'][0] == 0 and players[player][hero]['cooldown'][1] == 0:
             if allies_in_range_energise >= enemies_in_range_stun:
@@ -832,13 +833,11 @@ def generate_command_string(actions):
     Version
     -------
     specification: Martin Danhier (v.1 01/05/2019)
-    implementation: Martin Danhier (v.1 01/05/2019)
+    implementation: Martin Danhier (v.2 11/05/2019)
     """
     command = ''
     # For each action dictionary
-    counter = 0
     for action in actions:
-        counter += 1
         # Converts the action to a string and append it to command
         if action != {}:
             if action['action'] == 'move':
@@ -852,9 +851,11 @@ def generate_command_string(actions):
                 if 'target' in action:
                     command += ':%d-%d' % (action['target']
                                            [0], action['target'][1])
-            if counter < len(actions):
-                command += ' '
-    return command
+            command += ' '
+
+
+    # Remove trailing white spaces
+    return command.strip(' ')
 
 # ---
 
