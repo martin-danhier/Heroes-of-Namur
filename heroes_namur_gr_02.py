@@ -174,7 +174,7 @@ def display_ui(players, map, database):
     if 'Windows' in platform.platform():
         os.system('cls')  # Windows
     else:
-         #os.system('clear')  # Linux, Mac
+        os.system('clear')  # Linux, Mac
         pass
     # Print board
     print(board)
@@ -908,7 +908,6 @@ def use_special_ability(order, players, map, database):
     order_hero_capacity = order['action']
     order_hero_type = players[order['player']][order['hero']]['type']
     order_hero_lvl = players[order['player']][order['hero']]['level']
-    ability_used = False
 
     # Ability 1 (lvl 2 min. required)
     if order_hero_capacity in ('energise', 'invigorate', 'fulgura', 'reach'):
@@ -931,7 +930,6 @@ def use_special_ability(order, players, map, database):
                     else:
                         players[order['player']][hero]['active_effects'][order_hero_capacity] = [
                             1, capacity_x]
-                    ability_used = True
 
         # Invigorate
         elif order_hero_capacity == 'invigorate':
@@ -945,7 +943,6 @@ def use_special_ability(order, players, map, database):
                     # Check max hp
                     target_hero_type = players[order['player']][hero]['type']
                     target_hero_lvl = players[order['player']][hero]['level']
-                    ability_used = True
 
                     if players[order['player']][hero]['hp'] > database[target_hero_type][target_hero_lvl]['hp']:
                         players[order['player']
@@ -969,7 +966,6 @@ def use_special_ability(order, players, map, database):
                                 if target_hp < 0:
                                     target_hp = 0
                                 players[player][hero]['hp'] = target_hp
-                                ability_used = True
 
                                 # Set the memory to 2 in order to trigger a creature action next turn
                                 if player == 'creatures':
@@ -985,11 +981,9 @@ def use_special_ability(order, players, map, database):
 
                 players[order['player']][order['hero']
                                          ]['coords'] = order['target']
-                ability_used = True
 
         # Set cooldown if the ability is used
-        if ability_used:
-            players[order['player']][order['hero']]['cooldown'][0] = database[order_hero_type][order_hero_lvl]['abilities'][0]['cooldown'] + 1
+        players[order['player']][order['hero']]['cooldown'][0] = database[order_hero_type][order_hero_lvl]['abilities'][0]['cooldown'] + 1
 
     # Ability 2 (lvl 3 min. required)
     else:
@@ -1014,7 +1008,6 @@ def use_special_ability(order, players, map, database):
                             else:
                                 players[player][hero]['active_effects'][order_hero_capacity] = [
                                     1, capacity_x]
-                            ability_used = True
 
                             # Set the memory to 2 in order to trigger a creature action next turn
                             if player == 'creatures':
@@ -1033,7 +1026,6 @@ def use_special_ability(order, players, map, database):
 
                         players[order['player']][hero]['active_effects'][order_hero_capacity] = [
                             1]
-                        ability_used = True
 
         # Ovibus
         elif order_hero_capacity == 'ovibus':
@@ -1048,9 +1040,7 @@ def use_special_ability(order, players, map, database):
                                 players[order['player']][order['hero']]['coords'], players[player][hero]['coords']))
                             if players[player][hero]['coords'] == order['target'] and distance_checked <= capacity_radius:
 
-                                players[player][hero]['active_effects'][order_hero_capacity] = [
-                                    capacity_x]
-                                ability_used = True
+                                players[player][hero]['active_effects'][order_hero_capacity] = [capacity_x + 1]
 
                                 # Set the memory to 2 in order to trigger a creature action next turn
                                 if player == 'creatures':
@@ -1071,16 +1061,14 @@ def use_special_ability(order, players, map, database):
                             if target_hp < 0:
                                 target_hp = 0
                             players[player][hero]['hp'] = target_hp
-                            ability_used = True
 
                             # Set the memory to 2 in order to trigger a creature action next turn
                             if player == 'creatures':
                                 players[player][hero]['ability_affectation_memory'] = 2
 
-        # Set cooldown if the ability is used
-        if ability_used:
-            players[order['player']][order['hero']
-                                     ]['cooldown'][1] = database[order_hero_type][order_hero_lvl]['abilities'][1]['cooldown'] + 1
+        # Set cooldown
+        players[order['player']][order['hero']
+                                    ]['cooldown'][1] = database[order_hero_type][order_hero_lvl]['abilities'][1]['cooldown'] + 1
 
 
 def attack(order, players, map, database):
@@ -1199,9 +1187,6 @@ def move_on(order, players, map):
     tile_not_on_a_spawn_point = True
 
     for player in map['spawns']:
-        print(map['spawns'])
-        print(player)
-        print(order)
         if order['target'] == map['spawns'][player] and player != order['player']:
             tile_not_on_a_spawn_point = False
 
@@ -1240,63 +1225,64 @@ def process_creatures(players, map, database):
     orders = []
 
     for creature in players['creatures']:
-        order = {}
+        if 'ovibus' not in players['creatures'][creature]['active_effects']:
+            order = {}
 
-        # Get creature info
-        creature_coords = players['creatures'][creature]['coords']
-        creature_radius = players['creatures'][creature]['radius']
+            # Get creature info
+            creature_coords = players['creatures'][creature]['coords']
+            creature_radius = players['creatures'][creature]['radius']
 
-        # Get the closest hero
-        # get_closest_heroes() is restrictive : it returns a list of one hero, which is stored in closest_hero
-        closest_hero = get_closest_heroes(creature_coords, players, True)[0]
+            # Get the closest hero
+            # get_closest_heroes() is restrictive : it returns a list of one hero, which is stored in closest_hero
+            closest_hero = get_closest_heroes(creature_coords, players, True)[0]
 
-        # Get the coords of the closest hero
-        closest_hero_coords = players[closest_hero[0]][closest_hero[1]]['coords']
+            # Get the coords of the closest hero
+            closest_hero_coords = players[closest_hero[0]][closest_hero[1]]['coords']
 
-        # Get the distance between the hero and the creature
-        distance_hero_creature = get_distance(creature_coords, closest_hero_coords)
+            # Get the distance between the hero and the creature
+            distance_hero_creature = get_distance(creature_coords, closest_hero_coords)
 
-        # If the hero is in the creature radius or if the creature has been affected by an ability on the previous turn
-        if distance_hero_creature < creature_radius + 1 or players['creatures'][creature]['ability_affectation_memory'] > 0:
-            order = {'player': 'creatures', 'hero': creature}
-            
-            # If the creature is next to the hero
-            if distance_hero_creature < 2:
+            # If the hero is in the creature radius or if the creature has been affected by an ability on the previous turn
+            if distance_hero_creature < creature_radius + 1 or players['creatures'][creature]['ability_affectation_memory'] > 0:
+                order = {'player': 'creatures', 'hero': creature}
+                
+                # If the creature is next to the hero
+                if distance_hero_creature < 2:
 
-                # The creature attacks the hero
-                order['action'] = 'attack'
-                order['target'] = closest_hero_coords
+                    # The creature attacks the hero
+                    order['action'] = 'attack'
+                    order['target'] = closest_hero_coords
 
-            else:
+                else:
 
-                # The creature moves towards the hero
-                order['action'] = 'move'
+                    # The creature moves towards the hero
+                    order['action'] = 'move'
 
-                # The creature can move on 9 tiles
+                    # The creature can move on 9 tiles
 
-                first_loop = True
+                    first_loop = True
 
-                # Get the smallest distance
-                for x_coord in range(creature_coords[0] - 1, creature_coords[0] + 2):
-                    for y_coord in range(creature_coords[1] - 1, creature_coords[1] + 2):
+                    # Get the smallest distance
+                    for x_coord in range(creature_coords[0] - 1, creature_coords[0] + 2):
+                        for y_coord in range(creature_coords[1] - 1, creature_coords[1] + 2):
 
-                        # Get the distance between the checked tile and the hero
-                        distance_hero_tile = get_distance(
-                            (x_coord, y_coord), closest_hero_coords)
+                            # Get the distance between the checked tile and the hero
+                            distance_hero_tile = get_distance(
+                                (x_coord, y_coord), closest_hero_coords)
 
-                        if first_loop:
-                            min_distance = distance_hero_tile
-                            first_loop = False
-                             # The creature moves on to this tile
-                            order['target'] = (x_coord, y_coord)
-
-                        else:
-                            if distance_hero_tile < min_distance:
+                            if first_loop:
                                 min_distance = distance_hero_tile
+                                first_loop = False
                                 # The creature moves on to this tile
                                 order['target'] = (x_coord, y_coord)
-        if len(order) > 0:
-            orders.append(order)
+
+                            else:
+                                if distance_hero_tile < min_distance:
+                                    min_distance = distance_hero_tile
+                                    # The creature moves on to this tile
+                                    order['target'] = (x_coord, y_coord)
+            if len(order) > 0:
+                orders.append(order)
 
     return orders
 
@@ -1528,7 +1514,7 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
     }
 
     # Step 1 : create map and implements data
-    players, map = read_file('test.hon')
+    players, map = read_file(file)
  
 
     # Save the player colors
@@ -1546,7 +1532,6 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
         player = 'Player %d' % (player_index + 1)
         
         if AI_repartition[player] == 'computer':  # AI
-            print("bab")
             command = 'blork:mage groumpf:barbarian azagdul:healer bob:rogue'
             if player_id != 0:
                 remote_play.notify_remote_orders(connection, command)
@@ -1554,12 +1539,10 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
             command = input('%s, Create 4 heroes:\n>>> ' % colored.stylize(
                 player, colored.fg('light_%s' % map['player_colors'][player])))
         elif AI_repartition[player] == 'remote': # Remote
-            print("boub")
             command = remote_play.get_remote_orders(connection)
         print("%s: %s" % (player, command))
 
         create_character(players, map, command, player)
-        #input()
 
     # Main loop
     game_is_over = False
@@ -1570,9 +1553,8 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
         # Get creatures orders
         orders = process_creatures(players, map, database)
 
-	# Display UI
+	    # Display UI
         display_ui(players, map, database)
-
         for player in players:
             if player != 'creatures' and len(players[player]) > 0:
                

@@ -1,4 +1,7 @@
 .vscode
 __pycache__
 test.py
-
+*.pyc
+HeroesOfNamur
+save
+hon_gr7.py
