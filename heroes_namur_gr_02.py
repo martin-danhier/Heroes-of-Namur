@@ -1625,6 +1625,18 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
         remote_play.disconnect_from_player(connection)
 
 # --- Arguments support ---
-# Get the args
+# Get the arguments and start the program
+# Usage: python3 heroes_namur_gr_02.py <HON FILE PATH> <PLAYER 1 MODE> <PLAYER 2 MODE> [IP (optional)]
 
-# Start the program
+if len(sys.argv) in (4, 5):
+    file_path = sys.argv[1]
+    player1_mode = sys.argv[2]
+    player2_mode = sys.argv[3]
+    if len(sys.argv) == 5:
+        ip = sys.argv[4]
+    else:
+        ip = ''
+    main(file_path, (player1_mode, player2_mode), ip)
+else:
+    # Invalid usage
+    print('Usage: python3 heroes_namur_gr_02.py <HON FILE PATH> <PLAYER 1 MODE> <PLAYER 2 MODE> [IP (optional)]')
