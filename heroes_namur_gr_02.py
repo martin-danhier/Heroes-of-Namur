@@ -670,7 +670,7 @@ def read_file(path):
             elif current == 'spur:':
                 map['spur'].append((int(info[0]), int(info[1])))
             elif current == 'creatures:':
-                players['creatures'][info[0]] = {'id' : line_in_current,'coords': (int(info[1]), int(info[2])), 'hp': int(
+                players['creatures'][info[0]] = {'id': line_in_current, 'coords': (int(info[1]), int(info[2])), 'hp': int(
                     info[3]), 'dmg': int(info[4]), 'radius': int(info[5]), 'xp': int(info[6]), 'active_effects': {}, 'ability_affectation_memory': 0}
 
         # Increment the line counter.
@@ -744,7 +744,8 @@ def clean(players, map, database, orders):
 
             if len(selected_heroes) > 0:
                 # Calculate bonus
-                victory_points = math.ceil(victory_points / len(selected_heroes))
+                victory_points = math.ceil(
+                    victory_points / len(selected_heroes))
 
             for hero in selected_heroes:
                 players[hero[0]][hero[1]]['xp'] += victory_points
@@ -766,7 +767,6 @@ def clean(players, map, database, orders):
     # Remove dead creatures
     for creature in dead_creatures:
         players['creatures'].pop(creature)
-        
 
     # For each hero
     for player in players:
@@ -788,7 +788,7 @@ def clean(players, map, database, orders):
                             players[player][hero]['level'] = level
                             players[player][hero]['hp'] = database[hero_type][level]['hp']
                             # Unlock special ability
-                            
+
                             if len(players[player][hero]['cooldown']) == 0 and level in ('2', '3', '4', '5'):
                                 players[player][hero]['cooldown'].append(0)
                             if len(players[player][hero]['cooldown']) == 1 and level in ('3', '4', '5'):
@@ -816,35 +816,35 @@ def update_counters(players, map):
     """
     # For each hero or creature
     for player in players:
-            for hero in players[player]:
-                if player == 'creatures':
-                    for creature in players['creatures']:
+        for hero in players[player]:
+            if player == 'creatures':
+                for creature in players['creatures']:
                         # Decrement the abilty affectation memory.
                         # It is used to trigger a creature action.
-                        if players['creatures'][creature]['ability_affectation_memory'] > 0:
-                            players['creatures'][creature]['ability_affectation_memory'] -= 1
-                else:
-                    # Step 1: DECREMENT ABILITIES COOLDOWN
-                    # For each cooldown of that hero
-                    cooldowns = players[player][hero]['cooldown']
-                    for cooldown_index in range(len(cooldowns)):
-                        # Decrement the cooldown if it is strictly positive (0 = ready to use)
-                        if cooldowns[cooldown_index] > 0:
-                            cooldowns[cooldown_index] -= 1
+                    if players['creatures'][creature]['ability_affectation_memory'] > 0:
+                        players['creatures'][creature]['ability_affectation_memory'] -= 1
+            else:
+                # Step 1: DECREMENT ABILITIES COOLDOWN
+                # For each cooldown of that hero
+                cooldowns = players[player][hero]['cooldown']
+                for cooldown_index in range(len(cooldowns)):
+                    # Decrement the cooldown if it is strictly positive (0 = ready to use)
+                    if cooldowns[cooldown_index] > 0:
+                        cooldowns[cooldown_index] -= 1
 
-                # Step 2: DECREMENT ACTIVE EFFECTS COOLDOWN
-                # For each active effect of that hero
-                effects = players[player][hero]['active_effects']
-                new_dict = {}
-                for effect in effects:
-                    # Decrement the cooldown (0 = end of the effect)
-                    effects[effect][0] -= 1
-                    # If the cooldown of an effect reached 0, remove that effect
-                    # <=> only keep the elements with a strictly positive cooldown
-                    # This workaround avoids the RuntimeError "dict changed size during iteration"
-                    if effects[effect][0] > 0:
-                        new_dict[effect] = effects[effect]
-                players[player][hero]['active_effects'] = new_dict
+            # Step 2: DECREMENT ACTIVE EFFECTS COOLDOWN
+            # For each active effect of that hero
+            effects = players[player][hero]['active_effects']
+            new_dict = {}
+            for effect in effects:
+                # Decrement the cooldown (0 = end of the effect)
+                effects[effect][0] -= 1
+                # If the cooldown of an effect reached 0, remove that effect
+                # <=> only keep the elements with a strictly positive cooldown
+                # This workaround avoids the RuntimeError "dict changed size during iteration"
+                if effects[effect][0] > 0:
+                    new_dict[effect] = effects[effect]
+            players[player][hero]['active_effects'] = new_dict
 
     # Increment turn counter
     map['nb_turns'] += 1
@@ -983,7 +983,8 @@ def use_special_ability(order, players, map, database):
                                          ]['coords'] = order['target']
 
         # Set cooldown if the ability is used
-        players[order['player']][order['hero']]['cooldown'][0] = database[order_hero_type][order_hero_lvl]['abilities'][0]['cooldown'] + 1
+        players[order['player']][order['hero']
+                                 ]['cooldown'][0] = database[order_hero_type][order_hero_lvl]['abilities'][0]['cooldown'] + 1
 
     # Ability 2 (lvl 3 min. required)
     else:
@@ -1022,7 +1023,7 @@ def use_special_ability(order, players, map, database):
                     # If ally is in radius & coordinates matches, apply ability
                     distance_checked = math.floor(get_distance(
                         players[order['player']][order['hero']]['coords'], players[order['player']][hero]['coords']))
-                    if players[order['player']][hero]['coords'] == order['target'] and distance_checked <= capacity_radius:
+                    if players[order['player']][hero]['coords'] == order['target'] and hero != order['hero'] and distance_checked <= capacity_radius:
 
                         players[order['player']][hero]['active_effects'][order_hero_capacity] = [
                             1]
@@ -1040,7 +1041,8 @@ def use_special_ability(order, players, map, database):
                                 players[order['player']][order['hero']]['coords'], players[player][hero]['coords']))
                             if players[player][hero]['coords'] == order['target'] and distance_checked <= capacity_radius:
 
-                                players[player][hero]['active_effects'][order_hero_capacity] = [capacity_x + 1]
+                                players[player][hero]['active_effects'][order_hero_capacity] = [
+                                    capacity_x + 1]
 
                                 # Set the memory to 2 in order to trigger a creature action next turn
                                 if player == 'creatures':
@@ -1068,7 +1070,7 @@ def use_special_ability(order, players, map, database):
 
         # Set cooldown
         players[order['player']][order['hero']
-                                    ]['cooldown'][1] = database[order_hero_type][order_hero_lvl]['abilities'][1]['cooldown'] + 1
+                                 ]['cooldown'][1] = database[order_hero_type][order_hero_lvl]['abilities'][1]['cooldown'] + 1
 
 
 def attack(order, players, map, database):
@@ -1234,18 +1236,21 @@ def process_creatures(players, map, database):
 
             # Get the closest hero
             # get_closest_heroes() is restrictive : it returns a list of one hero, which is stored in closest_hero
-            closest_hero = get_closest_heroes(creature_coords, players, True)[0]
+            closest_hero = get_closest_heroes(
+                creature_coords, players, True)[0]
 
             # Get the coords of the closest hero
-            closest_hero_coords = players[closest_hero[0]][closest_hero[1]]['coords']
+            closest_hero_coords = players[closest_hero[0]
+                                          ][closest_hero[1]]['coords']
 
             # Get the distance between the hero and the creature
-            distance_hero_creature = get_distance(creature_coords, closest_hero_coords)
+            distance_hero_creature = get_distance(
+                creature_coords, closest_hero_coords)
 
             # If the hero is in the creature radius or if the creature has been affected by an ability on the previous turn
             if distance_hero_creature < creature_radius + 1 or players['creatures'][creature]['ability_affectation_memory'] > 0:
                 order = {'player': 'creatures', 'hero': creature}
-                
+
                 # If the creature is next to the hero
                 if distance_hero_creature < 2:
 
@@ -1288,6 +1293,7 @@ def process_creatures(players, map, database):
 
 ### TOOLS ###
 # Useful methods
+
 
 def get_distance(coords1, coords2):
     """ Get the distance between two coordinates.
@@ -1358,7 +1364,7 @@ def get_tile_info(coords, players, map):
                         if spawn == player and map['spawns'][spawn] == coords:
                             return 'clear'
                     return 'player'
-                    
+
         # If this code is reached, then there is no player on this tile
         if coords in map['spur']:
             return 'spur'
@@ -1454,7 +1460,7 @@ def get_closest_heroes(coords, players, restrictive):
 ### MAIN ###
 # Entry point of the game
 
-def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', player_colors=('green', 'red')):
+def main(file, AI_repartition=('human', 'computer'), remote_IP='127.0.0.1', player_colors=('green', 'red')):
     """ Manages the global course of the in-game events.
 
     Parameters
@@ -1475,11 +1481,10 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
     for AI_profile_index in range(len(AI_repartition)):
         if AI_repartition[AI_profile_index] == 'remote':
             player_id = AI_profile_index + 1
-	
+
     if player_id != 0:
         # Connect to the other player
         connection = remote_play.connect_to_player(player_id, remote_IP, True)
-    
 
     # Create the constant database dictionary containg the data of each class at each level
     database = {
@@ -1515,22 +1520,22 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
 
     # Step 1 : create map and implements data
     players, map = read_file(file)
- 
 
     # Save the player colors
-    map['player_colors'] = {'Player %d' % (index + 1): player_colors[index] for index in range(len(player_colors))}
+    map['player_colors'] = {'Player %d' % (
+        index + 1): player_colors[index] for index in range(len(player_colors))}
 
     # Convert AI repartition to a dictionary
     AI_repartition = {'Player %d' % (
         index + 1): AI_repartition[index] for index in range(len(AI_repartition))}
 
     # Display UI
-    display_ui (players, map, database)
+    display_ui(players, map, database)
 
     # Step 2 : create 4 heroes/player
     for player_index in range(len(players) - 1):
         player = 'Player %d' % (player_index + 1)
-        
+
         if AI_repartition[player] == 'computer':  # AI
             command = 'blork:mage groumpf:barbarian azagdul:healer bob:rogue'
             if player_id != 0:
@@ -1538,7 +1543,7 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
         elif AI_repartition[player] == 'human':  # Human
             command = input('%s, Create 4 heroes:\n>>> ' % colored.stylize(
                 player, colored.fg('light_%s' % map['player_colors'][player])))
-        elif AI_repartition[player] == 'remote': # Remote
+        elif AI_repartition[player] == 'remote':  # Remote
             command = remote_play.get_remote_orders(connection)
         print("%s: %s" % (player, command))
 
@@ -1553,16 +1558,17 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
         # Get creatures orders
         orders = process_creatures(players, map, database)
 
-	    # Display UI
+        # Display UI
         display_ui(players, map, database)
         for player in players:
             if player != 'creatures' and len(players[player]) > 0:
-               
+
                 if AI_repartition[player] == 'computer':  # AI
-                    command = AI_gr_02.get_AI_orders(players, map, database, player)
-                    
+                    command = AI_gr_02.get_AI_orders(
+                        players, map, database, player)
+
                     if player_id != 0:
-                        remote_play.notify_remote_orders(connection, command)    
+                        remote_play.notify_remote_orders(connection, command)
                 elif AI_repartition[player] == 'human':  # Human
                     command = input('%s, Enter orders:\n>>> ' % colored.stylize(
                         player, colored.fg('light_%s' % map['player_colors'][player])))
@@ -1624,4 +1630,5 @@ if __name__ == "__main__":
         main(file_path, (player1_mode, player2_mode), ip)
     else:
         # Invalid usage
-        print('Usage: python3 heroes_namur_gr_02.py <HON FILE PATH> <PLAYER 1 MODE> <PLAYER 2 MODE> [IP (optional)]')
+        print(
+            'Usage: python3 heroes_namur_gr_02.py <HON FILE PATH> <PLAYER 1 MODE> <PLAYER 2 MODE> [IP (optional)]')
