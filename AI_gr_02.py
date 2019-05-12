@@ -263,14 +263,16 @@ def process_healer(players, map, database, orders, player, hero):
 
                                     # Go towards him 
                                     order = find_path(players, map, orders, players[player][hero]['coords'], ally[0])
-                                    order['hero'] = hero
+                                    if len(order) > 0:
+                                        order['hero'] = hero
                                     return order
 
                     else:
 
                         # Go towards him
                         order = find_path(players, map, orders, players[player][hero]['coords'], ally[0])
-                        order['hero'] = hero
+                        if len(order) > 0:
+                            order['hero'] = hero
                         return order
 
     if players[player][hero]['level'] == '5' or len(players['creatures']) == 0:
@@ -515,7 +517,8 @@ def farm_creatures(players, map, database, orders, player, hero):
         else:
             order = find_path(players, map, orders,
                               players[player][hero]['coords'], target_coords)
-        order['hero'] = hero
+        if len(order) > 0:
+            order['hero'] = hero
         return order
 
 # ---
@@ -624,8 +627,8 @@ def rush_citadel(players, map, database, orders, player, hero):
                         players, map, orders, players[player][hero]['coords'], nearest_tile, False)
                 order_generated = True
             index += 1
-
-        order['hero'] = hero
+        if len(order) > 0:
+            order['hero'] = hero
         return order
     else:
         # The hero is on the spur
@@ -644,6 +647,8 @@ def rush_citadel(players, map, database, orders, player, hero):
         else:
             order = find_path(
                 players, map, orders, players[player][hero]['coords'], target_coords, True)
+        if len(order) == 0:
+            return {}
         order['hero'] = hero
         if (order['action'] == 'move' and order['target'] in map['spur']) or order['action'] == 'attack':
             # if the hero should move on another spur tile, or if the hero should attack, let it do it
@@ -688,7 +693,6 @@ def find_path(players, map, orders, source, target, attack_target=True, walkable
     specification: Martin Danhier (v.1 06/05/2019)
     implementation: Martin Danhier (v.1 06/05/2019)
     """
-
     order = {}
     distance = math.floor(get_distance(source, target))
     # If the source is next to the target
@@ -744,10 +748,10 @@ def find_path(players, map, orders, source, target, attack_target=True, walkable
             if info == 'clear' or (info == 'spur' and map['nb_turns'] > 20):
                 order['target'] = distances[index][0]
                 found = True
-            elif index == len(distances):
-                return {}
             else:
                 index += 1
+        if len(order) == 0:
+            return order
 
         # If the tile is at a distance of 1, move. Else, reach
         distance_from_source = math.floor(

@@ -174,7 +174,7 @@ def display_ui(players, map, database):
     if 'Windows' in platform.platform():
         os.system('cls')  # Windows
     else:
-        #os.system('clear')  # Linux, Mac
+        os.system('clear')  # Linux, Mac
         pass
     # Print board
     print(board)
@@ -720,33 +720,21 @@ def clean(players, map, database, orders):
             victory_points = players['creatures'][creature]['xp']
             radius = players['creatures'][creature]['radius']
 
-            # Store the heroes that are in the radius of influence
-            hero_in_radius = False
+            # Store the heroes that are in the radius of influence and alive
             for player in players:
                 if player != 'creatures':
 
                     for hero in players[player]:
-                        if math.floor(get_distance(players[player][hero]['coords'], players['creatures'][creature]['coords'])) <= radius:
+                        if players[player][hero]['hp'] > 0 and math.floor(get_distance(players[player][hero]['coords'], players['creatures'][creature]['coords'])) <= radius:
                             selected_heroes.append((player, hero))
-                            hero_in_radius = True
-
             # If there is no hero in the radius, get the closest heroes
-            if not hero_in_radius:
+            if len(selected_heroes) == 0:
                 selected_heroes = get_closest_heroes(
                     players['creatures'][creature]['coords'], players, False)
-
-            # Remove dead heroes
-            heroes = []
-            for hero in selected_heroes:
-                if players[hero[0]][hero[1]]['hp'] > 0:
-                    heroes.append(hero)
-            selected_heroes = heroes
-
             if len(selected_heroes) > 0:
                 # Calculate bonus
                 victory_points = math.ceil(
                     victory_points / len(selected_heroes))
-
             for hero in selected_heroes:
                 players[hero[0]][hero[1]]['xp'] += victory_points
 
@@ -1396,7 +1384,7 @@ def get_closest_heroes(coords, players, restrictive):
     Version:
     -------
     specification : Guillaume Nizet (v.1 29/03/19)
-    implementation : Guillaume Nizet, Jonathan Nhouyvanisvong, Martin Danhier (v.2 05/05/19)
+    implementation : Guillaume Nizet, Jonathan Nhouyvanisvong, Martin Danhier (v.3 12/05/19)
     """
     # Initialize the data
     closest_heroes = []
@@ -1411,7 +1399,7 @@ def get_closest_heroes(coords, players, restrictive):
         for player in players:
             if player != 'creatures':
                 for hero in players[player]:
-                    if (player, hero) in temp_closest_heroes or step == 0:
+                    if players[player][hero]['hp'] > 0 and ((player, hero) in temp_closest_heroes or step == 0):
                         # Step 0 : Check the distance to get the closest heroes
                         if step == 0:
                             checked_value = get_distance(
@@ -1447,6 +1435,10 @@ def get_closest_heroes(coords, players, restrictive):
                         elif checked_value == min:
                             # save this hero as well
                             closest_heroes.append((player, hero))
+
+        # Return an empty list if there is no hero to find
+        if len(closest_heroes) == 0:
+            return closest_heroes
 
         # Only return the list of the closest heroes (there might be more than one hero)
         if not restrictive:
@@ -1561,6 +1553,8 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP='127.0.0.1', play
         # Display UI
         display_ui(players, map, database)
         # input()
+
+        # Get input from players
         for player in players:
             if player != 'creatures' and len(players[player]) > 0:
 
