@@ -1555,6 +1555,7 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP = '127.0.0.1', pl
 
 	    # Display UI
         display_ui(players, map, database)
+        # input()
         for player in players:
             if player != 'creatures' and len(players[player]) > 0:
                
