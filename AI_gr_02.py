@@ -400,7 +400,7 @@ def process_rogue(players, map, database, orders, player, hero):
         # Get some data
         hero_coords = players[player][hero]['coords']
         closest_enemies = get_closest_entity(
-            hero_coords, players, player, False, 'all_enemies')
+            hero_coords, players, map, player, False, 'all_enemies')
         distance_min_enemies = math.floor(get_distance(
             players[closest_enemies[0][0]][closest_enemies[0][1]]['coords'], hero_coords))
 
@@ -503,7 +503,7 @@ def farm_creatures(players, map, database, orders, player, hero):
     # Else, target creatures
     else:
         target = get_closest_entity(
-            players[player][hero]['coords'], players, player, True, 'creatures')[0]
+            players[player][hero]['coords'], players, map, player, True, 'creatures')[0]
 
         # Get target coords and order
         target_coords = players[target[0]][target[1]]['coords']
@@ -630,9 +630,11 @@ def rush_citadel(players, map, database, orders, player, hero):
     else:
         # The hero is on the spur
 
-        # Target the closest enemy
-        target = get_closest_entity(
-            players[player][hero]['coords'], players, player, True, 'enemy_heroes')[0]
+        # check if an enemy is on the spur
+        target = get_closest_entity(players[player][hero]['coords'], players, map, player, True, 'all_enemies', True)
+        if len(target) == 0:
+            target = get_closest_entity(players[player][hero]['coords'], players, map, player, True, 'enemy_heroes')
+        target = target[0]
         target_coords = players[target[0]][target[1]]['coords']
 
         # Can reach be done ?
@@ -859,17 +861,19 @@ def generate_command_string(actions):
 
 # ---
 
-def get_closest_entity(coords, players, player, restrictive, mode):
+def get_closest_entity(coords, players, map, player, restrictive, mode, spur_restrictive = False):
     """ Returns the closest entiti(es) around the given tile.
 
     Parameters:
     ----------
     coords : the coordinates of a tile (tuple).
     players : data of player heroes and creatures (dict)
+    map: data of the map (spawns, spur, size, etc...) (dict)
     player : the AI player (str)
     restrictive : if True, the function will only return one hero (the closest one with several conditions to remove the ambiguity).
                       else, the function will return the list of the closest heroes (bool).
     mode : the target mode of the function. (str)
+    spur_restrictive : Only look on the spur (bool, default False)
 
     Returns:
     -------
@@ -877,7 +881,7 @@ def get_closest_entity(coords, players, player, restrictive, mode):
 
     Notes
     -----
-    For the format of 'players', see 'rapport_gr_02_part_2'.
+    For the format of 'players' and 'map', see 'rapport_gr_02_part_2'.
     A typical 'coord' tuple is in the format ( row (int), column (int) ).
     The possible modes are the following:
         - 'creatures': only target creatures
@@ -887,8 +891,8 @@ def get_closest_entity(coords, players, player, restrictive, mode):
 
     Version:
     -------
-    specification : Guillaume Nizet, Martin Danhier (v.2 02/05/19)
-    implementation : Guillaume Nizet, Jonathan Nhouyvanisvong, Martin Danhier (v.3 02/05/19)
+    specification : Guillaume Nizet, Martin Danhier (v.3 12/05/19)
+    implementation : Guillaume Nizet, Jonathan Nhouyvanisvong, Martin Danhier (v.4 12/05/19)
     """
     # Initialize the data
     closest_heroes = []
@@ -904,7 +908,7 @@ def get_closest_entity(coords, players, player, restrictive, mode):
             # Apply mode filters
             if (checked_player == 'creatures' and mode == 'creatures') or (checked_player not in ('creatures', player) and mode == 'enemy_heroes') or (checked_player != player and mode == 'all_enemies') or (checked_player == player and mode == 'allies'):
                 for hero in players[checked_player]:
-                    if (checked_player, hero) in temp_closest_heroes or step == 0:
+                    if ((checked_player, hero) in temp_closest_heroes or step == 0) and (not spur_restrictive or players[checked_player][hero]['coords'] in map['spur']):
                         # Step 0 : Check the distance to get the closest heroes
                         if step == 0:
                             checked_value = math.floor(get_distance(
@@ -942,8 +946,9 @@ def get_closest_entity(coords, players, player, restrictive, mode):
                             closest_heroes.append((checked_player, hero))
 
         # Only return the list of the closest heroes (there might be more than one hero)
-        if not restrictive:
+        if not restrictive or len(closest_heroes) == 0:
             return closest_heroes
+
         step += 1
 
     # restrictive == True: The single closest hero has been found

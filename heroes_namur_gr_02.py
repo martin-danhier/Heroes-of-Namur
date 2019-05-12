@@ -174,7 +174,7 @@ def display_ui(players, map, database):
     if 'Windows' in platform.platform():
         os.system('cls')  # Windows
     else:
-        os.system('clear')  # Linux, Mac
+        #os.system('clear')  # Linux, Mac
         pass
     # Print board
     print(board)
