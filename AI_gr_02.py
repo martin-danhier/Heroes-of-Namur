@@ -331,9 +331,9 @@ def process_mage(players, map, database, orders, player, hero):
             if player_checked == 'creatures':
                 for creature in players[player_checked]:
                     coords_creature = players[player_checked][creature]['coords']
-                    distance = math.floor(get_distance(
-                        players[player][hero]['coords'], coords_creature))
-                    if distance <= ovibus_range and ovibus_cooldown == 0:
+                    distance = get_distance(
+                        players[player][hero]['coords'], coords_creature)
+                    if distance < ovibus_range + 1 and ovibus_cooldown == 0:
                         x = coords_creature[0]
                         y = coords_creature[1]
                         return {'hero': hero, 'action': 'ovibus', 'target': (x, y)}

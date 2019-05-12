@@ -34,7 +34,7 @@ def display_ui(players, map, database):
     """
     board = "\n     "
     # Get a list of str with the stats
-    stats = create_stats(players, map, database).split('\n')
+    stats = create_stats(players, map, database, True).split('\n')
 
     # Get data
     height = map["size"][0]
@@ -174,7 +174,7 @@ def display_ui(players, map, database):
     if 'Windows' in platform.platform():
         os.system('cls')  # Windows
     else:
-        os.system('clear')  # Linux, Mac
+        # os.system('clear')  # Linux, Mac
         pass
     # Print board
     print(board)
@@ -216,7 +216,7 @@ def get_coords_to_color(coords):
 # -----
 
 
-def create_stats(players, map, database):
+def create_stats(players, map, database, show_creatures = True):
     """ Generates a string containing the stats of the players.
 
     Parameters:
@@ -224,6 +224,7 @@ def create_stats(players, map, database):
     players : data of player heroes and creatures (dict)
     map: data of the map (spawns, spur, size, etc...). (dict)
     database: data of hero classes (dict)
+    show_creatures: if True, show the creatures column (bool)
 
     Returns
     -------
@@ -235,17 +236,20 @@ def create_stats(players, map, database):
 
     Version
     -------
-    specification : Martin Danhier (v.4 15/03/19)
-    implementation : Martin Danhier (v.2 15/03/19)
+    specification : Martin Danhier (v.5 12/05/19)
+    implementation : Martin Danhier (v.3 12/05/19)
 
     """
     stats = ''
-    creature_stats = '\n\n%s:' % colored.stylize(
-        'Creatures', colored.fg('light_magenta'))
+    if show_creatures:
+        creature_stats = '\n\n%s:' % colored.stylize(
+            'Creatures', colored.fg('light_magenta'))
+    else:
+        creature_stats = ''
 
     # For each player or creature
     for player in players:
-        if player == 'creatures':
+        if player == 'creatures' and show_creatures:
             # Add creature data
             for creature in players['creatures']:
                 active_effects = players['creatures'][creature]['active_effects']
@@ -283,7 +287,7 @@ def create_stats(players, map, database):
                         if index == 1 and len(active_effects) > 2:
                             creature_stats += '\n' + ' ' * 19
                         index += 1
-        else:
+        elif player != 'creatures':
             # Add the name of the player
             if len(players[player]) > 0:
                 stats += "\n\n%s:" % colored.stylize(
@@ -373,27 +377,30 @@ def create_stats(players, map, database):
     line_counter = 0
     full_stats = '=== TURN #%s ===' % colored.stylize(
         map['nb_turns'], colored.fg('light_goldenrod_1'))
-    splitted_stats = stats.split('\n')
-    splitted_creature_stats = creature_stats.split('\n')
-    while line_counter < len(splitted_stats) or line_counter < len(splitted_creature_stats):
-        line = '\n'
-        if line_counter < len(splitted_stats):
-            line += splitted_stats[line_counter]
-        if line_counter < len(splitted_creature_stats):
-            # Fix the length error caused by the color codes in the str
-            colors = ['light_goldenrod_1', 'light_magenta'] + ['light_' +
-                                                               map['player_colors'][player] for player in map['player_colors']]
-            error = 4 * (len(line.split(colored.attr('reset'))) -
-                         1) + len(line.split('\u0336')) - 1
-            for color in colors:
-                error += len(colored.fg(color)) * \
-                    (len(line.split(colored.fg(color))) - 1)
+    if show_creatures:
+        splitted_stats = stats.split('\n')
+        splitted_creature_stats = creature_stats.split('\n')
+        while line_counter < len(splitted_stats) or line_counter < len(splitted_creature_stats):
+            line = '\n'
+            if line_counter < len(splitted_stats):
+                line += splitted_stats[line_counter]
+            if line_counter < len(splitted_creature_stats):
+                # Fix the length error caused by the color codes in the str
+                colors = ['light_goldenrod_1', 'light_magenta'] + ['light_' +
+                                                                map['player_colors'][player] for player in map['player_colors']]
+                error = 4 * (len(line.split(colored.attr('reset'))) -
+                            1) + len(line.split('\u0336')) - 1
+                for color in colors:
+                    error += len(colored.fg(color)) * \
+                        (len(line.split(colored.fg(color))) - 1)
 
-            line += ' ' * (75 - len(line) + error) + \
-                splitted_creature_stats[line_counter]
+                line += ' ' * (75 - len(line) + error) + \
+                    splitted_creature_stats[line_counter]
 
-        full_stats += line
-        line_counter += 1
+            full_stats += line
+            line_counter += 1
+    else:
+        full_stats += stats
 
     # Return the full stats string
     return full_stats
@@ -1025,16 +1032,18 @@ def use_special_ability(order, players, map, database):
                     if player != order['player']:
                         for hero in players[player]:
                             # If enemy is in radius & coordinates matches, apply ability
-                            distance_checked = math.floor(get_distance(
-                                players[order['player']][order['hero']]['coords'], players[player][hero]['coords']))
-                            if players[player][hero]['coords'] == order['target'] and distance_checked <= capacity_radius:
-
+                            distance_checked = get_distance(
+                                players[order['player']][order['hero']]['coords'], players[player][hero]['coords'])
+                            players[player][hero]['coords'] == order['target']
+                            if players[player][hero]['coords'] == order['target'] and distance_checked < capacity_radius + 1:
                                 players[player][hero]['active_effects'][order_hero_capacity] = [
                                     capacity_x + 1]
 
                                 # Set the memory to 2 in order to trigger a creature action next turn
                                 if player == 'creatures':
                                     players[player][hero]['ability_affectation_memory'] = 2
+                if map['nb_turns'] > 70:
+                    input()
 
         # Burst
         elif order_hero_capacity == 'burst':
