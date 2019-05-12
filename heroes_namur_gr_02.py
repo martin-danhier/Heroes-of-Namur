@@ -1587,11 +1587,12 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP='127.0.0.1', play
         # Step 4 : First clear
         orders = clean(players, map, database, orders)
 
-        # Step 5 : Move & Fight
+        # Step 5 : Fight
         for order in orders:
             if order['action'] == 'attack':
                 attack(order, players, map, database)
-            elif order['action'] == 'move':
+        for order in orders:
+            if order['action'] == 'move':
                 move_on(order, players, map)
 
         # Step 6 : Second clear
