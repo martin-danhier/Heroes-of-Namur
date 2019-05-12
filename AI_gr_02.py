@@ -257,7 +257,7 @@ def process_healer(players, map, database, orders, player, hero):
                                     if players[player][hero]['cooldown'][1] == 0:
 
                                         # Use immunise
-                                        return { 'hero' : hero, 'action' : 'immunise'}
+                                        return { 'hero' : hero, 'action' : 'immunise', 'target' : ally[0]}
 
                                 else:   
 
