@@ -1,5 +1,5 @@
 map:
-39 39 15
+39 39 10
 spawn:
 2 2
 38 38
@@ -10,4 +10,14 @@ spur:
 19 20
 21 20 
 creatures:
-guardian 20 20 40 5 5 400
+butterfly 10 10 20 5 4 300
+frenay 20 20 42 7 7 500
+bear 25 10 10 3 3 175
+dog 10 15 20 5 4 350
+dinosaur 10 14 10 3 3 240
+bob 30 20 20 5 4 200
+zombie 15 20 10 3 3 100
+chicken 30 25 20 5 4 350
+goffman 15 25 10 3 3 375
+canopy 25 30 10 3 4 321
+spider 35 30 10 3 4 200
