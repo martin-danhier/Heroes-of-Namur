@@ -323,7 +323,7 @@ def process_mage(players, map, database, orders, player, hero):
 
         # Target creature
         ovibus_range = database['mage'][str(
-            players[player][hero]['level'])]['abilities'][0]['radius']
+            players[player][hero]['level'])]['abilities'][1]['radius']
         ovibus_cooldown = players[player][hero]['cooldown'][1]
 
         # Check if creature nearby -> use ovibus

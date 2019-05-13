@@ -734,16 +734,20 @@ def clean(players, map, database, orders):
                     for hero in players[player]:
                         if players[player][hero]['hp'] > 0 and math.floor(get_distance(players[player][hero]['coords'], players['creatures'][creature]['coords'])) <= radius:
                             selected_heroes.append((player, hero))
+            print(selected_heroes)
             # If there is no hero in the radius, get the closest heroes
             if len(selected_heroes) == 0:
                 selected_heroes = get_closest_heroes(
                     players['creatures'][creature]['coords'], players, False)
+            print(selected_heroes)
             if len(selected_heroes) > 0:
                 # Calculate bonus
                 victory_points = math.ceil(
                     victory_points / len(selected_heroes))
             for hero in selected_heroes:
                 players[hero[0]][hero[1]]['xp'] += victory_points
+            if map['nb_turns'] > 68:
+                input()
 
     # Dead heroes
     dead_heroes = []
@@ -1042,8 +1046,7 @@ def use_special_ability(order, players, map, database):
                                 # Set the memory to 2 in order to trigger a creature action next turn
                                 if player == 'creatures':
                                     players[player][hero]['ability_affectation_memory'] = 2
-                if map['nb_turns'] > 70:
-                    input()
+
 
         # Burst
         elif order_hero_capacity == 'burst':
