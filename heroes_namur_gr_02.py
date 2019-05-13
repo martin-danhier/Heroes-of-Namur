@@ -746,9 +746,6 @@ def clean(players, map, database, orders):
                     victory_points / len(selected_heroes))
             for hero in selected_heroes:
                 players[hero[0]][hero[1]]['xp'] += victory_points
-            if map['nb_turns'] > 68:
-                input()
-
     # Dead heroes
     dead_heroes = []
     for player in players:
