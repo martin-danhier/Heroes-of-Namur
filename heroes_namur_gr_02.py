@@ -13,7 +13,7 @@ import collections
 # Display user interface
 
 
-def display_ui(players, map, database):
+def display_ui(players, map, database, show_creatures='auto'):
     """ Displays the board (with colors) and statistics of the players.
 
     Parameters
@@ -21,6 +21,7 @@ def display_ui(players, map, database):
     players : data of player heroes and creatures (dict)
     map: data of the map (spawns, spur, size, etc...) (dict)
     database: data of hero classes (dict)
+    show_creatures: if 'all', the creature stats are displayed. 'auto', only a subset is displayed. 'off', none is displayed (str, default 'auto')
 
     Notes
     -----
@@ -34,7 +35,7 @@ def display_ui(players, map, database):
     """
     board = "\n     "
     # Get a list of str with the stats
-    stats = create_stats(players, map, database, True).split('\n')
+    stats = create_stats(players, map, database, show_creatures).split('\n')
 
     # Get data
     height = map["size"][0]
@@ -174,7 +175,7 @@ def display_ui(players, map, database):
     if 'Windows' in platform.platform():
         os.system('cls')  # Windows
     else:
-        # os.system('clear')  # Linux, Mac
+        os.system('clear')  # Linux, Mac
         pass
     # Print board
     print(board)
@@ -216,7 +217,7 @@ def get_coords_to_color(coords):
 # -----
 
 
-def create_stats(players, map, database, show_creatures = True):
+def create_stats(players, map, database, show_creatures='auto'):
     """ Generates a string containing the stats of the players.
 
     Parameters:
@@ -224,7 +225,7 @@ def create_stats(players, map, database, show_creatures = True):
     players : data of player heroes and creatures (dict)
     map: data of the map (spawns, spur, size, etc...). (dict)
     database: data of hero classes (dict)
-    show_creatures: if True, show the creatures column (bool)
+    show_creatures: if 'all', the creature stats are displayed. 'auto', only a subset is displayed. 'off', none is displayed (str, default 'auto')
 
     Returns
     -------
@@ -240,8 +241,12 @@ def create_stats(players, map, database, show_creatures = True):
     implementation : Martin Danhier (v.3 12/05/19)
 
     """
+
+    terminal_size = [int(element) for element in os.popen(
+        'stty size', 'r').read().strip('\n').split(' ')]
+
     stats = ''
-    if show_creatures:
+    if show_creatures != 'off':
         creature_stats = '\n\n%s:' % colored.stylize(
             'Creatures', colored.fg('light_magenta'))
     else:
@@ -249,44 +254,53 @@ def create_stats(players, map, database, show_creatures = True):
 
     # For each player or creature
     for player in players:
-        if player == 'creatures' and show_creatures:
+        if player == 'creatures' and show_creatures != 'off':
             # Add creature data
+            remaining_height = terminal_size[0] - 6
             for creature in players['creatures']:
                 active_effects = players['creatures'][creature]['active_effects']
 
-                # Get damage
-                damage = players['creatures'][creature]['dmg']
-                if 'stun' in active_effects:
-                    # new damage = initial damage - x
-                    damage -= active_effects['stun'][1]
-                if damage < 1:
-                    damage = 1  # no damage below 1
-
-                # Color damage
-                if damage < players['creatures'][creature]['dmg']:
-                    damage_color = 'light_red'
-                else:
-                    damage_color = 'light_goldenrod_1'
-                damage = colored.stylize(
-                    '%d' % damage, colored.fg(damage_color))
-
-                creature_stats += '\n - %s:\n   (HP: %s, XP: %s, RADIUS: %s, DMG: %s)\n   Position: (%s, %s)' % (colored.stylize(creature, colored.fg('light_magenta')), colored.stylize(players['creatures'][creature]['hp'], colored.fg('light_goldenrod_1')), colored.stylize(players['creatures'][creature]['xp'], colored.fg(
-                    'light_goldenrod_1')), colored.stylize(players['creatures'][creature]['radius'], colored.fg('light_goldenrod_1')), damage, colored.stylize(players['creatures'][creature]['coords'][0], colored.fg('light_goldenrod_1')), colored.stylize(players['creatures'][creature]['coords'][1], colored.fg('light_goldenrod_1')))
-
-                # Display active effects
+                # Get the stats height for this creature
+                current_creature_stat_height = 3
                 if len(active_effects) > 0:
-                    index = 0
-                    creature_stats += '\n   Active effects: '
-                    for effect in active_effects:
-                        creature_stats += '%s (%s turns left)' % (effect, colored.stylize(
-                            active_effects[effect][0], colored.fg('light_goldenrod_1')))
-                        # Add a comma to separate effects
-                        if index < len(active_effects) - 1:
-                            creature_stats += ', '
-                        # Add a new line after the second effect
-                        if index == 1 and len(active_effects) > 2:
-                            creature_stats += '\n' + ' ' * 19
-                        index += 1
+                    current_creature_stat_height += 1
+
+                if (show_creatures == 'auto' and remaining_height >= current_creature_stat_height) or show_creatures == 'all':
+
+                    # Get damage
+                    damage = players['creatures'][creature]['dmg']
+                    if 'stun' in active_effects:
+                        # new damage = initial damage - x
+                        damage -= active_effects['stun'][1]
+                    if damage < 1:
+                        damage = 1  # no damage below 1
+
+                    # Color damage
+                    if damage < players['creatures'][creature]['dmg']:
+                        damage_color = 'light_red'
+                    else:
+                        damage_color = 'light_goldenrod_1'
+                    damage = colored.stylize(
+                        '%d' % damage, colored.fg(damage_color))
+
+                    creature_stats += '\n - %s:\n   (HP: %s, XP: %s, RADIUS: %s, DMG: %s)\n   Position: (%s, %s)' % (colored.stylize(creature, colored.fg('light_magenta')), colored.stylize(players['creatures'][creature]['hp'], colored.fg('light_goldenrod_1')), colored.stylize(players['creatures'][creature]['xp'], colored.fg(
+                        'light_goldenrod_1')), colored.stylize(players['creatures'][creature]['radius'], colored.fg('light_goldenrod_1')), damage, colored.stylize(players['creatures'][creature]['coords'][0], colored.fg('light_goldenrod_1')), colored.stylize(players['creatures'][creature]['coords'][1], colored.fg('light_goldenrod_1')))
+
+                    # Display active effects
+                    if len(active_effects) > 0:
+                        index = 0
+                        creature_stats += '\n   Active effects: '
+                        for effect in active_effects:
+                            creature_stats += '%s (%s turns left)' % (effect, colored.stylize(
+                                active_effects[effect][0], colored.fg('light_goldenrod_1')))
+                            # Add a comma to separate effects
+                            if index < len(active_effects) - 1:
+                                creature_stats += ', '
+                            # Add a new line after the second effect
+                            if index == 1 and len(active_effects) > 2:
+                                creature_stats += '\n' + ' ' * 19
+                            index += 1
+                remaining_height -= current_creature_stat_height
         elif player != 'creatures':
             # Add the name of the player
             if len(players[player]) > 0:
@@ -387,9 +401,9 @@ def create_stats(players, map, database, show_creatures = True):
             if line_counter < len(splitted_creature_stats):
                 # Fix the length error caused by the color codes in the str
                 colors = ['light_goldenrod_1', 'light_magenta'] + ['light_' +
-                                                                map['player_colors'][player] for player in map['player_colors']]
+                                                                   map['player_colors'][player] for player in map['player_colors']]
                 error = 4 * (len(line.split(colored.attr('reset'))) -
-                            1) + len(line.split('\u0336')) - 1
+                             1) + len(line.split('\u0336')) - 1
                 for color in colors:
                     error += len(colored.fg(color)) * \
                         (len(line.split(colored.fg(color))) - 1)
@@ -734,12 +748,10 @@ def clean(players, map, database, orders):
                     for hero in players[player]:
                         if players[player][hero]['hp'] > 0 and math.floor(get_distance(players[player][hero]['coords'], players['creatures'][creature]['coords'])) <= radius:
                             selected_heroes.append((player, hero))
-            print(selected_heroes)
             # If there is no hero in the radius, get the closest heroes
             if len(selected_heroes) == 0:
                 selected_heroes = get_closest_heroes(
                     players['creatures'][creature]['coords'], players, False)
-            print(selected_heroes)
             if len(selected_heroes) > 0:
                 # Calculate bonus
                 victory_points = math.ceil(
@@ -1043,7 +1055,6 @@ def use_special_ability(order, players, map, database):
                                 # Set the memory to 2 in order to trigger a creature action next turn
                                 if player == 'creatures':
                                     players[player][hero]['ability_affectation_memory'] = 2
-
 
         # Burst
         elif order_hero_capacity == 'burst':
@@ -1461,7 +1472,7 @@ def get_closest_heroes(coords, players, restrictive):
 ### MAIN ###
 # Entry point of the game
 
-def main(file, AI_repartition=('human', 'computer'), remote_IP='127.0.0.1', player_colors=('green', 'red')):
+def main(file, AI_repartition=('human', 'computer'), remote_IP='127.0.0.1', player_colors=('green', 'red'), show_creatures='auto'):
     """ Manages the global course of the in-game events.
 
     Parameters
@@ -1469,11 +1480,12 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP='127.0.0.1', play
     file: the path of the .hon file used to generate the map. (str)
     AI_repartition: a value is True if the corresponding player must be controlled by the computer (tuple of boolean) (optional)
     player_colors: the colors of each player (tuple of str) (optional)
+    show_creatures: if 'all', the creature stats are displayed. 'auto', only a subset is displayed. 'off', none is displayed (str, default 'auto')
 
     Version:
     --------
-    specification : Guillaume Nizet, Martin Danhier (v.3 20/03/19)
-    implementation : Martiin Danhier (v.2 20/03/19)
+    specification : Guillaume Nizet, Martin Danhier (v.4 14/05/19)
+    implementation : Martiin Danhier (v3 14/05/19)
 
     """
 
@@ -1531,7 +1543,7 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP='127.0.0.1', play
         index + 1): AI_repartition[index] for index in range(len(AI_repartition))}
 
     # Display UI
-    display_ui(players, map, database)
+    display_ui(players, map, database, show_creatures)
 
     # Step 2 : create 4 heroes/player
     for player_index in range(len(players) - 1):
@@ -1560,7 +1572,7 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP='127.0.0.1', play
         orders = process_creatures(players, map, database)
 
         # Display UI
-        display_ui(players, map, database)
+        display_ui(players, map, database, show_creatures)
         # input()
 
         # Get input from players
@@ -1624,16 +1636,21 @@ if __name__ == "__main__":
     # Get the arguments and start the program
     # Usage: python3 heroes_namur_gr_02.py <HON FILE PATH> <PLAYER 1 MODE> <PLAYER 2 MODE> [IP (optional)]
 
-    if len(sys.argv) in (4, 5):
+    if len(sys.argv) in (4, 5, 6):
         file_path = sys.argv[1]
         player1_mode = sys.argv[2]
         player2_mode = sys.argv[3]
-        if len(sys.argv) == 5:
-            ip = sys.argv[4]
+        if len(sys.argv) >= 5:
+            show_creatures = sys.argv[4]
+        else:
+            show_creatures = 'auto'
+        if len(sys.argv) == 6:
+            ip = sys.argv[5]
         else:
             ip = ''
-        main(file_path, (player1_mode, player2_mode), ip)
+        main(file_path, (player1_mode, player2_mode),
+             ip, show_creatures=show_creatures)
     else:
         # Invalid usage
         print(
-            'Usage: python3 heroes_namur_gr_02.py <HON FILE PATH> <PLAYER 1 MODE> <PLAYER 2 MODE> [IP (optional)]')
+            'Usage: python3 heroes_namur_gr_02.py <HON FILE PATH> <PLAYER 1 MODE> <PLAYER 2 MODE> [SHOW CREATURES (optional)] [IP (optional)]')

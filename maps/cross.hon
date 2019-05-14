@@ -1,0 +1,44 @@
+map:
+39 45 10
+spawn:
+4 4
+36 42
+spur:
+20 23
+20 22
+20 24
+19 23
+21 23
+creatures:
+spy 2 3 6 2 3 100
+espion 38 43 6 2 3 100
+zombie 4 10 8 2 1 130
+undead 30 42 8 2 1 130
+witch 10 4 7 3 2 160
+sorciere 36 36 7 3 2 160
+dog 7 7 4 1 3 80
+cat 33 39 4 1 3 80
+ork 11 13 10 3 2 200
+orque 29 33 10 3 2 200
+fly 10 13 2 1 1 50
+mouche 11 12 2 1 1 50
+moskito 29 34 2 1 1 50
+moustique 30 33 2 1 1 50
+crocodile 6 29 9 3 1 150
+croco 26 9 9 3 1 150
+dile 14 37 9 3 1 150
+alligator 34 17 9 3 1 150
+dragon 9 34 15 5 4 300
+gorilla 31 12 15 5 4 300
+wolf 15 18 9 3 3 180
+loup 25 28 9 3 3 180
+bear 14 23 10 4 1 200
+ours 20 17 10 4 1 200
+winnie 20 29 10 4 1 200
+oso 26 23 10 4 1 200
+monkey 19 22 7 3 2 150
+singe 21 22 7 3 2 150
+babouin 19 24 7 3 2 150
+mono 21 24 7 3 2 150
+god 39 1 1 1 1 4000
+dieu 1 45 1 1 1 4000

@@ -585,6 +585,7 @@ def rush_citadel(players, map, database, orders, player, hero):
         # Init loop
         index = 0
         order_generated = False
+        order = {}
         
         # find a tile to target
         while index < len(spur_sorted) and not order_generated:
@@ -627,8 +628,15 @@ def rush_citadel(players, map, database, orders, player, hero):
                         players, map, orders, players[player][hero]['coords'], nearest_tile, False)
                 order_generated = True
             index += 1
+        # Nothing to do
+        if len(order) == 0:
+            target = get_closest_entity(players[player][hero]['coords'], players, map, player, True, 'all_enemies')
+            if len(target) > 0:
+                target = target[0]
+                order = find_path(players, map, orders, players[player][hero]['coords'], players[target[0]][target[1]]['coords'])
         if len(order) > 0:
             order['hero'] = hero
+        
         return order
     else:
         # The hero is on the spur

@@ -1,0 +1,44 @@
+map:
+39 39 20
+spawn:
+38 4
+4 38
+spur:
+21 21
+21 20
+21 22
+20 21
+22 21
+creatures:
+bear 21 16 6 3 3 325
+wolf 21 26 9 4 3 295
+chicken 16 21 13 6 3 325
+cow 26 21 18 9 3 295
+penguin 19 18 9 4 3 310
+frog 18 19 18 9 3 310
+chair 18 23 23 8 3 280
+bottle 19 24 20 7 3 280
+flower 23 24 23 8 3 310
+glasses 24 23 20 7 3 310
+tiger 24 19 30 9 4 280
+elephant 23 18 30 9 4 280
+unicorn 23 7 6 3 4 225
+monkey 6 24 13 6 4 225
+paper 18 36 9 4 4 210
+book 35 19 18 9 4 210
+moon 32 16 6 3 3 150
+mouth 29 13 9 4 2 165
+house 28 12 13 6 2 165
+bag 25 9 18 9 3 195
+cocktail 8 26 27 9 3 195
+facebook 11 29 23 8 2 165
+phone 12 30 23 8 2 165
+finger 15 33 20 7 3 150
+skype 21 9 27 9 5 240
+water 20 10 23 8 5 240
+goat 33 21 23 8 5 265
+chipmunk 32 22 20 7 5 265
+windows 8 22 30 9 5 240
+twitter 9 21 30 9 5 240
+paint 20 34 30 9 5 265
+turtle 21 33 30 9 5 265

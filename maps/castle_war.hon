@@ -1,0 +1,127 @@
+map:
+40 50 20
+spawn:
+7 7
+7 44
+spur:
+23 23
+23 24
+23 25
+23 26
+23 27
+24 23
+24 24
+24 25
+24 26
+24 27
+25 23
+25 24
+25 25
+25 26
+25 27
+26 23
+26 24
+26 25
+26 26
+26 27
+creatures:
+cloneBaa 1 1 5 2 2 40
+cloneii 1 50 5 2 2 40
+cloneHG 19 19 5 2 2 40
+cloneHH 19 20 5 2 2 40
+cloneHi 19 21 5 2 2 40
+cloneia 19 22 5 2 2 40
+cloneiB 19 23 5 2 2 40
+cloneiC 19 24 5 2 2 40
+cloneiD 19 25 5 2 2 40
+cloneiJ 19 26 5 2 2 40
+cloneie 19 27 5 2 2 40
+cloneif 19 28 5 2 2 40
+cloneiG 19 29 5 2 2 40
+cloneiH 19 30 5 2 2 40
+cloneeD 19 31 5 2 2 40
+cloneHf 20 19 5 2 2 40
+cloneeJ 20 31 5 2 2 40
+cloneHe 21 19 5 2 2 40
+cloneJf 21 21 5 2 2 40
+cloneJe 21 22 5 2 2 40
+cloneJJ 21 23 5 2 2 40
+cloneJD 21 24 5 2 2 40
+cloneJC 21 25 5 2 2 40
+cloneJB 21 26 5 2 2 40
+cloneJa 21 27 5 2 2 40
+cloneDi 21 28 5 2 2 40
+cloneDH 21 29 5 2 2 40
+cloneee 21 31 5 2 2 40
+cloneHJ 22 19 5 2 2 40
+cloneJG 22 21 5 2 2 40
+cloneBe 22 22 5 2 2 40
+cloneBJ 22 23 5 2 2 40
+cloneBD 22 24 5 2 2 40
+cloneBC 22 25 5 2 2 40
+cloneBB 22 26 5 2 2 40
+cloneBa 22 27 5 2 2 40
+clonei 22 28 5 2 2 40
+cloneDG 22 29 5 2 2 40
+cloneef 22 31 5 2 2 40
+cloneHD 23 19 5 2 2 40
+cloneJH 23 21 5 2 2 40
+cloneBf 23 22 5 2 2 40
+cloneH 23 28 5 2 2 40
+cloneDf 23 29 5 2 2 40
+cloneeG 23 31 5 2 2 40
+cloneHC 24 19 5 2 2 40
+cloneJi 24 21 5 2 2 40
+cloneBG 24 22 5 2 2 40
+cloneG 24 28 5 2 2 40
+cloneDe 24 29 5 2 2 40
+cloneeH 24 31 5 2 2 40
+cloneHB 25 19 5 2 2 40
+cloneea 25 21 5 2 2 40
+cloneBH 25 22 5 2 2 40
+clonef 25 28 5 2 2 40
+cloneDJ 25 29 5 2 2 40
+cloneei 25 31 5 2 2 40
+cloneHa 26 19 5 2 2 40
+cloneeB 26 21 5 2 2 40
+cloneBi 26 22 5 2 2 40
+clonee 26 28 5 2 2 40
+cloneDD 26 29 5 2 2 40
+clonefa 26 31 5 2 2 40
+cloneGi 27 19 5 2 2 40
+cloneeC 27 21 5 2 2 40
+cloneCa 27 22 5 2 2 40
+cloneCB 27 23 5 2 2 40
+cloneCC 27 24 5 2 2 40
+cloneB 27 25 5 2 2 40
+cloneC 27 26 5 2 2 40
+cloneD 27 27 5 2 2 40
+cloneJ 27 28 5 2 2 40
+cloneDC 27 29 5 2 2 40
+clonefB 27 31 5 2 2 40
+cloneGH 28 19 5 2 2 40
+cloneCD 28 21 5 2 2 40
+cloneCJ 28 22 5 2 2 40
+cloneCe 28 23 5 2 2 40
+cloneCf 28 24 5 2 2 40
+cloneCG 28 25 5 2 2 40
+cloneCH 28 26 5 2 2 40
+cloneCi 28 27 5 2 2 40
+cloneDa 28 28 5 2 2 40
+cloneDB 28 29 5 2 2 40
+clonefC 28 31 5 2 2 40
+cloneGG 29 19 5 2 2 40
+clonefD 29 31 5 2 2 40
+cloneGf 30 19 5 2 2 40
+cloneGe 30 20 5 2 2 40
+cloneGJ 30 21 5 2 2 40
+cloneGD 30 22 5 2 2 40
+cloneGC 30 23 5 2 2 40
+cloneGB 30 24 5 2 2 40
+cloneGa 30 25 5 2 2 40
+clonefi 30 26 5 2 2 40
+clonefH 30 27 5 2 2 40
+clonefG 30 28 5 2 2 40
+cloneff 30 29 5 2 2 40
+clonefe 30 30 5 2 2 40
+clonefJ 30 31 5 2 2 40
