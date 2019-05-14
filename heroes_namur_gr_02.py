@@ -1471,7 +1471,7 @@ def get_closest_heroes(coords, players, restrictive):
 ### MAIN ###
 # Entry point of the game
 
-def main(file, AI_repartition=('human', 'computer'), remote_IP='127.0.0.1', player_colors=('green', 'red'), show_creatures='auto'):
+def main(file, AI_repartition=('human', 'computer'), remote_IP='127.0.0.1', player_colors=('green', 'red'), show_creatures='auto', debug = False):
     """ Manages the global course of the in-game events.
 
     Parameters
@@ -1480,6 +1480,7 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP='127.0.0.1', play
     AI_repartition: a value is True if the corresponding player must be controlled by the computer (tuple of boolean) (optional)
     player_colors: the colors of each player (tuple of str) (optional)
     show_creatures: if 'all', the creature stats are displayed. 'auto', only a subset is displayed. 'off', none is displayed (str, default 'auto')
+    debug: debug the game using the debug functions (bool)
 
     Version:
     --------
@@ -1572,7 +1573,9 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP='127.0.0.1', play
 
         # Display UI
         display_ui(players, map, database, show_creatures)
-        # input()
+        
+        if debug:
+            save_world_state(players, database, 'save1')
 
         # Get input from players
         for player in players:
@@ -1593,6 +1596,10 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP='127.0.0.1', play
                 # Save orders
                 orders += parse_command(player, command, players, database)
 
+        if debug:
+            if not check_world_state('save1', 'save2'):
+                input('eh houston, on a un problème :/')
+        
         # Step 4 : Use special abilities
         for order in orders:
             if order['action'] not in ('attack', 'move'):
@@ -1629,13 +1636,54 @@ def main(file, AI_repartition=('human', 'computer'), remote_IP='127.0.0.1', play
         remote_play.disconnect_from_player(connection)
 
 
+# === BUGFIXING MODULE ===
+# Compares two games at runtime and stops if a there is a difference
+# By Clement Delzotti
+
+def save_world_state(players, database, path):
+    fh = open(path, 'w+')
+
+    for player in players:
+        if player != 'creatures':
+            for hero in players[player]:
+                HP = players[player][hero]['hp']
+                DPH = database[players[player][hero]['type']][players[player][hero]['level']]['dmg']
+                XP = players[player][hero]['xp']
+                POSX = players[player][hero]['coords'][1]
+                POSY = players[player][hero]['coords'][0]
+                fh.write('%s:HP:%d --> DPH:%d --> XP:%d --> POS:%d-%d\n' % (hero,HP,DPH,XP,POSX, POSY))
+
+    for hero in players['creatures']:
+        HP = players['creatures'][hero]['hp']
+        DPH = players['creatures'][hero]['dmg']
+        POSX = players['creatures'][hero]['coords'][1]
+        POSY = players['creatures'][hero]['coords'][0]
+        fh.write('%s:HP:%d --> DPH:%d --> POS:%d-%d\n' % (hero,HP,DPH,POSX, POSY))
+    fh.close()
+
+def check_world_state(path1, path2):
+    fh = open(path1, 'r')
+    state1 = fh.readlines()
+    fh.close()
+    fh = open(path2, 'r')
+    state2 = fh.readlines()
+    fh.close()
+    for i in range(0, len(state1)):
+        if state1[i] != state2[i]:
+            print('DIFFERENT\n%s\n%s\n' % (state1[i], state2[i]))
+            return False 
+    return True
+
+
+# === Arguments ===
+
 # Execute this if the module is executed instead of imported
 if __name__ == "__main__":
     # --- Arguments support ---
     # Get the arguments and start the program
     # Usage: python3 heroes_namur_gr_02.py <HON FILE PATH> <PLAYER 1 MODE> <PLAYER 2 MODE> [IP (optional)]
 
-    if len(sys.argv) in (4, 5, 6):
+    if len(sys.argv) in (4, 5, 6, 7):
         file_path = sys.argv[1]
         player1_mode = sys.argv[2]
         player2_mode = sys.argv[3]
@@ -1643,12 +1691,16 @@ if __name__ == "__main__":
             show_creatures = sys.argv[4]
         else:
             show_creatures = 'auto'
-        if len(sys.argv) == 6:
+        if len(sys.argv) >= 6:
             ip = sys.argv[5]
         else:
             ip = ''
+        if len(sys.argv) == 7:
+            debug = sys.argv[6] in ('True', 'true')
+        else:
+            debug = False
         main(file_path, (player1_mode, player2_mode),
-             ip, show_creatures=show_creatures)
+             ip, show_creatures=show_creatures, debug=debug)
     else:
         # Invalid usage
         print(

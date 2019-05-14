@@ -648,13 +648,8 @@ def rush_citadel(players, map, database, orders, player, hero):
         target = target[0]
         target_coords = players[target[0]][target[1]]['coords']
 
-        # Can reach be done ?
-        if players[player][hero]['type'] == 'rogue' and int(players[player][hero]['level']) >= 3 and players[player][hero]['cooldown'][0] == 0:
-            order = find_path(players, map, orders, players[player][hero]['coords'], target_coords,
-                              True, database['rogue'][players[player][hero]['level']]['abilities'][0]['radius'])
-        else:
-            order = find_path(
-                players, map, orders, players[player][hero]['coords'], target_coords, True)
+        order = find_path(
+            players, map, orders, players[player][hero]['coords'], target_coords, True)
         if len(order) == 0:
             return {}
         order['hero'] = hero
