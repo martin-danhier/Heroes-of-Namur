@@ -175,7 +175,7 @@ def display_ui(players, map, database, show_creatures='auto'):
     if 'Windows' in platform.platform():
         os.system('cls')  # Windows
     else:
-        os.system('clear')  # Linux, Mac
+        # os.system('clear')  # Linux, Mac
         pass
     # Print board
     print(board)
@@ -826,11 +826,10 @@ def update_counters(players, map):
     for player in players:
         for hero in players[player]:
             if player == 'creatures':
-                for creature in players['creatures']:
-                        # Decrement the abilty affectation memory.
-                        # It is used to trigger a creature action.
-                    if players['creatures'][creature]['ability_affectation_memory'] > 0:
-                        players['creatures'][creature]['ability_affectation_memory'] -= 1
+                # Decrement the abilty affectation memory.
+                # It is used to trigger a creature action.
+                if players['creatures'][hero]['ability_affectation_memory'] > 0:
+                    players['creatures'][hero]['ability_affectation_memory'] -= 1
             else:
                 # Step 1: DECREMENT ABILITIES COOLDOWN
                 # For each cooldown of that hero
